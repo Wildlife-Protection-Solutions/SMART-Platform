@@ -75,7 +75,7 @@ public class PatrolTrackWizardPage extends WizardPage {
 
 	public static final String PAGE_NAME ="PatrolTrack"; //$NON-NLS-1$
 	
-	private static final String SELECTPATROL = Messages.PatrolTrackWizardPage_SelectPatrol;
+	private static final String SELECTPATROL = Messages.PatrolTrackWizardPage_SelectPatrol2;
 	
 	private CheckboxTableViewer tblViewer;
 	private ComboViewer cmbViewer;
@@ -125,7 +125,7 @@ public class PatrolTrackWizardPage extends WizardPage {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(main,SWT.NONE);
-		l.setText(Messages.PatrolTrackWizardPage_PatrolLabel);
+		l.setText(Messages.PatrolTrackWizardPage_PatrolLabel2);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		cmbViewer = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -141,7 +141,7 @@ public class PatrolTrackWizardPage extends WizardPage {
 		cmbViewer.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		
 		l = new Label(main,SWT.NONE);
-		l.setText(Messages.PatrolTrackWizardPage_TracksLabel);
+		l.setText(Messages.PatrolTrackWizardPage_TracksLabel2);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		Composite wrapper = new Composite(main, SWT.NONE);
@@ -191,8 +191,8 @@ public class PatrolTrackWizardPage extends WizardPage {
 		});
 		setControl(main);
 		
-		setTitle(Messages.PatrolTrackWizardPage_Title);
-		setMessage(Messages.PatrolTrackWizardPage_Message);
+		setTitle(Messages.PatrolTrackWizardPage_Title2);
+		setMessage(Messages.PatrolTrackWizardPage_Message2);
 	}
 
 	private Job loadTracks = new Job("loading tracks") { //$NON-NLS-1$

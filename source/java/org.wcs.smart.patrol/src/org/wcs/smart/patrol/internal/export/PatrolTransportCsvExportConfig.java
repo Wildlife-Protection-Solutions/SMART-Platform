@@ -79,7 +79,7 @@ public class PatrolTransportCsvExportConfig extends AbstractCsvExportConfig {
 
 	@Override
 	public String getMessage() {
-		return Messages.PatrolTransportCsvExportConfig_DialogMessage1;
+		return Messages.PatrolTransportCsvExportConfig_DialogMessage12;
 	}
 
 	@Override

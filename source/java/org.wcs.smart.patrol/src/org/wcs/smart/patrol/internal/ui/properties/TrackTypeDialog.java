@@ -55,6 +55,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.ui.PlatformUI;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -73,6 +74,7 @@ import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.PatrolDynamicMenuManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -131,11 +133,15 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 	private NamedIconItemLabelProvider lblProvider = new NamedIconItemLabelProvider();
 	
 	final private ConservationArea currentCa = SmartDB.getCurrentConservationArea();
+
+	private String menuTerm;
+	private boolean needsRestart = false;
 	
 	public TrackTypeDialog(Shell parent) {
 		super(parent);
 		toDelete = new ArrayList<>();
 		deleteAttributes = new ArrayList<>();
+		menuTerm = PatrolDynamicMenuManager.INSTANCE.getCurrentTerm();			
 	}
 
 	
@@ -148,7 +154,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		lc.setLayout(new GridLayout(2, false));
 		
 		Label l = new Label(lc, SWT.NONE);
-		l.setText("Language:");
+		l.setText(Messages.TrackTypeDialog_language);
 				
 		languageViewer = new LanguageViewer(lc, SWT.NONE, currentCa);
 		languageViewer.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -180,35 +186,34 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		
 		parts.setWeights(1,2);
 		
-		
-		
 		tabs = new CTabFolder(rightPart,  SWT.NONE);
 		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		CTabItem detailsItem = new CTabItem(tabs, SWT.NONE);
-		detailsItem.setText("Details");
+		detailsItem.setText(Messages.TrackTypeDialog_detailstab);
 		
 		Composite details = createDetailsPanel(tabs);
 		detailsItem.setControl(details);
 
 		CTabItem transportTypeItem = new CTabItem(tabs, SWT.NONE);
-		transportTypeItem.setText("Transport Types");
+		transportTypeItem.setText(LabelConstants.TRANSPORT_MODE);
 		Composite types = createTransportTypePanel(tabs);
 		transportTypeItem.setControl(types);
 		
 		CTabItem transportTypeGroupItem = new CTabItem(tabs, SWT.NONE);
-		transportTypeGroupItem.setText("Transport Type Groups");
+		transportTypeGroupItem.setText(LabelConstants.ENVIRONMENT_NAME);
 		Composite groups = createTransportTypeGroupPanel(tabs);
 		transportTypeGroupItem.setControl(groups);
 		
 		CTabItem attributeTypeItem = new CTabItem(tabs, SWT.NONE);
-		attributeTypeItem.setText("Custom Attributes");
+		attributeTypeItem.setText(LabelConstants.CUSTOM_METADATA_NAME);
 		Composite attributes = createAttributePanel(tabs);
 		attributeTypeItem.setControl(attributes);
 		
-		setTitle("Track Type Configuration");
-		getShell().setText("Track Type Configuration");
-		setMessage("Configure the track types, associated transportation types and custom attributes.");
+		String title = Messages.TrackTypeDialog_title; 
+		setTitle(title);
+		getShell().setText(title);
+		setMessage(Messages.TrackTypeDialog_message);
 		
 		tabs.setSelection(detailsItem);
 		tabs.setVisible(false);
@@ -225,7 +230,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		type.setTransportTypes(new ArrayList<>());
 		type.setCustomAttributes(new ArrayList<>());
 		type.setTransportGroups(new ArrayList<>());
-		type.setName("New Track Type");
+		type.setName(MessageFormat.format(Messages.TrackTypeDialog_new, LabelConstants.TRACK_TYPE));
 		type.updateName(currentCa.getDefaultLanguage(), type.getName());
 		type.updateName(SmartDB.getCurrentLanguage(), type.getName());
 		type.setKeyId(DataModelManager.INSTANCE.generateKey(type.getName(), types));
@@ -244,7 +249,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		PatrolType pt = (PatrolType)x;
 		
 		boolean doDelete = MessageDialog.openConfirm(getShell(), DialogConstants.DELETE_BUTTON_TEXT, 
-				MessageFormat.format("Are you sure you want to delete the track type {0}?", getName(pt)));
+				MessageFormat.format(Messages.TrackTypeDialog_deletetrackteyp, getName(pt)));
 		if (!doDelete) return;
 		
 		if(pt.getUuid() != null) {
@@ -252,11 +257,11 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 				for(PatrolTransportType tt : pt.getTransportTypes()) {
 					if (tt.getUuid() == null) continue;
 					if (!DeleteManager.canDelete(tt, session)) {
-						throw new Exception(MessageFormat.format("Cannot delete transport type {0} associated with type {1}.", getName(tt), getName(pt)));
+						throw new Exception(MessageFormat.format(Messages.TrackTypeDialog_deletemodeerror, getName(tt), getName(pt)));
 					}	
 				}
 				if (!DeleteManager.canDelete(pt, session)) {
-					throw new Exception(MessageFormat.format("Cannot delete track type {0}", getName(pt)));
+					throw new Exception(MessageFormat.format(Messages.TrackTypeDialog_deletetrackerror, getName(pt)));
 				}
 				
 				
@@ -274,6 +279,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		updateDetails();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void importTypes() {
 		PatrolTransportCsvImportConfig config = new PatrolTransportCsvImportConfig();
         CsvCaImportDialog dialog = new CsvCaImportDialog(getShell(), config);
@@ -368,29 +374,29 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		c.setLayout(new GridLayout());
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite header = SmartUiUtils.createHeaderLabel(c, "Track Types");
+		Composite header = SmartUiUtils.createHeaderLabel(c, LabelConstants.TRACK_TYPE);
 		header.setLayout(new GridLayout(2, false));
 		
 		ToolBar tbtypes = new ToolBar(header, SWT.FLAT);
 		tbtypes.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 
 		ToolItem importType = new ToolItem(tbtypes, SWT.PUSH);
-		importType.setToolTipText("import transport types");
+		importType.setToolTipText(Messages.TrackTypeDialog_importtypestooltip);
 		importType.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 		importType.addListener(SWT.Selection, e->importTypes());
 		
 		ToolItem exportType = new ToolItem(tbtypes, SWT.PUSH);
-		exportType.setToolTipText("export transport types");
+		exportType.setToolTipText(Messages.TrackTypeDialog_exporttypestooltip);
 		exportType.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
 		exportType.addListener(SWT.Selection, e->exportTypes());
 		
 		ToolItem deleteType = new ToolItem(tbtypes, SWT.PUSH);
-		deleteType.setToolTipText("delete track type");
+		deleteType.setToolTipText(Messages.TrackTypeDialog_deletetypetooltip);
 		deleteType.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		deleteType.addListener(SWT.Selection, e->deleteType());
 		
 		ToolItem newType = new ToolItem(tbtypes, SWT.PUSH);
-		newType.setToolTipText("create new track type");
+		newType.setToolTipText(Messages.TrackTypeDialog_newtypetooltip);
 		newType.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		newType.addListener(SWT.Selection, e->createNewType());
 		
@@ -528,7 +534,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 
 		boolean ok = MessageDialog.openConfirm(getShell(), 
 				Messages.PatrolTypePropertyPage_DeleteDialogTitle, 
-				MessageFormat.format(Messages.PatrolTypePropertyPage_DeleteWarningMessage, new Object[]{getName(ttype)}));
+				MessageFormat.format(Messages.TrackTypeDialog_confirmdeletemode, new Object[]{getName(ttype)}));
 		if (!ok){
 			return;
 		}
@@ -561,7 +567,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 			
 		boolean ok = MessageDialog.openConfirm(getShell(), 
 				Messages.PatrolTypePropertyPage_DeleteDialogTitle, 
-				MessageFormat.format("Area you sure you want to delete the transport group {0}?", getName(group)));
+				MessageFormat.format(Messages.TrackTypeDialog_confirmdeleteenv, getName(group)));
 		if (!ok) return;
 		
 		try(Session s = HibernateManager.openSession()){
@@ -579,7 +585,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 				modified();
 			}
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog(MessageFormat.format("Could not delete patrol transport group {0}." + ex.getLocalizedMessage(), getName(group)), ex); //$NON-NLS-1$
+			SmartPatrolPlugIn.displayLog(MessageFormat.format("Could not delete environment {0}." + ex.getLocalizedMessage(), getName(group)), ex); //$NON-NLS-1$
 		}
 		
 		modified();
@@ -628,7 +634,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		if (currentType.getTransportTypes() == null) currentType.setTransportTypes(new ArrayList<>());
 		currentType.getTransportTypes().add(newPtt);
 		
-		newPtt.updateName(newPtt.getConservationArea().getDefaultLanguage(), Messages.PatrolTypePropertyPage_DefaultTransportionTypeName);
+		newPtt.updateName(newPtt.getConservationArea().getDefaultLanguage(), MessageFormat.format(Messages.PatrolTypePropertyPage_DefaultTransportionTypeName2, LabelConstants.TRANSPORT_MODE));
 		newPtt.setName(newPtt.findName(newPtt.getConservationArea().getDefaultLanguage()));
 		
 		newPtt.setKeyId(DataModelManager.INSTANCE.generateKey(newPtt.getName(), getAllTransportTypes()));
@@ -647,7 +653,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		if (currentType.getTransportGroups() == null) currentType.setTransportGroups(new ArrayList<>());
 		currentType.getTransportGroups().add(newgroup);
 		
-		newgroup.updateName(currentType.getConservationArea().getDefaultLanguage(), "New Transport Group");
+		newgroup.updateName(currentType.getConservationArea().getDefaultLanguage(), MessageFormat.format(Messages.TrackTypeDialog_newenv, LabelConstants.ENVIRONMENT_NAME));
 		newgroup.setName(newgroup.findName(currentType.getConservationArea().getDefaultLanguage()));
 		
 		newgroup.setKeyId(DataModelManager.INSTANCE.generateKey(newgroup.getName(), getAllTransportGroups()));
@@ -693,7 +699,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		//Name
 		viewerColumn = new TableViewerColumn(tblTransportGroupTypes,SWT.NONE);
 		column = viewerColumn.getColumn();
-		column.setText("Group");
+		column.setText(LabelConstants.ENVIRONMENT_NAME);
 		column.setResizable(true);
 		column.setMoveable(true);
 
@@ -734,7 +740,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 						}else{
 							//invalid name
 							MessageDialog.openError(getShell(), INVALID_TYPE_DIALOG_TITLE, 
-									MessageFormat.format("Transportation group names must not be blank, can only contain {0}, and must be fewer than {1, number, integer} characters.", SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, PatrolType.MAX_TRANSPORT_NAME_LENGTH));
+									MessageFormat.format(Messages.TrackTypeDialog_envnameerror, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, PatrolType.MAX_TRANSPORT_NAME_LENGTH));
 							modified();
 						}				
 						tblTransportGroupTypes.refresh();
@@ -1090,7 +1096,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		panel.setLayout(new GridLayout(2, false));
 		
 		Label l = new Label(panel, SWT.WRAP);
-		l.setText("Custom attributes can be shared across track data types.");
+		l.setText(Messages.TrackTypeDialog_metadatasharedinfo);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite wrapper = new Composite(panel, SWT.NONE);
@@ -1144,7 +1150,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		//Name
 		viewerColumn = new TableViewerColumn(tblAttributes,SWT.NONE);
 		column = viewerColumn.getColumn();
-		column.setText("Attribute");
+		column.setText(Messages.TrackTypeDialog_attributecol);
 		column.setResizable(true);
 
 		layout = (TableColumnLayout) tblAttributes.getTable().getParent().getLayout();
@@ -1296,7 +1302,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		detailsPanel.setLayout(new GridLayout(3, false));
 
 		Label l = new Label(detailsPanel, SWT.NONE);
-		l.setText("Enabled:");
+		l.setText(Messages.TrackTypeDialog_enabled);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		cmbActive = new ComboViewer(detailsPanel, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -1305,8 +1311,8 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		cmbActive.setInput(new Boolean[] {Boolean.TRUE, Boolean.FALSE});
 		cmbActive.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
-				if ((Boolean)element) return "Yes";
-				return "No";
+				if ((Boolean)element) return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
+				return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
 			}
 		});
 		cmbActive.addSelectionChangedListener(e->{
@@ -1319,7 +1325,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		
 		
 		l = new Label(detailsPanel, SWT.NONE);
-		l.setText("Name:");
+		l.setText(Messages.TrackTypeDialog_name);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		txtTypeName = new Text(detailsPanel, SWT.BORDER);
@@ -1342,7 +1348,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		
 		
 		l = new Label(detailsPanel, SWT.NONE);
-		l.setText("Key:");
+		l.setText(Messages.TrackTypeDialog_key);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		txtTypeKey = new Label(detailsPanel,SWT.NONE);
@@ -1367,7 +1373,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		
 		
 		l = new Label(detailsPanel, SWT.NONE);
-		l.setText("Icon:");
+		l.setText(Messages.TrackTypeDialog_icon);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		lblIcon = new Label(detailsPanel, SWT.NONE);
@@ -1379,7 +1385,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		
 		Button btnClearIcon = new Button(temp, SWT.NONE);
 		btnClearIcon.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		btnClearIcon.setText("Clear");
+		btnClearIcon.setText(Messages.TrackTypeDialog_clear);
 		btnClearIcon.addListener(SWT.Selection, e->setTypeIcon(null));
 		
 		Button btnEditIcon = new Button(temp, SWT.NONE);
@@ -1482,7 +1488,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		for (PatrolAttributePatrolType type : currentType.getCustomAttributes()) {
 			if(type.getPatrolType().equals(currentType)) continue;
 			if (type.getPatrolAttribute().equals(pa)) {
-				MessageDialog.openInformation(getShell(), DialogConstants.EDIT_BUTTON_TEXT, "Modifying this attribute changes it across all track types that are associated with this attribute.");
+				MessageDialog.openInformation(getShell(), DialogConstants.EDIT_BUTTON_TEXT, Messages.TrackTypeDialog_modifywarning);
 				break;
 			}
 		}
@@ -1522,7 +1528,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		
 		PatrolAttributePatrolType pa = (PatrolAttributePatrolType) x;
 		if (!MessageDialog.openQuestion(getShell(), DialogConstants.DELETE_BUTTON_TEXT,
-				MessageFormat.format("Are you sure you want to remove the custom attribute ''{0}'' from the type ''{1}''? \n\n This will remove all values associated with this attribute for patrols of type ''{2}''.", 
+				MessageFormat.format(Messages.TrackTypeDialog_deletequestion, 
 						getName(pa.getPatrolAttribute()), getName(currentType), getName(currentType)))) {
 			return;
 		}
@@ -1651,6 +1657,11 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 				if (!doSave()) return;
 			}			
 		}
+		if (needsRestart) {
+			if (MessageDialog.openQuestion(getShell(), Messages.TrackTypeDialog_restart, Messages.TrackTypeDialog_restartmessage)) {
+				PlatformUI.getWorkbench().restart();
+			}
+		}
 		super.cancelPressed();
 	}
 	
@@ -1664,17 +1675,20 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 				session.flush();
 				for (PatrolType pt : types) {
 					for (PatrolTransportType tt : pt.getTransportTypes()) {
-						HibernateManager.saveOrMerge(session, tt.getIcon());
+						tt.setIcon(HibernateManager.saveOrMerge(session, tt.getIcon()));
 					}
 					for (PatrolTransportGroup g: pt.getTransportGroups()) {
-						HibernateManager.saveOrMerge(session, g.getIcon());
+						g.setIcon(HibernateManager.saveOrMerge(session, g.getIcon()));
 					}
 				}
 				session.flush();
 				for (PatrolType pt : types) {
-					HibernateManager.saveOrMerge(session, pt.getIcon());
+					
+					pt.setIcon(HibernateManager.saveOrMerge(session, pt.getIcon()));
 					
 					if (pt.getUuid() == null) session.persist(pt);
+					
+					session.flush();
 					
 					for (PatrolTransportGroup tt : pt.getTransportGroups()) {
 						if (tt.getUuid() != null) {
@@ -1683,6 +1697,8 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 							session.persist(tt);
 						}
 					}
+					
+					session.flush();
 					
 					for (PatrolTransportType tt : pt.getTransportTypes()) {
 						if (tt.getUuid() != null) {
@@ -1720,8 +1736,8 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 					}
 					if (!canDelete) continue;
 					
-					boolean dodelete = MessageDialog.openQuestion(getShell(), "Patrol Attribute", 
-							MessageFormat.format("The custom attribute ''{0}'' is not associated with any track type. Do you want to remove it from the Conservation Area?", getName(pa)));
+					boolean dodelete = MessageDialog.openQuestion(getShell(), LabelConstants.CUSTOM_METADATA_NAME, 
+							MessageFormat.format(Messages.TrackTypeDialog_attributenotused, getName(pa)));
 					if (dodelete) {
 						session.remove(pa);
 					}					
@@ -1734,12 +1750,18 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 				getButton(IDialogConstants.OK_ID).setEnabled(false);
 				
 				loadDataJob.schedule();
+				
+				String newTerm = PatrolDynamicMenuManager.INSTANCE.updateTerm();
+				needsRestart = !newTerm.equalsIgnoreCase(menuTerm);
+				
 				return true;
 			}catch (Exception ex) {
-				SmartPatrolPlugIn.displayLog(MessageFormat.format("Unable to save changes: {0}", ex.getMessage()), ex);
+				SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.TrackTypeDialog_saveerror, ex.getMessage()), ex);
 				return false;
 			}
 		}
+		
+		
 	}
 	
 	/*
@@ -1774,7 +1796,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		/* Transport Type Name Column */
 		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
 		column = viewerColumn.getColumn();
-		column.setText(Messages.PatrolTypePropertyPage_TransportType_ColumnHeader);
+		column.setText(LabelConstants.TRANSPORT_MODE);
 		column.setToolTipText(column.getText());
 		column.setResizable(true);
 		column.setMoveable(true);
@@ -1863,7 +1885,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		/* Group Speed */
 		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
 		column = viewerColumn.getColumn();
-		column.setText("Group");
+		column.setText(LabelConstants.ENVIRONMENT_NAME);
 		column.setToolTipText(column.getText());
 		column.setResizable(true);
 		column.setMoveable(true);
@@ -1934,7 +1956,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		/* Max Speed */
 		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
 		column = viewerColumn.getColumn();
-		column.setText("Max Speed (km/h)");
+		column.setText(Messages.TrackTypeDialog_maxspeedcol);
 		column.setToolTipText(column.getText());
 		column.setResizable(true);
 		column.setMoveable(true);
@@ -2002,7 +2024,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 						ttype.setMaxSpeed(newValue);
 						modified();
 					}catch (Exception ex) {
-						MessageDialog.openError(getShell(), INVALID_TYPE_DIALOG_TITLE, MessageFormat.format("Max speed must be between {0} and {1}.", PatrolTransportType.MAX_SPEED_MIN_VALUE, PatrolTransportType.MAX_SPEED_MAX_VALUE));
+						MessageDialog.openError(getShell(), INVALID_TYPE_DIALOG_TITLE, MessageFormat.format(Messages.TrackTypeDialog_invalidmaxspeed, PatrolTransportType.MAX_SPEED_MIN_VALUE, PatrolTransportType.MAX_SPEED_MAX_VALUE));
 					}
 					viewer.refresh();
 				}					
@@ -2011,7 +2033,7 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 		/* Requires Pilot */
 		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
 		column = viewerColumn.getColumn();
-		column.setText("Requires Pilot");
+		column.setText(Messages.TrackTypeDialog_pilotrequired);
 		column.setToolTipText(column.getText());
 		column.setResizable(true);
 		column.setMoveable(true);
@@ -2190,8 +2212,8 @@ public class TrackTypeDialog extends SmartStyledTitleDialog {
 					});
 				});
 				
-				allAttributes = session.createQuery("FROM PatrolAttribute WHERE conservationArea = :ca", PatrolAttribute.class)
-						.setParameter("ca", SmartDB.getCurrentConservationArea())
+				allAttributes = session.createQuery("FROM PatrolAttribute WHERE conservationArea = :ca", PatrolAttribute.class) //$NON-NLS-1$
+						.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 						.list();
 				
 				for (PatrolAttribute a : allAttributes) {

@@ -197,14 +197,14 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
     /**
      * Job to refresh the service and map.
      */
-    private Job refreshJob = new Job(Messages.PatrolMapPageEditor_RefreshPatrolLayers_Job){
+    private Job refreshJob = new Job(Messages.PatrolMapPageEditor_RefreshPatrolLayers_Job2){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (patrolService != null){
 				try {
 					patrolService.refresh(parentEditor.getPatrol(), null);
 				} catch (IOException e) {
-					SmartPatrolPlugIn.log(Messages.PatrolMapPageEditor_Error_RefreshingLayers, e);
+					SmartPatrolPlugIn.log(Messages.PatrolMapPageEditor_Error_RefreshingLayers2, e);
 				}
 			}
 			//clear selection

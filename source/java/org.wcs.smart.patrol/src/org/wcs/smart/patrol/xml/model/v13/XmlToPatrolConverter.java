@@ -179,7 +179,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		try(InputStream is = Files.newInputStream(xmlFile)){
 			xml = readDataModel(is);
 		}
-		if (xml == null) throw new Exception(Messages.XmlToPatrolConverter_ReadError);
+		if (xml == null) throw new Exception(Messages.XmlToPatrolConverter_ReadError2);
 		this.session = session;
 		this.ca = ca;
 		this.attachmentLocation = attachmentLocation;
@@ -223,7 +223,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 			PatrolAttribute pa = findAttribute(av.getKey());
 			if (pa == null) continue;
 			if (pa.getType() == AttributeType.TREE) {
-				warnings.add(Messages.XmlToPatrolConverter_TreeAttributesNotSupported);
+				warnings.add(Messages.XmlToPatrolConverter_TreeAttributesNotSupported2);
 				continue;
 			}
 			
@@ -270,7 +270,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		for (PatrolAttributeListItem li : pa.getAttributeList()) {
 			if (li.getKeyId().equalsIgnoreCase(key)) return li;
 		}
-		warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_ListItemNotFound, pa.getName(), key));
+		warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_ListItemNotFound2, pa.getName(), key));
 		return null;
 	}
 	
@@ -279,7 +279,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
 				new Object[] {"keyId", key}).uniqueResult(); //$NON-NLS-1$
 		if (a == null) {
-			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_AttributeNotFound, key));
+			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_AttributeNotFound2, key));
 		}
 		return a;
 	}
@@ -296,7 +296,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				//ERROR
 				throw new Exception(
 						MessageFormat.format(
-								Messages.XmlToPatrolConverter_Error_MandateNotFound,
+								Messages.XmlToPatrolConverter_Error_MandateNotFound2,
 								new Object[]{xml.getMandate().getValue(), xml.getMandate().getLanguageCode()})
 								);
 			}else{
@@ -311,7 +311,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				
 		if (ttype == null){
 			throw new Exception(MessageFormat.format(
-				Messages.XmlToPatrolConverter_Error_TranpsortTypeNotFound1, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(), 
+				Messages.XmlToPatrolConverter_Error_TranpsortTypeNotFound12, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(), 
 						patrol.getPatrolType().getName()}));
 		}
 		
@@ -353,7 +353,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 					if (existing.getMember().equals(e)) {
 						//add a warning
 						exists = true;
-						warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_duplicateWarning,
+						warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_duplicateWarning2,
 								member.getGivenName(), member.getFamilyName(),member.getEmployeeId()));
 						if (member.isIsLeader()) existing.setIsLeader(true);
 						if (member.isIsPilot()) existing.setIsLeader(true);
@@ -380,7 +380,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				//ensure leg day is included in leg date range, if not don't include it
 				leg.getPatrolLegDays().add(pld);
 			}else{
-				warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_DayOutsideLegRange, new Object[]{leg.getId(), pld.getDate(), leg.getStartDate(), leg.getEndDate()}));
+				warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_DayOutsideLegRange2, new Object[]{leg.getId(), pld.getDate(), leg.getStartDate(), leg.getEndDate()}));
 			}
 			
 			

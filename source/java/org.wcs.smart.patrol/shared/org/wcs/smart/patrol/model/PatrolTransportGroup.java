@@ -83,6 +83,10 @@ public class PatrolTransportGroup extends NamedKeyIconItem{
 	
 	static {
 		MIXED = new PatrolTransportGroup() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 2L;
 			private String name = null;
 			public String getName() {
 				if (this.name == null) {

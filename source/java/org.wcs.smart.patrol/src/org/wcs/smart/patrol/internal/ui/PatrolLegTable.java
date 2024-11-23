@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -63,11 +64,11 @@ public class PatrolLegTable {
 		LEGID(Messages.PatrolLegTable_LegId_ColumnName), 
 		STARTDATE(Messages.PatrolLegTable_LegStartDate_ColumnName), 
 		ENDDATE(Messages.PatrolLegTable_LegEndDate_ColumnName),
-		MANDATE(Messages.PatrolLegTable_Mandate_ColumnName),
-		TRANSPORTTYPE(Messages.PatrolLegTable_LegTranportType_ColumnName), 
-		LEADER(Messages.PatrolLegTable_LegLeader_ColumnName), 
-		PILOT(Messages.PatrolLegTable_LegPilot_ColumnName), 
-		MEMBERS(Messages.PatrolLegTable_LegMembers_ColumnName);
+		MANDATE(LabelConstants.MANDATE_NAME),
+		TRANSPORTTYPE(LabelConstants.TRANSPORT_MODE), 
+		LEADER(LabelConstants.LEADER), 
+		PILOT(LabelConstants.PILOT), 
+		MEMBERS(LabelConstants.MEMBERS);
 
 		private String guiName;
 

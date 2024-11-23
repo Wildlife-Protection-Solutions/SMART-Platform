@@ -71,7 +71,7 @@ public class GPSDataImport {
 	 */
 	public enum ImportType{
 		WAYPOINT (Messages.GPSDataImport_WaypointName, Messages.GPSDataImport_WaypointImportDescription), 
-		TRACK(Messages.GPSDataImport_TrackName, Messages.GPSDataImport_TrackImportDescrption);
+		TRACK("TrackPoint", Messages.GPSDataImport_TrackImportDescrption);
 		
 		public String guiName;
 		public String importDesc;

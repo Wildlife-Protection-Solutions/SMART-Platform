@@ -46,9 +46,9 @@ public class PatrolXmlImportDialog extends XmlImportDialog {
 
 	public PatrolXmlImportDialog(Shell parentShell) {
 		super(parentShell,
-				Messages.ImportPatrolDialog_DialogTitle,
-				Messages.ImportPatrolDialog_DialogText,
-				Messages.ImportPatrolDialog_DialogMessage);
+				Messages.ImportPatrolDialog_DialogTitle2,
+				Messages.ImportPatrolDialog_DialogText2,
+				Messages.ImportPatrolDialog_DialogMessage2);
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class PatrolXmlImportDialog extends XmlImportDialog {
 		optionCmp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 		Label l = new Label(optionCmp, SWT.NONE);
-		l.setText(Messages.PatrolXmlImportDialog_IdsOptionLabel);
+		l.setText(Messages.PatrolXmlImportDialog_IdsOptionLabel2);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		Composite op = new Composite(optionCmp, SWT.NONE);
@@ -70,8 +70,8 @@ public class PatrolXmlImportDialog extends XmlImportDialog {
 		op.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Button btnAssign = new Button(op, SWT.RADIO);
-		btnAssign.setText(Messages.PatrolXmlImportDialog_NewId);
-		btnAssign.setToolTipText(Messages.PatrolXmlImportDialog_AutoGenerateIdsTooltip);
+		btnAssign.setText(Messages.PatrolXmlImportDialog_NewId2);
+		btnAssign.setToolTipText(Messages.PatrolXmlImportDialog_AutoGenerateIdsTooltip2);
 		btnAssign.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		btnAssign.setSelection(true);
 		btnAssign.addSelectionListener(new SelectionAdapter() {
@@ -82,8 +82,8 @@ public class PatrolXmlImportDialog extends XmlImportDialog {
 		});
 
 		Button btnKeep = new Button(op, SWT.RADIO);
-		btnKeep.setText(Messages.PatrolXmlImportDialog_KeepId);
-		btnKeep.setToolTipText(Messages.PatrolXmlImportDialog_KeepIdsTooltip);
+		btnKeep.setText(Messages.PatrolXmlImportDialog_KeepId2);
+		btnKeep.setToolTipText(Messages.PatrolXmlImportDialog_KeepIdsTooltip2);
 		btnKeep.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnKeep.addSelectionListener(new SelectionAdapter() {
 			@Override

@@ -94,7 +94,7 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 		txtMaxSpeed.addListener(SWT.Modify, e->validate());
 		
 		l = new Label(panel, SWT.NONE);
-		l.setText(MessageFormat.format("{0}:", ILabelProvider.getLabel(ILabelProvider.Key.PatrolSpeedRoutineType_Param_TypeName, Locale.getDefault()))); //$NON-NLS-1$
+		l.setText(MessageFormat.format("{0}", ILabelProvider.getLabel(ILabelProvider.Key.PatrolSpeedRoutineType_Param_TypeName, Locale.getDefault()))); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 2, 1));
 		
 		cdTt = new ControlDecoration(l, SWT.RIGHT | SWT.TOP);
@@ -146,7 +146,7 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 		cdTt.hide();
 		if (tblTransportTypes.getCheckedElements().length == 0){
 			isValid = false;
-			cdTt.setDescriptionText(Messages.PatrolSpeedParameterCollector_TransportTypeRequired);
+			cdTt.setDescriptionText(Messages.PatrolSpeedParameterCollector_TransportTypeRequired2);
 			cdTt.show();
 		}else{
 			boolean found = false;
@@ -158,7 +158,7 @@ public class PatrolSpeedParameterCollector extends IParameterCollector {
 			}
 			if (!found){
 				isValid = false;
-				cdTt.setDescriptionText(Messages.PatrolSpeedParameterCollector_TransportTypeRequired);
+				cdTt.setDescriptionText(Messages.PatrolSpeedParameterCollector_TransportTypeRequired2);
 				cdTt.show();
 			}
 		}

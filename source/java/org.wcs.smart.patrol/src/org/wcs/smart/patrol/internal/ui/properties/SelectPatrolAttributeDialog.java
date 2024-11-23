@@ -42,7 +42,9 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -115,7 +117,7 @@ public class SelectPatrolAttributeDialog extends SmartStyledTitleDialog {
 		
 		Button btnAdd = new Button(main, SWT.NONE);
 		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		btnAdd.setText("Create New Custom Attribute");
+		btnAdd.setText(Messages.SelectPatrolAttributeDialog_CreateNew);
 		btnAdd.addListener(SWT.Selection, e->newAttribute());
 		
 		TableColumn tc = new TableColumn(lstAttributes.getTable(), SWT.NONE);
@@ -123,9 +125,9 @@ public class SelectPatrolAttributeDialog extends SmartStyledTitleDialog {
 		layout.setColumnData(tc, new ColumnWeightData(100));
 		wrapper.setLayout(layout);
 		
-		setTitle("Custom Track Attributes");
-		getShell().setText("Custom Track Attributes");
-		setMessage("Select the custom track attributes to add");
+		setTitle(LabelConstants.CUSTOM_METADATA_NAME);
+		getShell().setText(LabelConstants.CUSTOM_METADATA_NAME);
+		setMessage(Messages.SelectPatrolAttributeDialog_message);
 		
 		return main;
 	}

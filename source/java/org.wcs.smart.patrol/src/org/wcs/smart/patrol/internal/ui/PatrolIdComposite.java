@@ -40,6 +40,7 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -68,7 +69,7 @@ public class PatrolIdComposite extends PatrolItemComposite {
 		center.setLayout(new GridLayout(2, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText(Messages.PatrolIdComposite_Id_Label);
+		lbl.setText(LabelConstants.ID);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		
 		txtPatrolId = new Text(center, SWT.BORDER | style);
@@ -113,7 +114,7 @@ public class PatrolIdComposite extends PatrolItemComposite {
 		if (isDup){
 			if (!MessageDialog.openQuestion(txtPatrolId.getDisplay().getActiveShell(), 
 					Messages.PatrolIdComposite_WarningDialogTitle, 
-					MessageFormat.format(Messages.PatrolIdComposite_DuplicateIdWarning, new Object[]{newPatrolId}))){
+					MessageFormat.format(Messages.PatrolIdComposite_idexists, new Object[]{newPatrolId}))){
 				return false;
 			}
 		}
@@ -131,7 +132,7 @@ public class PatrolIdComposite extends PatrolItemComposite {
 	 */
 	@Override
 	public String getTitle() {
-		return Messages.PatrolIdComposite_Title;
+		return LabelConstants.ID;
 	}
 	
 	/**
@@ -147,7 +148,7 @@ public class PatrolIdComposite extends PatrolItemComposite {
 		errorMessage = null;
 		if (! SmartUtils.isSimpleString(txtPatrolId.getText().trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Patrol.MAX_ID_LENGTH) ) {
 			cdPatrolId.show();
-			errorMessage = MessageFormat.format(Messages.PatrolIdComposite_Error_InvalidId,
+			errorMessage = MessageFormat.format(Messages.PatrolIdComposite_invalidid,
 					new Object[]{Patrol.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc});
 			cdPatrolId.setDescriptionText(errorMessage);
 			isValid = false;

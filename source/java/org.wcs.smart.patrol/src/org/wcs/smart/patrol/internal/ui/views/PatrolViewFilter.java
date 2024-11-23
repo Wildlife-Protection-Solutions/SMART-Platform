@@ -32,6 +32,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.ui.LabelConstants;
 
 import jakarta.persistence.Tuple;
 
@@ -61,7 +62,7 @@ public class PatrolViewFilter {
 		}
 	}
 	public enum SortBy{
-		ID(Messages.PatrolViewFilter_PatrolIdSort, "lower(p.id)"), //$NON-NLS-1$
+		ID(LabelConstants.ID, "lower(p.id)"),  //$NON-NLS-1$
 		START_DATE(Messages.PatrolViewFilter_StartDateSort, "p.startDate"), //$NON-NLS-1$
 		END_DATE(Messages.PatrolViewFilter_EndDateSort, "p.endDate"); //$NON-NLS-1$
 		

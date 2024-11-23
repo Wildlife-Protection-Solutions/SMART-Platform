@@ -49,7 +49,7 @@ public class PlanCaDeleteHandler implements ICaDeleteHandler{
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor)
 			throws Exception {
-		monitor.subTask(Messages.PlanCaDeleteHandler_DeletePatrolPlan_SubTasl);
+		monitor.subTask(Messages.PlanCaDeleteHandler_DeletePatrolPlan_SubTasl2);
 		deletePatrolPlan(ca, session);
 		monitor.subTask(Messages.PlanCaDeleteHandler_DeleteTargets_SubTask);
 		deletePlanTargets(ca, session);

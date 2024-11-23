@@ -71,7 +71,7 @@ public class DeleteEmptyEndPatrolDaysAction implements IQaAction {
 			}
 		}
 		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), DialogConstants.DELETE_BUTTON_TEXT, 
-				Messages.DeleteEmptyEndPatrolDaysAction_ConfirmMessage)){
+				Messages.DeleteEmptyEndPatrolDaysAction_ConfirmMessage2)){
 			return false;
 		}
 		
@@ -101,7 +101,7 @@ public class DeleteEmptyEndPatrolDaysAction implements IQaAction {
 
 	@Override
 	public String getName(Locale l) {
-		return Messages.DeleteEmptyEndPatrolDaysAction_ActionName;
+		return Messages.DeleteEmptyEndPatrolDaysAction_ActionName2;
 	}
 	
 	private void updateItem(QaError item, Session s, QaError.Status status, String message) {
@@ -140,7 +140,7 @@ public class DeleteEmptyEndPatrolDaysAction implements IQaAction {
 			
 			Patrol p = s.get(Patrol.class, item.getSourceId());
 			if (p == null) {
-				updateItem(item, s, QaError.Status.ERROR, Messages.DeleteEmptyEndPatrolDaysAction_PatrolNotFoundError);
+				updateItem(item, s, QaError.Status.ERROR, Messages.DeleteEmptyEndPatrolDaysAction_PatrolNotFoundError2);
 				return;
 			}
 			patrolId = p.getId();
@@ -176,7 +176,7 @@ public class DeleteEmptyEndPatrolDaysAction implements IQaAction {
 			if (toDelete.size() == alldates.size()) {
 				//deleting everything confirm with user first
 				if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), DialogConstants.DELETE_BUTTON_TEXT, 
-						MessageFormat.format(Messages.DeleteEmptyEndPatrolDaysAction_DeletePatrolConfirm, patrolId))){
+						MessageFormat.format(Messages.DeleteEmptyEndPatrolDaysAction_DeletePatrolConfirm2, patrolId))){
 					return ;
 				}
 				boolean isDeleted = false;
@@ -189,9 +189,9 @@ public class DeleteEmptyEndPatrolDaysAction implements IQaAction {
 				}
 				try(Session session = HibernateManager.openSession()){
 					if (isDeleted) {
-						updateItem(item, session, QaError.Status.FIXED, Messages.DeleteEmptyEndPatrolDaysAction_PatrolDeletedStatus);
+						updateItem(item, session, QaError.Status.FIXED, Messages.DeleteEmptyEndPatrolDaysAction_PatrolDeletedStatus2);
 					}else {
-						updateItem(item, session, QaError.Status.ERROR, Messages.DeleteEmptyEndPatrolDaysAction_PatrolDeletedErrorStatus);
+						updateItem(item, session, QaError.Status.ERROR, Messages.DeleteEmptyEndPatrolDaysAction_PatrolDeletedErrorStatus2);
 					}
 				}
 			} else {
@@ -236,12 +236,12 @@ public class DeleteEmptyEndPatrolDaysAction implements IQaAction {
 						
 						modified.add(p);
 						
-						updateItem(item, session, QaError.Status.FIXED, Messages.DeleteEmptyEndPatrolDaysAction_EmptyDaysRemovedStatus);
+						updateItem(item, session, QaError.Status.FIXED, Messages.DeleteEmptyEndPatrolDaysAction_EmptyDaysRemovedStatus2);
 
 						session.getTransaction().commit();
 					}catch (Exception ex) {
 						session.getTransaction().rollback();
-						QaPlugIn.displayLog(MessageFormat.format(Messages.DeleteEmptyEndPatrolDaysAction_RemoteError, patrolId, ex.getMessage()), ex);
+						QaPlugIn.displayLog(MessageFormat.format(Messages.DeleteEmptyEndPatrolDaysAction_RemoteError2, patrolId, ex.getMessage()), ex);
 						
 						updateItem(item, session, QaError.Status.ERROR, Messages.DeleteEmptyEndPatrolDaysAction_GeneralError + ex.getMessage());						
 					}

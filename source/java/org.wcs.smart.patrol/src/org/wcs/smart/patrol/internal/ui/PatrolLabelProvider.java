@@ -32,6 +32,7 @@ import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolTransportGroup;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
+import org.wcs.smart.patrol.ui.LabelConstants;
 
 /**
  * Implementation for patrol label provider.
@@ -45,29 +46,29 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 	public String getLabel(Object item, Locale l) {
 		
 		if (item instanceof PatrolWaypointSource){
-			return Messages.PatrolWaypointSource_PatrolWaypointSourceName;
+			return Messages.PatrolWaypointSource_PatrolWaypointSourceName2;
 		}
-		if (item.equals(PATROLTEAM_TABLENAME_KEY)) return Messages.PatrolLabelProvider_PatrolTeamColumnNameKey;
-		if (item.equals(PATROLTT_TABLENAME_KEY)) return Messages.PatrolLabelProvider_PatrolTransportTypeColumnName;
-		if (item.equals(PATROLMANDATE_TABLENAME_KEY)) return Messages.PatrolLabelProvider_PatrolMandateColumnName;
+		if (item.equals(PATROLTEAM_TABLENAME_KEY)) return Messages.PatrolLabelProvider_PatrolTeamColumnNameKey2;
+		if (item.equals(PATROLTT_TABLENAME_KEY)) return LabelConstants.TRANSPORT_MODE;
+		if (item.equals(PATROLMANDATE_TABLENAME_KEY)) return Messages.PatrolLabelProvider_PatrolMandateColumnName2;
 		if (item.equals(TEAMNAME_KEY)) return Messages.PatrolLabelProvider_TeamColumnName;
 		if (item.equals(TEAMDESCRIPTION_KEY)) return Messages.PatrolLabelProvider_DescriptionColumnName;
 		if (item.equals(TEAMMANDATE_KEY)) return Messages.PatrolLabelProvider_MandateColumnName;
 		if (item.equals(TEAMACTIVE_KEY)) return Messages.PatrolLabelProvider_TeamActiveColumnName;
-		if (item.equals(TRANSPORTNAME_KEY)) return Messages.PatrolLabelProvider_TransportTypeColumnName;
+		if (item.equals(TRANSPORTNAME_KEY)) return LabelConstants.TRANSPORT_MODE;
 		if (item.equals(TRANSPORTACTIVE_KEY)) return Messages.PatrolLabelProvider_TransportActiveColumnName;
 		if (item.equals(TRANSPORTTYPE_KEY)) return Messages.PatrolLabelProvider_PatrolTypeColumnName1;
-		if (item.equals(MANDATENAME_KEY)) return Messages.PatrolLabelProvider_PatrolMandateColumnName;
+		if (item.equals(MANDATENAME_KEY)) return Messages.PatrolLabelProvider_PatrolMandateColumnName2;
 		if (item.equals(MANDATEACTIVE_KEY)) return Messages.PatrolLabelProvider_MandateActiveColumnName;
-		if (item.equals(MIXED_KEY)) return "[Mixed]";
-		if (item.equals(NOGROUP_KEY)) return "[None]";
+		if (item.equals(MIXED_KEY)) return Messages.PatrolLabelProvider_Mixed;
+		if (item.equals(NOGROUP_KEY)) return Messages.PatrolLabelProvider_None;
 		
 		if (item instanceof PatrolJsonFeatureProcessor.Messages) {
 			return getMessage((PatrolJsonFeatureProcessor.Messages)item, l);
 		}
 		
 		if (item == PatrolType.DefaultType.PATROL) {
-			return "Patrol";
+			return Messages.PatrolLabelProvider_PatrolTrackTypeName;
 		}
 		if (item == PatrolTransportGroup.DefaultType.GROUND) {
 			return Messages.PatrolType_GroundName;
@@ -82,29 +83,29 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 	@Override
 	public String getMessage(PatrolJsonFeatureProcessor.Messages message, Locale l) {
 		switch(message) {
-		case COMPLETE_MSG: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE;
+		case COMPLETE_MSG: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE2;
 		case INVALID_DATA_TYPE: return Messages.PatrolLabelProvider_JSONPROCESSOR_1;
-		case INVALID_FEATURE_TYPE: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_2;
+		case INVALID_FEATURE_TYPE: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_2_2;
 		case MISSING_PROPERTY: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_3;
-		case PATROLLEG_LINK_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_4;
-		case PATROL_LINK_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_5;
-		case PATROL_LINK_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_6;
-		case PATROLLEG_LINK_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_7;
-		case PATROLLEG_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_8;
-		case TRANSPORTTYPE_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_9;
-		case MANDATE_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_10;
-		case MANDATE_EXISTING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_11;
-		case EMPLOYEE_NOT_FOUND: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_12;
-		case NO_EMPLOYEES: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_13;
-		case NO_LEADER: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_14;
-		case NO_PILOT: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_151;
-		case INVALID_PATROL_UUID: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_16;
-		case INVALID_PATROLLEG_UUID: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_17;
-		case PATROL_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_18;
-		case PATROLLEG_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_19;
+		case PATROLLEG_LINK_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_42;
+		case PATROL_LINK_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_52;
+		case PATROL_LINK_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_62;
+		case PATROLLEG_LINK_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_72;
+		case PATROLLEG_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_82;
+		case TRANSPORTTYPE_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_92;
+		case MANDATE_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_102;
+		case MANDATE_EXISTING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_112;
+		case EMPLOYEE_NOT_FOUND: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_122;
+		case NO_EMPLOYEES: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_132;
+		case NO_LEADER: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_142;
+		case NO_PILOT: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_152;
+		case INVALID_PATROL_UUID: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_162;
+		case INVALID_PATROLLEG_UUID: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_172;
+		case PATROL_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_182;
+		case PATROLLEG_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_192;
 		case TEAM_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_20;
 		case STATION_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_21;
-		case CUSTOM_ATTRIBUTE_ERROR: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_22;
+		case CUSTOM_ATTRIBUTE_ERROR: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_22_2;
 		case OBSERVATION_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_23;
 		case WAYPOINT_NOT_FOUND: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_24;
 		case OBSERVATION_NOT_FOUND: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_25;
@@ -166,7 +167,7 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			key = Messages.PatrolLabelProvider_CommentMetadata;
 			break;
 		case EMPLOYEES:
-			key = Messages.PatrolLabelProvider_EmployeesMetadata;
+			key = Messages.PatrolLabelProvider_EmployeesMetadata2;
 			break;
 		case LEADER:
 			key = Messages.PatrolLabelProvider_LeaderMetadata;
@@ -178,7 +179,7 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			key = Messages.PatrolLabelProvider_ObjectiveMetdata;
 			break;
 		case PATROLID:
-			key = Messages.PatrolLabelProvider_PidMetadata;
+			key = Messages.PatrolLabelProvider_PidMetadata2;
 			break;
 		case PILOT:
 			key = Messages.PatrolLabelProvider_PilotMetadata;
@@ -190,7 +191,7 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			key = Messages.PatrolLabelProvider_TeamMetadata;
 			break;
 		case TRANSPORT_TYPE:
-			key = Messages.PatrolLabelProvider_TransportTypeMetadata;
+			key = LabelConstants.TRANSPORT_MODE;
 			break;
 		default:
 			break;

@@ -61,7 +61,7 @@ public class EditPatrolDateLegsDialog extends AbstractPropertyJHeaderDialog{
 	public EditPatrolDateLegsDialog(Shell parent, 
 			LocalDate startDate, LocalDate endDate){
 		
-		super(parent, Messages.EditPatrolDateLegsDialog_Title);
+		super(parent, Messages.EditPatrolDateLegsDialog_Title2);
 		item = new DateComposite();
 		this.startDate = startDate;
 		this.endDate = endDate;

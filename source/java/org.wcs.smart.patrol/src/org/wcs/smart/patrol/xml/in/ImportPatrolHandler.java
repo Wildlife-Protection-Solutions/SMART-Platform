@@ -62,7 +62,7 @@ import org.wcs.smart.patrol.ui.PatrolEditorInput;
 @SuppressWarnings("restriction")
 public class ImportPatrolHandler {
 
-	private static final String PATROL_NOT_IMPORTED_ERROR_MSG = Messages.ImportPatrolHandler_PatrolNotImported_Error;
+	private static final String PATROL_NOT_IMPORTED_ERROR_MSG = Messages.ImportPatrolHandler_PatrolNotImported_Error2;
 
 	@Execute
 	public void execute(Shell activeShell, IEclipseContext context){
@@ -130,7 +130,7 @@ public class ImportPatrolHandler {
 					});
 					
 					
-					monitor.beginTask(Messages.ImportPatrolHandler_Progress_LoadingPatrols, files.size());
+					monitor.beginTask(Messages.ImportPatrolHandler_Progress_LoadingPatrols2, files.size());
 					IProgressMonitor nullPm = new NullProgressMonitor();
 					boolean cancelled = false;
 					List<Patrol> imported = new ArrayList<>();
@@ -163,7 +163,7 @@ public class ImportPatrolHandler {
 						@Override
 						public void run() {
 							if (fcancelled) {
-								MessageDialog.openInformation(shell, Messages.ImportPatrolHandler_Cancelled_DialogTitle, MessageFormat.format(Messages.ImportPatrolHandler_Cancelled_DialogMessage1, imported.size(), files.size()));									
+								MessageDialog.openInformation(shell, Messages.ImportPatrolHandler_Cancelled_DialogTitle, MessageFormat.format(Messages.ImportPatrolHandler_Cancelled_DialogMessage12, imported.size(), files.size()));									
 							}else {
 								MessageDialog.openInformation(shell, Messages.ImportPatrolHandler_MessageTitle, MessageFormat.format(Messages.ImportPatrolHandler_CompleteMessage, imported.size(), files.size()));
 							}

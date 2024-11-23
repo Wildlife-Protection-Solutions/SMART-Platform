@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.PatrolTransportComposite;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**
@@ -66,7 +67,7 @@ public class TransportTypeWizardPage extends NewPatrolWizardPage {
 		transportType.createComponent(center, SWT.NONE);
 		
 		Label lbl = new Label(center, SWT.WRAP);
-		lbl.setText(Messages.TransportTypeWizardPage_MultiTransportType_InfoLabel);
+		lbl.setText(Messages.TransportTypeWizardPage_MultiTransportType_InfoLabel2);
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 2,1);
 		gd.widthHint = getShell().getBounds().width / 2;
 		lbl.setLayoutData(gd);
@@ -74,8 +75,8 @@ public class TransportTypeWizardPage extends NewPatrolWizardPage {
 		
 		setControl(main);
 		
-		setTitle(Messages.TransportTypeWizardPage_Title);
-		setMessage(Messages.TransportTypeWizardPage_PageMessage);
+		setTitle(LabelConstants.TRANSPORT_MODE);
+		setMessage(Messages.TransportTypeWizardPage_PageMessage2);
 	}
 
 	/**

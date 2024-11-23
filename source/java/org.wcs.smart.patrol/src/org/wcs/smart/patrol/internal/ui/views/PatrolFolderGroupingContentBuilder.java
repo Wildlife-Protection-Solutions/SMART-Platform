@@ -58,7 +58,7 @@ public class PatrolFolderGroupingContentBuilder implements IGroupContentBuilder 
 			PatrolEditorInput[] patrols = (PatrolEditorInput[]) input;
 			List<ITreeElement> result = new ArrayList<>();
 			
-			Job j = new Job(Messages.PatrolTreeContentProvider_JobName) {
+			Job j = new Job(Messages.PatrolTreeContentProvider_JobName2) {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try(Session s = HibernateManager.openSession()) {
@@ -107,7 +107,7 @@ public class PatrolFolderGroupingContentBuilder implements IGroupContentBuilder 
 			try {
 				j.join();
 			} catch (InterruptedException e) {
-				SmartPlugIn.displayError(Messages.PatrolFolderGroupingContentBuilder_SortFoldersJob_Error, e);
+				SmartPlugIn.displayError(Messages.PatrolFolderGroupingContentBuilder_SortFoldersJob_Error2, e);
 			}
 			
 			return result;

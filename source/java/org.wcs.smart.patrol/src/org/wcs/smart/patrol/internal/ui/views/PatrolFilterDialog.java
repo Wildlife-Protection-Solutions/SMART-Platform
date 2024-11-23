@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.patrol.internal.ui.views;
 
+import java.text.MessageFormat;
+import java.util.List;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -43,9 +46,11 @@ import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.PatrolDynamicMenuManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
@@ -108,7 +113,7 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 		toUpdate.setDateFilter(dateFilterCmp.getDateFilterForModel(),
 				dateFilterCmp.getStartDateForModel(), dateFilterCmp.getEndDateForModel());
 		
-		if (btnFilterTypes.getSelection()){
+		if (btnFilterTypes != null && btnFilterTypes.getSelection()){
 			Object[] values = patrolTypeTableViewer.getCheckedElements();
 			PatrolType[] types = new PatrolType[values.length];
 			for (int i = 0; i < values.length; i ++){
@@ -134,15 +139,16 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 	protected void updateControlsValues(){
 		//patrol type
 		boolean enabled = currentFilter.getPatrolTypeFilters() != null;
-		btnFilterTypes.setSelection(enabled);
-		btnIncludeAllTypes.setSelection(!enabled);
-		patrolTypeTableViewer.getTable().setEnabled(enabled);
-		if (enabled){
-			patrolTypeTableViewer.setCheckedElements(currentFilter.getPatrolTypeFilters());
-		}else{
-			patrolTypeTableViewer.setAllChecked(true);
+		if(btnFilterTypes != null) btnFilterTypes.setSelection(enabled);
+		if (btnIncludeAllTypes != null) btnIncludeAllTypes.setSelection(!enabled);
+		if (patrolTypeTableViewer != null) {
+			patrolTypeTableViewer.getTable().setEnabled(enabled);
+			if (enabled){
+				patrolTypeTableViewer.setCheckedElements(currentFilter.getPatrolTypeFilters());
+			}else{
+				patrolTypeTableViewer.setAllChecked(true);
+			}
 		}
-
 		//date 
 		dateFilterCmp.applyState(currentFilter.getDateFilter(), currentFilter.getStartDate(), currentFilter.getEndDate());
 		
@@ -158,9 +164,11 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 	 */
 	protected Control createDialogArea(Composite parent) {
 		final Composite filter = (Composite)super.createDialogArea(parent);
-		setMessage(Messages.PatrolFilterDialog_DialogMessage);
-		setTitle(Messages.PatrolFilterDialog_DialogTitle);
-		getShell().setText(Messages.PatrolFilterDialog_DialogTitle);
+		setMessage(Messages.PatrolFilterDialog_message);
+		String title = MessageFormat.format(Messages.PatrolFilterDialog_title, PatrolDynamicMenuManager.INSTANCE.getCurrentTerm());
+		
+		setTitle(title);
+		getShell().setText(title);
 
 		if (this.session == null) {
 			try(Session fsession = HibernateManager.openSession()){
@@ -178,16 +186,19 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 		composite.setLayout(new GridLayout(1, false));
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-		Composite dateFilterExpComp = createGroupComposite(Messages.PatrolFilterDialog_PatrolDatesGroupLabel, composite);
+		Composite dateFilterExpComp = createGroupComposite(LabelConstants.DATES, composite);
 		dateFilterCmp = new DateFilterComposite(dateFilterExpComp, SWT.NONE, this);
 
-		Composite patrolType = createGroupComposite(Messages.PatrolFilterDialog_PatrolTypesGroupLabel1, composite);
-		createPatrolType(fsession, patrolType);
+		List<PatrolType> activeTypes = PatrolHibernateManager.getPatrolTypes(SmartDB.getCurrentConservationArea(), fsession);
+		if (activeTypes.size() > 1) {
+			Composite patrolType = createGroupComposite(Messages.PatrolFilterDialog_PatrolTypesGroupLabel1, composite);
+			createPatrolType(fsession, patrolType, activeTypes);
+		}
 
-		Composite patrolIdComp = createGroupComposite(Messages.PatrolFilterDialog_PatrolIdGroupLabel, composite);
-		patrolIdFilterCmp = new StringFilterComposite(patrolIdComp, SWT.NONE, new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.PatrolFilterDialog_PatrolIdLabel, "id")}); //$NON-NLS-1$
-		patrolIdFilterCmp.setIncludeAllRadioLabel(Messages.PatrolFilterDialog_OpIncludeAllPatrolsIdsLabel);
-		patrolIdFilterCmp.setFilterRadioLabel(Messages.PatrolFilterDialog_OpFilterPatrolIdLabel);
+		Composite patrolIdComp = createGroupComposite(LabelConstants.ID, composite);
+		patrolIdFilterCmp = new StringFilterComposite(patrolIdComp, SWT.NONE, new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.PatrolFilterDialog_PatrolIdLabel2, "id")}); //$NON-NLS-1$
+		patrolIdFilterCmp.setIncludeAllRadioLabel(Messages.PatrolFilterDialog_IncludeAll);
+		patrolIdFilterCmp.setFilterRadioLabel(Messages.PatrolFilterDialog_FilterbyId);
 		
 		
 		Composite sortDirection = createGroupComposite(Messages.PatrolFilterDialog_SortByOption, composite);
@@ -249,7 +260,8 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 	/*
 	 * Creates the patrol type filter section
 	 */
-	private Composite createPatrolType(Session session, Composite parent) {
+	private Composite createPatrolType(Session session, Composite parent, List<PatrolType> activeTypes) {
+
 		Composite patrolTypeComp = new Composite(parent, SWT.NONE);
 		patrolTypeComp.setLayout(new GridLayout(1, false));
 		patrolTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -264,7 +276,7 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 		patrolTypeTableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));		
 		patrolTypeTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		patrolTypeTableViewer.setLabelProvider(new NamedItemLabelProvider());
-		patrolTypeTableViewer.setInput(PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session));
+		patrolTypeTableViewer.setInput(activeTypes);
 		
 		btnFilterTypes.addSelectionListener(new SelectionAdapter() {
 			@Override

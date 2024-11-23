@@ -224,7 +224,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 						return true;
 					}catch (Exception ex){
 						s.getTransaction().rollback();
-						SmartPlanPlugIn.displayLog(Messages.PatrolPlanContribution_Save_Error + ex.getLocalizedMessage(), ex);
+						SmartPlanPlugIn.displayLog(Messages.PatrolPlanContribution_Save_Error2 + ex.getLocalizedMessage(), ex);
 						return false;
 					}
 				}
@@ -283,7 +283,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 
 		if (currentPlan == null) {
 			toolkit.createLabel(main,
-					Messages.PatrolPlanContribution_NoAssociatedPlan_Label);
+					"There are no associated plans.");
 		} else {
 			Composite planc = toolkit.createComposite(main);
 			planc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

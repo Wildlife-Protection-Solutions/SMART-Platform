@@ -101,11 +101,11 @@ public class PatrolTrackEditDialog extends SmartStyledTitleDialog {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				String title = MessageFormat.format(Messages.PatrolTrackEditDialog_Title, 
+				String title = MessageFormat.format(Messages.PatrolTrackEditDialog_Title2, 
 						DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(patrolLegDay.getDate()));
 				setTitle(title);
 				getShell().setText(title);
-				setMessage(Messages.PatrolTrackEditDialog_Message);
+				setMessage(Messages.PatrolTrackEditDialog_Message2);
 	
 				cmp = new PartolTracksComposite(comp, patrolLegDay, canEdit);
 				cmp.addChangeListener(new ITracksCompositeListener() {
@@ -140,7 +140,7 @@ public class PatrolTrackEditDialog extends SmartStyledTitleDialog {
 	public boolean close() {
 		if (isChanged) {
 			MessageDialog md = new MessageDialog(getShell(), 
-					Messages.PatrolTrackEditDialog_ConfirmCloseDialog_Title, 
+					Messages.PatrolTrackEditDialog_ConfirmCloseDialog_Title2, 
 					null, 
 					Messages.PatrolTrackEditDialog_ConfirmCloseDialog_Message, MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
 			int ret = md.open();

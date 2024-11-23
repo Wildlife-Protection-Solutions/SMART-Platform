@@ -114,7 +114,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolEditor"; //$NON-NLS-1$
 
-	private static final String SAVE_PATROL_JOB_NAME = Messages.PatrolEditor_SavePatrol_JobName;
+	private static final String SAVE_PATROL_JOB_NAME = Messages.PatrolEditor_SavePatrol_JobName2;
 	
 	public static final DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("#0.##"); //$NON-NLS-1$
 	
@@ -397,7 +397,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 
 	public void updatePartName(){
-		super.setPartName(Messages.PatrolEditor_EditorName_Prefix + getPatrol().getId());
+		super.setPartName(getPatrol().getId());
 	}
 	
 	/**
@@ -494,7 +494,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 								PatrolEditor.this.dispose();
 								PatrolEditor.this.getSite().getPage().closeEditor(PatrolEditor.this, false);
 								if (t instanceof SWTError&& t.getMessage().contains("No more handles")) { //$NON-NLS-1$
-									SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_LoadEditorError_NoMoreHandlers + t.getLocalizedMessage(), t);
+									SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_LoadEditorError_NoMoreHandlers2 + t.getLocalizedMessage(), t);
 								} else {
 									SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_LoadEditorError_Other+ t.getLocalizedMessage(), t);
 								}
@@ -538,7 +538,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				
 				if (super.getContainer() instanceof CTabFolder) {
 					if (!dayHasData) {
-						((CTabFolder)super.getContainer()).getItem(i).setToolTipText(Messages.PatrolEditor_NoWaypoints);
+						((CTabFolder)super.getContainer()).getItem(i).setToolTipText(Messages.PatrolEditor_NoWaypoints2);
 						((CTabFolder)super.getContainer()).getItem(i).setFont(noDataFont);
 					}else {
 						((CTabFolder)super.getContainer()).getItem(i).setToolTipText(null);
@@ -686,7 +686,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						if (saveSession.getTransaction().isActive()){
 							saveSession.getTransaction().rollback();
 						}
-						SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError + ex.getLocalizedMessage(), ex);
+						SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError2 + ex.getLocalizedMessage(), ex);
 					}
 				}
 				
@@ -796,7 +796,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						if (saveSession.getTransaction().isActive()){
 							saveSession.getTransaction().rollback();
 						}
-						SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError + ex.getLocalizedMessage(), ex);
+						SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError2 + ex.getLocalizedMessage(), ex);
 					}
 				}
 				
@@ -850,7 +850,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				if (saveSession.getTransaction().isActive()){
 					saveSession.getTransaction().rollback();
 				}
-				SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getLocalizedMessage(), ex);
+				SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol2 + ex.getLocalizedMessage(), ex);
 			}
 		}				
 		PatrolEventManager.getInstance().patrolSaved(patrol, false);

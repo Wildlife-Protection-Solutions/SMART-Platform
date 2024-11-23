@@ -69,7 +69,7 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						SmartPlugIn.displayLog(Messages.DataQueueCtPatrolJob_ErrorMsg, e);
+						SmartPlugIn.displayLog(Messages.DataQueueCtPatrolJob_ErrorMsg2, e);
 					}
 				});
 				return;

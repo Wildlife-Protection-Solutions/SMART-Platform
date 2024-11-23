@@ -27,6 +27,8 @@ import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 
 public class LabelConstants {
 
+	public static final String TRACKPOINTS = Messages.LabelConstants_PatrolTrackpointsLabel;
+	
 	public static final String CLEAR_IMAGE = Messages.PatrolMandatePropertyPage_ClearImage;
 	
 	public static final String TEAM_NAME = Messages.Team_Name;
@@ -34,10 +36,28 @@ public class LabelConstants {
 	public static final String TEAM_MANDATE = Messages.Team_MandateFieldName;
 	public static final String TEAM_KEY = Messages.Team_KeyFieldName;
 
+	public static final String TRACK_TYPE= Messages.LabelConstants_TrackType;
+	
+	public static final String ARMED= Messages.LabelConstants_ArmedField;
+	public static final String COMMENT= Messages.LabelConstants_CommentField;
+	public static final String MEMBERS= Messages.LabelConstants_MembersField;
+	public static final String LEADER= Messages.LabelConstants_LeaderField;
+	public static final String PILOT= Messages.LabelConstants_PilotField;
+	public static final String OBJECTIVE= Messages.LabelConstants_ObjectiveField;
+	
+	public static final String REFRESH_JOB_NAME = Messages.LabelConstants_RefreshJob;
+	
+	public static final String STATION_NAME = Messages.LabelConstants_StationField;
+	public static final String CUSTOM_METADATA_NAME = Messages.LabelConstants_CustomMetadataField;
+	public static final String DATES = Messages.LabelConstants_DatesField;
+	public static final String ID = Messages.LabelConstants_IDField;
+	
 	public static final String MANDATE_NAME = Messages.PatrolMandate_MandateName;
 	public static final String MANDATE_KEY = Messages.PatrolMandate_MandateKey;
 
-	public static final String TRANSTYPE_NAME = Messages.PatrolTransportType_Name;
+	public static final String ENVIRONMENT_NAME = Messages.LabelConstants_EnvironmentField;
+	
+	public static final String TRANSPORT_MODE = Messages.PatrolTransportType_Name2;
 	public static final String TRANSTYPE_KEY = Messages.PatrolTransportType_Key;
 	
 	public static final String GROUND_NAME = Messages.PatrolType_GroundName;
@@ -45,16 +65,16 @@ public class LabelConstants {
 	public static final String AIR_NAME = Messages.PatrolType_AirName;
 	public static final String MIXED_NAME =Messages.PatrolType_MixedName;
 	
-	public static final String SC_OP_TRANSPORT = Messages.ScreenOption_TransportType;
-	public static final String SC_OP_ARMED = Messages.ScreenOption_Armed;
+	public static final String SC_OP_TRANSPORT = TRANSPORT_MODE;
+	public static final String SC_OP_ARMED = Messages.ScreenOption_Armed2;
 	public static final String SC_OP_STATION = Messages.ScreenOption_Station;
 	public static final String SC_OP_TEAM = Messages.ScreenOption_Team;
-	public static final String SC_OP_MANDATE = Messages.ScreenOption_Mandate;
-	public static final String SC_OP_OBJECTIVE = Messages.ScreenOption_Objective;
-	public static final String SC_OP_COMMENT = Messages.ScreenOption_Comment;
-	public static final String SC_OP_MEMBERS = Messages.ScreenOption_Members;
-	public static final String SC_OP_LEADER = Messages.ScreenOption_Leader;
-	public static final String SC_OP_PILOT = Messages.ScreenOption_Pilot;
+	public static final String SC_OP_MANDATE = Messages.ScreenOption_Mandate2;
+	public static final String SC_OP_OBJECTIVE = Messages.ScreenOption_Objective2;
+	public static final String SC_OP_COMMENT = Messages.ScreenOption_Comment2;
+	public static final String SC_OP_MEMBERS = Messages.ScreenOption_Members2;
+	public static final String SC_OP_LEADER = Messages.ScreenOption_Leader2;
+	public static final String SC_OP_PILOT = Messages.ScreenOption_Pilot2;
 	
 		
 	public static String getLabel(PatrolScreenOptionMeta op){

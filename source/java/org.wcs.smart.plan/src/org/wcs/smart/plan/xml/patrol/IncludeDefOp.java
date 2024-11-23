@@ -50,7 +50,7 @@ public class IncludeDefOp implements IPatrolExportContribution {
 	public void createControls(Composite comp) {
 		Label l = new Label(comp, SWT.NONE);
 		l.setText(Messages.IncludeDefOp_IncludeOp);
-		l.setToolTipText(Messages.IncludeDefOp_Tooltip);
+		l.setToolTipText(Messages.IncludeDefOp_Tooltip2);
 		
 		btnDef = new Button(comp, SWT.CHECK);
 		btnDef.setSelection(selection);

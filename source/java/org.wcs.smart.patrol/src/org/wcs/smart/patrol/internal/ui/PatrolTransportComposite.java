@@ -39,7 +39,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.ca.IconManager;
@@ -52,6 +51,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.ui.EmployeeSelectorDialog;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
 
 /**
@@ -81,11 +81,7 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)center.getLayout()).marginWidth = 0;
 		((GridLayout)center.getLayout()).marginHeight = 0;
-		
-		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText(Messages.PatrolTransportComposite_TransportType_Lable);
-		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
-		
+
 		Composite table = new Composite(center, SWT.NONE);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		table.setLayout(new TableColumnLayout());
@@ -184,7 +180,7 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 					if (!hasPilot){
 						//as for pilot
 						EmployeeSelectorDialog dialog = new EmployeeSelectorDialog(patrolTypeViewer.getControl().getShell(), Messages.PatrolTransportComposite_PilotLabel, 
-								MessageFormat.format(Messages.PatrolTransportComposite_PilotRequired, pm.getName()), EmployeeSelectorDialog.Type.PILOT,patrolLeg);
+								MessageFormat.format(Messages.PatrolTransportComposite_PilotRequired2, pm.getName()), EmployeeSelectorDialog.Type.PILOT,patrolLeg);
 						if (dialog.open() != Window.OK) return false;  //not pilot selected
 					}
 				}
@@ -197,7 +193,7 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 			}
 			return true;
 		}else{
-			SmartPatrolPlugIn.displayLog(Messages.PatrolTransportComposite_Error_NoTransportType, null);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolTransportComposite_modrequired, null);
 			return false;
 		}
 		
@@ -209,7 +205,7 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return Messages.PatrolTransportComposite_Title;
+		return LabelConstants.TRANSPORT_MODE;
 	}
 	
 	

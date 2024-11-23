@@ -61,9 +61,9 @@ public class NewPatrolPlanWizardPage extends NewPatrolWizardPage {
 		
 		ppComp = new PatrolPlanComposite(parent, SWT.NONE);
 		ppComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		super.setTitle(Messages.NewPatrolPlanWizardPage_Title);
+		super.setTitle(Messages.NewPatrolPlanWizardPage_Title2);
 		super.setMessage(MessageFormat.format(
-				Messages.NewPatrolPlanWizardPage_Message, LoadPlanJob.NONE_LABEL));
+				Messages.NewPatrolPlanWizardPage_Message2, LoadPlanJob.NONE_LABEL));
 		super.setControl(ppComp);
 	}
 
@@ -115,7 +115,7 @@ public class NewPatrolPlanWizardPage extends NewPatrolWizardPage {
 			Plan plan = (Plan)session.get(Plan.class, lastSelection.getUuid());
 			if (plan == null){
 				MessageDialog.openError(getShell(), Messages.NewPatrolPlanWizardPage_ErrorDialog_Title, 
-						MessageFormat.format(Messages.NewPatrolPlanWizardPage_ErrorDialog_Message, lastSelection.getName()));				
+						MessageFormat.format(Messages.NewPatrolPlanWizardPage_ErrorDialog_Message2, lastSelection.getName()));				
 			}
 			
 			PatrolPlan pp = new PatrolPlan();

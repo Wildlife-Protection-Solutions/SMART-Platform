@@ -42,16 +42,16 @@ public class PatrolCyberTrackerLabelProvider implements IPatrolCyberTrackerLabel
 		if (item == PatrolJsonImportWarning.WarningType.TEAM_NOT_FOUND) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning2;
 		if (item == PatrolJsonImportWarning.WarningType.MANDATE_NOT_FOUND) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning3;
 		if (item == PatrolJsonImportWarning.WarningType.MEMBER_NOT_FOUND) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning4;
-		if (item == PatrolJsonImportWarning.WarningType.TT_NOT_FOUND_ERROR) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning5;
-		if (item == PatrolJsonImportWarning.WarningType.TRACK_POINT_MULTI_MATCHES) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning6;
-		if (item == PatrolJsonImportWarning.WarningType.PATROL_NOT_FOUND) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning7;
-		if (item == PatrolJsonImportWarning.WarningType.DUPLICATE) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning8;
+		if (item == PatrolJsonImportWarning.WarningType.TT_NOT_FOUND_ERROR) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning52;
+		if (item == PatrolJsonImportWarning.WarningType.TRACK_POINT_MULTI_MATCHES) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning62;
+		if (item == PatrolJsonImportWarning.WarningType.PATROL_NOT_FOUND) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning72;
+		if (item == PatrolJsonImportWarning.WarningType.DUPLICATE) return Messages.PatrolCyberTrackerLabelProvider_JsonProcessingWarning82;
 		
 		
-		if (item == PatrolJsonProcessor.StatusMessage.ADDED) return Messages.PatrolCyberTrackerLabelProvider_CreatedMessage;
-		if (item == PatrolJsonProcessor.StatusMessage.MODIFIED) return Messages.PatrolCyberTrackerLabelProvider_ModifiedMessage;
+		if (item == PatrolJsonProcessor.StatusMessage.ADDED) return Messages.PatrolCyberTrackerLabelProvider_CreatedMessage2;
+		if (item == PatrolJsonProcessor.StatusMessage.MODIFIED) return Messages.PatrolCyberTrackerLabelProvider_ModifiedMessage2;
 		
-		if (item == PatrolJsonProcessor.CA_ERROR) return Messages.PatrolCyberTrackerLabelProvider_CaErrorMessage;
+		if (item == PatrolJsonProcessor.CA_ERROR) return Messages.PatrolCyberTrackerLabelProvider_CaErrorMessage2;
 		
 		if (item == MobileDeviceIdPatrolQueryOption.KEY) return Messages.PatrolCyberTrackerLabelProvider_DeviceIdQueryOption;
 		return null;

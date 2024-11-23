@@ -41,7 +41,7 @@ public class PatrolReviewWaypointRawDefaultStyle implements IMapLayerDefaultStyl
 
 	@Override
 	public String getMapName() {
-		return Messages.PatrolReviewWaypointRawDefaultStyle_MapName;
+		return Messages.PatrolReviewWaypointRawDefaultStyle_MapName2;
 	}
 
 	@Override

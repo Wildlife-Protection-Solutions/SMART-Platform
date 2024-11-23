@@ -67,8 +67,8 @@ public class PatrolLegsWizardPage extends NewPatrolWizardPage {
 			}
 		});
 		
-		setTitle(Messages.PatrolLegsWizardPage_Title);
-		setMessage(Messages.PatrolLegsWizardPage_PageMessage);
+		setTitle(Messages.PatrolLegsWizardPage_Title2);
+		setMessage(Messages.PatrolLegsWizardPage_PageMessage2);
 		super.setControl(comp);
 	}
 	

@@ -35,6 +35,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.LabelConstants;
 
 /**
  * Composite for collecting patrol comments.
@@ -61,7 +62,7 @@ public class CommentComposite extends PatrolItemComposite implements ModifyListe
 		center.setLayout(new GridLayout(2, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText(Messages.CommentComposite_Comments_Label);
+		lbl.setText(LabelConstants.COMMENT + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		txtComment = new Text(center, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
@@ -81,7 +82,8 @@ public class CommentComposite extends PatrolItemComposite implements ModifyListe
 	public void modifyText(ModifyEvent e) {
 		String error = null;
 		if (txtComment.getText().length() > Patrol.MAX_COMMENT_LENGTH){
-			error = MessageFormat.format( Messages.CommentComposite_PatrolCommentTooLongErrorMessage, new Object[]{Patrol.MAX_COMMENT_LENGTH});
+			error = MessageFormat.format( Messages.CommentComposite_CommentTooLong
+					, new Object[]{Patrol.MAX_COMMENT_LENGTH});
 		}
 		setErrorMessage(error);
 		fireChangeListeners();
@@ -110,7 +112,7 @@ public class CommentComposite extends PatrolItemComposite implements ModifyListe
 	 */
 	@Override
 	public String getTitle() {
-		return Messages.CommentComposite_Title;
+		return LabelConstants.COMMENT;		
 	}
 	
 	/**

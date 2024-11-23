@@ -11,12 +11,12 @@
             locationURI="menu:org.eclipse.ui.main.menu?before=org.wcs.smart.fielddata">
          <menu
                id="org.wcs.smart.menu.patrol"
-               label="%patroltrack.menu.label"
+               label="Patrol/Track"
                mnemonic="%patrol.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.patrol.newPatrol"
                   id="org.wcs.smart.patrol.create"
-                  label="%newpatrol.command.label"
+                  label="New Patrol/Track"
                   mnemonic="%patrol.newpatrol.command.mnemonic"
                   style="push"
                   tooltip="%patrol.newpatrol.command.tooltip">
@@ -27,7 +27,8 @@
             </separator>
             <menu
                   icon="images/icons/obj16/patrol.png"
-                  label="%menu.label.0">
+                  id="org.wcs.smart.patrol.data"
+                  label="Patrol/Track Data">
                <command
                      commandId="org.wcs.smart.patrol.exportPatrol"
                      label="%patrolexport.command.label"
@@ -46,11 +47,27 @@
             <menu
                   icon="images/icons/obj16/patrol.png"
                   id="org.wcs.smart.patrol.configuration"
-                  label="%patroltrackconfig.menu.label.">
+                  label="Patrol/Track Configuration">
+               <command
+                     commandId="org.wcs.smart.patrol.patrolTypes"
+                     icon="images/icons/obj16/patrol_transport_type.png"
+                     label="%tracktypes.command.label"
+                     mnemonic="%tracktypes.command.mnemonic"
+                     style="push"
+                     tooltip="%patro.types.command.tooltip1">
+                  <visibleWhen
+                        checkEnabled="true">
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                  </visibleWhen>
+               </command>
                <command
                      commandId="org.wcs.smart.patrol.patrolMandate"
                      icon="images/icons/obj16/patrol_mandate.png"
-                     label="%patrol.mandates.command.label"
+                     label="%mandates.command.label"
                      mnemonic="%patrol.mandates.command.mnemonic"
                      style="push"
                      tooltip="%patrol.mandates.command.tooltip">
@@ -64,25 +81,9 @@
                   </visibleWhen>
                </command>
                <command
-                     commandId="org.wcs.smart.patrol.patrolTypes"
-                     icon="images/icons/obj16/patrol_transport_type.png"
-                     label="%types.command.label"
-                     mnemonic="t"
-                     style="push"
-                     tooltip="%patro.types.command.tooltip1">
-                  <visibleWhen
-                        checkEnabled="true">
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                  </visibleWhen>
-               </command>
-               <command
                      commandId="org.wcs.smart.patrol.teamList"
                      icon="images/icons/obj16/patrol_team.png"
-                     label="%patrols.teams.command.label"
+                     label="%teams.command.label"
                      mnemonic="%patrols.teams.command.mnemonic"
                      style="push"
                      tooltip="%patrols.teams.command.tooltip">
@@ -104,7 +105,7 @@
                   commandId="org.wcs.smart.observation.perspective.show"
                   icon="images/icons/obj16/patrol.png"
                   id="org.wcs.smart.patrol.view"
-                  label="%viewpatrol.command.label"
+                  label="View Patrol/Tracks"
                   mnemonic="%showpatrolperspectivecommand.mnemonic"
                   style="push"
                   tooltip="%showpatrolperspectivecommand.tooltip">
@@ -160,26 +161,26 @@
          <command
                commandId="org.wcs.smart.patrol.view.DeletePatrol"
                icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png"
-               label="%patrollist.delete.command.label"
+               label="%delete.command.label"
                mnemonic="%patrollist.delete.command.mnemonic"
                style="push"
-               tooltip="%patrollist.delete.command.tooltip">
+               tooltip="%delete.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.patrol.newPatrol"
                icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
-               label="%patroltoolbar.newpatrol.command.label"
+               label="%new.command.label"
                mnemonic="%patroltoolbar.newpatrol.command.mnemonic"
                style="push"
-               tooltip="%patroltoolbar.newpatrol.command.tooltip">
+               tooltip="%new.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
                icon="images/icons/obj16/groupby.png"
                id="org.wcs.smart.patrol.groupby.menu"
-               label="%command.groupby"
+               label="%groupby.command.label"
                style="pulldown"
-               tooltip="%command.groupBy.tooltip">
+               tooltip="%groupby.command.tooltip">
             <parameter
                   name="org.eclipse.ui.commands.radioStateParameter"
                   value="NONE">
@@ -188,9 +189,9 @@
          <command
                commandId="org.wcs.smart.patrol.view.ShowPatrolFilter"
                icon="platform:/plugin/org.wcs.smart/images/icons/shared16/filter.png"
-               label="%patrollist.filter.command.label"
+               label="%filter.command.label"
                style="push"
-               tooltip="%patrollist.filter.command.tooltip">
+               tooltip="%filter.command.tooltip">
          </command>
       </menuContribution>
       <menuContribution
@@ -208,22 +209,22 @@
          <command
                commandId="org.wcs.smart.patrol.view.DeletePatrol"
                icon="platform:/plugin/org.wcs.smart/images/icons/shared16/delete.png"
-               label="%popup.delete.command.label"
+               label="%delete1.command.label"
                mnemonic="%popup.delete.command.mnemonic"
                style="push"
-               tooltip="%popup.delete.command.tooltip">
+               tooltip="%delete1.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.MergePatrols"
                icon="images/icons/obj16/patrol.png"
-               label="%popup.merge.command.label"
+               label="%merge.command.label"
                mnemonic="%popup.merge.command.mnemonic"
                style="push"
-               tooltip="%popup.merge.command.tooltip">
+               tooltip="%merge.command.tooltip">
          </command>
          <command
                commandId="org.wcs.smart.patrol.exportPatrol"
-               label="%export.command.label"
+               label="%export2.command.label"
                style="push">
          </command>
          <separator
@@ -259,7 +260,7 @@
                   commandId="org.wcs.smart.patrol.view.groupby"
                   icon="images/icons/obj16/patrol.png"
                   id="org.wcs.smart.patrol.view.groupby.transport"
-                  label="%command.groupby.transport"
+                  label="%transportmode.command.label"
                   style="radio">
                <parameter
                      name="org.eclipse.ui.commands.radioStateParameter"
@@ -341,7 +342,7 @@
                commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/obj16/patrol@2x.png"
                id="org.wcs.smart.perspective.fielddata.patrol"
-               label="%showpatrolperspective.command.label1"
+               label="Patrol/Track"
                mnemonic="%showpatrolperspectivecommand.mnemonic"
                mode="FORCE_TEXT"
                style="radio"
@@ -412,109 +413,7 @@
                commandId="org.wcs.smart.patrol.view.groupby"
                icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.patrol.view.groupby.transport"
-               label="%command.groupby.transport"
-               style="radio">
-            <parameter
-                  name="org.eclipse.ui.commands.radioStateParameter"
-                  value="TRANSPORTTYPE">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.patrol.view.groupby"
-               icon="platform:/plugin/org.wcs.smart/images/icons/obj16/station.png"
-               id="org.wcs.smart.patrol.view.groupby.station"
-               label="%command.groupby.station"
-               style="radio">
-            <parameter
-                  name="org.eclipse.ui.commands.radioStateParameter"
-                  value="STATION">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.patrol.view.groupby"
-               icon="images/icons/obj16/patrol_team.png"
-               id="org.wcs.smart.patrol.view.groupby.team"
-               label="%command.groupby.team"
-               style="radio">
-            <parameter
-                  name="org.eclipse.ui.commands.radioStateParameter"
-                  value="TEAM">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.patrol.view.groupby"
-               icon="images/icons/obj16/patrol_mandate.png"
-               id="org.wcs.smart.patrol.view.groupby.mandate"
-               label="%command.groupby.mandate"
-               style="radio">
-            <parameter
-                  name="org.eclipse.ui.commands.radioStateParameter"
-                  value="MANDATE">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.patrol.view.groupby"
-               icon="images/icons/obj16/calendar_month.png"
-               id="org.wcs.smart.patrol.view.groupby.month"
-               label="%command.groupby.month"
-               style="radio">
-            <parameter
-                  name="org.eclipse.ui.commands.radioStateParameter"
-                  value="MONTH">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.patrol.view.groupby"
-               icon="images/icons/obj16/calendar_year.png"
-               id="org.wcs.smart.patrol.view.groupby.year"
-               label="%command.groupby.year"
-               style="radio">
-            <parameter
-                  name="org.eclipse.ui.commands.radioStateParameter"
-                  value="YEAR">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.patrol.view.groupby"
-               id="org.wcs.smart.patrol.view.groupby.none"
-               label="%command.groupby.none"
-               style="radio">
-            <parameter
-                  name="org.eclipse.ui.commands.radioStateParameter"
-                  value="NONE">
-            </parameter>
-         </command>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="menu:org.wcs.smart.patrol.groupby.menu2">
-         <command
-               commandId="org.wcs.smart.patrol.view.groupby"
-               icon="images/icons/obj16/patrol_folder.png"
-               id="org.wcs.smart.patrol.view.groupby.folder"
-               label="%command.groupby.folder"
-               style="radio">
-            <parameter
-                  name="org.eclipse.ui.commands.radioStateParameter"
-                  value="FOLDER">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.patrol.view.groupby"
-               icon="images/icons/obj16/patrol.png"
-               id="org.wcs.smart.patrol.view.groupby.type"
-               label="%tracktypegroupby.command.label"
-               style="radio">
-            <parameter
-                  name="org.eclipse.ui.commands.radioStateParameter"
-                  value="PATROLTYPE">
-            </parameter>
-         </command>
-         <command
-               commandId="org.wcs.smart.patrol.view.groupby"
-               icon="images/icons/obj16/patrol.png"
-               id="org.wcs.smart.patrol.view.groupby.transport"
-               label="%command.groupby.transport"
+               label="%transportmode2command.label"
                style="radio">
             <parameter
                   name="org.eclipse.ui.commands.radioStateParameter"
@@ -684,10 +583,10 @@
                id="vertical.org.wcs.smart.patrol.toolbar2">
             <command
                   commandId="org.wcs.smart.patrol.importPatrol"
-                  label="%import.command.label"
+                  label="%import2.command.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="%patrol.importpatrols.command.tooltip">
+                  tooltip="%import2.command.tooltip">
                <visibleWhen>
                   <and>
                      <test
@@ -731,10 +630,10 @@
             </command>
             <command
                   commandId="org.wcs.smart.patrol.exportPatrol"
-                  label="%exportpatrol.command.label"
+                  label="%export3.command.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="%patrol.export.command.tooltip">
+                  tooltip="%export3.command.tooltip">
                <visibleWhen>
                   <and>
                      <test
@@ -856,10 +755,6 @@
       <command
             id="org.wcs.smart.patrol.view.DeletePatrol"
             name="%deletepatrol.command.name">
-      </command>
-      <command
-            id="org.wcs.smart.patrol.patrolScreens"
-            name="%command.name.screenconfiguration">
       </command>
       <command
             id="org.wcs.smart.patrol.view.MergePatrols"
@@ -1011,10 +906,6 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.patrol.internal.ui.properties.handlers.PartolScreenOptionsMetaHandler$PatrolScreenOptionsMetaHandlerWrapper"
-            commandId="org.wcs.smart.patrol.patrolScreens">
-      </handler>
-      <handler
             class="org.wcs.smart.patrol.internal.ui.views.MergePatrolsHandler$MergePatrolsHandlerWrapper"
             commandId="org.wcs.smart.patrol.view.MergePatrols">
          <activeWhen>
@@ -1153,7 +1044,7 @@
             class="org.wcs.smart.patrol.internal.ui.views.PatrolListView$PatrolListViewWrapper"
             icon="images/icons/obj16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolListView"
-            name="%patrollist.view.name"
+            name="Patrols/Tracks"
             restorable="true">
       </view>
    </extension>
@@ -1359,5 +1250,11 @@
       <defaultmaplayerstyle
             class="org.wcs.smart.patrol.map.style.PatrolReviewWaypointRawDefaultStyle">
       </defaultmaplayerstyle>
+   </extension>
+   <extension
+         point="org.wcs.smart.caLogin">
+      <windowHandler
+            class="org.wcs.smart.patrol.MenuHandler">
+      </windowHandler>
    </extension>
 </plugin>

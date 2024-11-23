@@ -102,8 +102,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 
 	private DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
 	
-	private static final String START_INFO_LABEL = Messages.PatrolLegsComposite_PatrolStart_Label;
-	private static final String END_INFO_LABEL = Messages.PatrolLegsComposite_PatrolEnd_Label;
+	private static final String START_INFO_LABEL = Messages.PatrolLegsComposite_startdate;
+	private static final String END_INFO_LABEL = Messages.PatrolLegsComposite_enddate;
 	
 	private Label lblDateInfo;
 	private Label lblNewPatrol;
@@ -273,7 +273,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		
 		final Button btnSplit = new Button(buttonPanel, SWT.PUSH);
-		btnSplit.setText(Messages.PatrolLegsComposite_SplitPatrol_Button);
+		btnSplit.setText(Messages.PatrolLegsComposite_split);
 		btnSplit.setSelection(false);
 		btnSplit.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnSplit.addSelectionListener(new SelectionAdapter() {
@@ -328,7 +328,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		if (canEditDates){
 			btnMoveToNewPatrol = new Button(buttonPanel, SWT.PUSH);
 			btnMoveToNewPatrol.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-			btnMoveToNewPatrol.setText(Messages.PatrolLegsComposite_0);
+			btnMoveToNewPatrol.setText(Messages.PatrolLegsComposite_move);
 			btnMoveToNewPatrol.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e){
@@ -350,7 +350,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 							newPatrols.add(movePatrolLegDialog.getNewPatrol());
 							newPatrolsLegMapping.putAll(movePatrolLegDialog.getLegMapping());
 						}
-						lblNewPatrol.setText(Messages.PatrolLegsComposite_1);
+						lblNewPatrol.setText(Messages.PatrolLegsComposite_movemessage);
 					}
 				}
 			});
@@ -1008,7 +1008,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				c.splitPatrol(session, patrol, p2);
 			}
 			
-			lblNewPatrol.setText(Messages.PatrolLegsComposite_2);
+			lblNewPatrol.setText(Messages.PatrolLegsComposite_movedomplete);
 		}
 	}
 
@@ -1017,7 +1017,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return Messages.PatrolLegsComposite_Title;
+		return Messages.PatrolLegsComposite_modifylegs;
 	}
 
 	public int getLegCount(){
@@ -1035,17 +1035,17 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			PatrolLeg legA = (PatrolLeg) iterator.next();
 			
 			if (legA.getStartDate().isAfter(patrolEndDate)){
-				return MessageFormat.format(Messages.PatrolLegsComposite_LegError_A, new Object[]{legA.getId()});
+				return MessageFormat.format(Messages.PatrolLegsComposite_invaliddate1, new Object[]{legA.getId()});
 			}
 			if (legA.getStartDate().isBefore(patrolStartDate)){
-				return MessageFormat.format(Messages.PatrolLegsComposite_LegError_B, new Object[]{legA.getId()});
+				return MessageFormat.format(Messages.PatrolLegsComposite_invaliddate2, new Object[]{legA.getId()});
 			}
 			
 			if (legA.getEndDate().isAfter(patrolEndDate)){
-				return MessageFormat.format(Messages.PatrolLegsComposite_LegError_C, new Object[]{legA.getId()});
+				return MessageFormat.format(Messages.PatrolLegsComposite_invaliddate3, new Object[]{legA.getId()});
 			}
 			if (legA.getEndDate().isBefore(patrolStartDate)){
-				return MessageFormat.format(Messages.PatrolLegsComposite_LegError_D, new Object[]{legA.getId()});
+				return MessageFormat.format(Messages.PatrolLegsComposite_invaliddate4, new Object[]{legA.getId()});
 			}
 		}
 		
@@ -1067,7 +1067,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 					}
 					for (PatrolLegMember member : legA.getMembers()){
 						if (bMembers.contains(member.getMember())){
-							return MessageFormat.format(Messages.PatrolLegsComposite_LegError_E, 
+							return MessageFormat.format(Messages.PatrolLegsComposite_overlappingmembers, 
 								new Object[]{SmartLabelProvider.getFullLabel(member.getMember()), legA.getId(), legB.getId() });
 						}
 					}
@@ -1090,7 +1090,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				
 			}
 			if (!found){
-				return MessageFormat.format(Messages.PatrolLegsComposite_Error_MissingLegDay,
+				return MessageFormat.format(Messages.PatrolLegsComposite_Error_MissingLegDay2,
 						new Object[]{ DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(working) });
 			}		
 			working = ChronoUnit.DAYS.addTo(working, 1);

@@ -72,7 +72,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 	 * Creates a new wizard.
 	 */
 	public CreatePatrolWizard() {
-		setWindowTitle(Messages.CreatePatrolWizard_Title);
+		setWindowTitle(Messages.CreatePatrolWizard_Title2);
 
 		patrol = new Patrol();
 		patrol.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -273,7 +273,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				ret = false;
-				SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
+				SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol2 + ex.getLocalizedMessage(), ex);
 				session.getTransaction().rollback();
 			}
 		}

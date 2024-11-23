@@ -173,7 +173,7 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 				return false;
 			}
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog(Messages.EditPatrolItemDialog_Error_CouldNoSaveChanges + ex.getLocalizedMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.EditPatrolItemDialog_Error_CouldNoSaveChanges2 + ex.getLocalizedMessage(), ex);
 		}
 		return false;
 		

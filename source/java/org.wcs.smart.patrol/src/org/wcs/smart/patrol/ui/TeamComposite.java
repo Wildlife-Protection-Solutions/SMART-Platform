@@ -40,7 +40,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -74,11 +73,6 @@ public class TeamComposite extends PatrolItemComposite{
 		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)center.getLayout()).marginWidth = 0;
 		((GridLayout)center.getLayout()).marginHeight = 0;
-		
-		
-		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText(Messages.TeamComposite_TeamLabel);
-		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
 		
 		Composite table = new Composite(center, SWT.NONE);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -142,7 +136,7 @@ public class TeamComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return Messages.TeamComposite_Title;
+		return LabelConstants.TEAM_NAME;
 	}
 	
 	

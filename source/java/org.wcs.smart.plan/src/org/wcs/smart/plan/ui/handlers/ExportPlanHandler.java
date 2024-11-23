@@ -128,7 +128,7 @@ public class ExportPlanHandler {
 					xx.convertPlan(p, xmlFile);
 					cnt++;
 				}catch (Exception ex) {
-					SmartPlanPlugIn.displayLog(MessageFormat.format(Messages.ExportPlanHandler_ErrorMsg, p.getName() + " [" + p.getId() + "]", ex.getMessage()),ex); //$NON-NLS-1$ //$NON-NLS-2$
+					SmartPlanPlugIn.displayLog(MessageFormat.format(Messages.ExportPlanHandler_ErrorMsg2, p.getName() + " [" + p.getId() + "]", ex.getMessage()),ex); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}

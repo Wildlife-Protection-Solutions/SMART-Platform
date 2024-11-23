@@ -35,6 +35,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
@@ -95,7 +96,7 @@ public class MergePatrolsHandler {
 					if (pt == null) {
 						pt = p.getPatrolType();
 					}else if (!pt.equals(p.getPatrolType())) {
-						SmartPlugIn.displayLog("Cannot merge patrols with different track types.", null);
+						SmartPlugIn.displayLog(Messages.MergePatrolsHandler_cannotmerge, null);
 						return;
 					}
 					patrols.add(p);

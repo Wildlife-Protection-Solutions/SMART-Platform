@@ -40,6 +40,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -75,14 +76,14 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText(Messages.DateComposite_StartDate_Label);
+		lbl.setText(Messages.DateComposite_start);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dtStartDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
 		dtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		
 		lbl = new Label(center, SWT.NONE);
-		lbl.setText(Messages.DateComposite_EndDate_Label);
+		lbl.setText(Messages.DateComposite_end);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dtEndDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG| SWT.DATE);
@@ -171,7 +172,7 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 */
 	@Override
 	public String getTitle() {
-		return Messages.DateComposite_Title;
+		return LabelConstants.DATES;
 	}
 	
 	/**
@@ -189,12 +190,12 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 			
 			if (days > Patrol.MAX_PATROL_LENGTH_DAYS){
 				error = MessageFormat.format(
-							Messages.DateComposite_Error_PatrolToLong,
+							Messages.DateComposite_toolongerror,
 							new Object[]{ Patrol.MAX_PATROL_LENGTH_DAYS});
 			}else if(days >= Patrol.WARN_PATROL_LENGTH_DAYS ){
 				cdEndDate.setDescriptionText(
 						MessageFormat.format(
-								Messages.DateComposite_PatrolLengthWarning,
+								Messages.DateComposite_tolongwarn,
 								new Object[]{Patrol.WARN_PATROL_LENGTH_DAYS}));
 				cdEndDate.show();
 			}

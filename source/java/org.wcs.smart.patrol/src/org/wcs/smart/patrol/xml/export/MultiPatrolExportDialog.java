@@ -75,7 +75,7 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 
 	private static final String OUTPUT_DIR = "outputDir"; //$NON-NLS-1$
 	private static final String INCLUDE_ATTACHMENT = "attachements"; //$NON-NLS-1$
-	private static final String EXPORT_DIALOGTITLE = Messages.ExportPatrolHandler_ExportDialog_Title;
+	private static final String EXPORT_DIALOGTITLE = Messages.ExportPatrolHandler_ExportDialog_Title2;
 
 	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.patrol.export.dialog"); //$NON-NLS-1$
 	static{
@@ -94,16 +94,16 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 	 * @param patrol patrol to export
 	 */
 	public MultiPatrolExportDialog(Shell parentShell, PatrolViewFilter filter, List<PatrolEditorInput> initValues) {
-		super(parentShell, Messages.MultiPatrolExportDialog_ChangeFilter);
+		super(parentShell, Messages.MultiPatrolExportDialog_ChangeFilter2);
 		if (filter != null) this.currentFilter = filter;
 		this.initValues = initValues;
 	}
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		setTitle(Messages.MultiPatrolExportDialog_PageTitle);
-		setMessage(Messages.MultiPatrolExportDialog_Message);
-		getShell().setText(Messages.MultiPatrolExportDialog_Title);
+		setTitle(Messages.MultiPatrolExportDialog_PageTitle2);
+		setMessage(Messages.MultiPatrolExportDialog_Message2);
+		getShell().setText(Messages.MultiPatrolExportDialog_Title2);
 		return super.createDialogArea(parent);
 	}
 	
@@ -187,7 +187,7 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 
 	@Override
 	protected void loadObjectData() {
-		Job loadPatrols = new Job(Messages.MultiPatrolExportDialog_LoadPatrolJobName){
+		Job loadPatrols = new Job(Messages.MultiPatrolExportDialog_LoadPatrolJobName2){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				List<RowItem> items = new ArrayList<>();

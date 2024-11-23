@@ -392,7 +392,7 @@ public class PatrolHibernateManager extends HibernateManager{
 			session.getTransaction().commit();
 		}catch (Exception ex){
 			session.getTransaction().rollback();
-			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol2 + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 		return true;

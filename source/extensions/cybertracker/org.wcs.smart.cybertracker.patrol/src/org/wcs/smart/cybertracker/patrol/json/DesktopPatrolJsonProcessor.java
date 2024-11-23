@@ -95,12 +95,12 @@ public class DesktopPatrolJsonProcessor extends PatrolJsonProcessor implements I
 						newPatrols = pd.getNewPatrols();
 					}
 				}catch (Exception ex){
-					CyberTrackerPlugIn.displayError(Messages.PatrolJsonProcessor_ErrorDialog, Messages.PatrolJsonProcessor_ErrorMesg + ex.getMessage(), ex);
+					CyberTrackerPlugIn.displayError(Messages.PatrolJsonProcessor_ErrorDialog, Messages.PatrolJsonProcessor_ErrorMesg2 + ex.getMessage(), ex);
 					cancel[0] = true;
 				}
 			}	
 		});
-		if (cancel[0]) throw new UserCancelledException(Messages.PatrolJsonProcessor_UserCancelled); 
+		if (cancel[0]) throw new UserCancelledException(Messages.PatrolJsonProcessor_UserCancelled2); 
 	}
 
 	/*
@@ -115,7 +115,7 @@ public class DesktopPatrolJsonProcessor extends PatrolJsonProcessor implements I
 				public void run() {
 					WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), 
 							Messages.PatrolJsonProcessor_WarningsLabel, 
-							Messages.PatrolJsonProcessor_WarningsMsg,
+							Messages.PatrolJsonProcessor_WarningsMsg2,
 							allWarnings,
 							new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
 					if (wd.open() == 0){
@@ -134,6 +134,7 @@ public class DesktopPatrolJsonProcessor extends PatrolJsonProcessor implements I
 	@Override
 	public void afterSave() {
 		for (Patrol p : modifiedPatrols){
+			if (p.getUuid() == null) continue;
 			try{
 				PatrolEventManager.getInstance().patrolSaved(p, true);
 			}catch (Exception ex){

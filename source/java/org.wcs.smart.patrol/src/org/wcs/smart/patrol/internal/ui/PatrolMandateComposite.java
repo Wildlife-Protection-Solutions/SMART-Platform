@@ -38,16 +38,15 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
 
 
@@ -79,11 +78,7 @@ public class PatrolMandateComposite extends PatrolLegItemComposite{
 		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)center.getLayout()).marginWidth = 0;
 		((GridLayout)center.getLayout()).marginHeight = 0;
-		
-		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText(Messages.PatrolMandateComposite_Mandate_Label);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		
+
 		Composite table = new Composite(center, SWT.NONE);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		table.setLayout(new TableColumnLayout());
@@ -125,7 +120,7 @@ public class PatrolMandateComposite extends PatrolLegItemComposite{
 			});
 			session.getTransaction().rollback();
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog(Messages.PatrolMandateComposite_Error_LoadingMandates, ex);
+			SmartPatrolPlugIn.displayLog("Error loading mandates.", ex); //$NON-NLS-1$
 			session.getTransaction().rollback();
 			session.close();
 			return;
@@ -178,7 +173,7 @@ public class PatrolMandateComposite extends PatrolLegItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return Messages.PatrolMandateComposite_Title;
+		return LabelConstants.MANDATE_NAME;
 	}
 	
 	/**

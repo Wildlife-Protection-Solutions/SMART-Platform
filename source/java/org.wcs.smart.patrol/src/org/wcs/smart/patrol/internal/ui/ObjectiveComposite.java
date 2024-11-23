@@ -35,6 +35,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.LabelConstants;
 
 /**
  * Patrol item composite for selecting patrol objective and
@@ -62,7 +63,7 @@ public class ObjectiveComposite extends PatrolItemComposite implements ModifyLis
 		center.setLayout(new GridLayout(2, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText(Messages.ObjectiveComposite_Objective_Label);
+		lbl.setText(Messages.ObjectiveComposite_Objective_Label2);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		txtObjective = new Text(center, SWT.BORDER | SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
@@ -82,7 +83,7 @@ public class ObjectiveComposite extends PatrolItemComposite implements ModifyLis
 	public void modifyText(ModifyEvent e) {
 		String error = null;
 		if (txtObjective.getText().length() > Patrol.MAX_OBJECTIVE_LENGTH){
-			error = MessageFormat.format(Messages.ObjectiveComposite_PatrolObjectiveTooLongError, new Object[]{Patrol.MAX_OBJECTIVE_LENGTH});
+			error = MessageFormat.format(Messages.ObjectiveComposite_PatrolObjectiveTooLongError2, new Object[]{Patrol.MAX_OBJECTIVE_LENGTH});
 		}
 		setErrorMessage(error);
 		fireChangeListeners();
@@ -111,7 +112,7 @@ public class ObjectiveComposite extends PatrolItemComposite implements ModifyLis
 	 */
 	@Override
 	public String getTitle() {
-		return Messages.ObjectiveComposite_Title;
+		return LabelConstants.OBJECTIVE;
 	}
 	
 	/**

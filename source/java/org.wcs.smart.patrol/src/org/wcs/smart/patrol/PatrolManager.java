@@ -97,7 +97,7 @@ public class PatrolManager {
 			if (ChronoUnit.DAYS.between(patrol.getStartDate(), LocalDate.now()) < ops.getEditTime()){
 				return null;
 			}else{
-				return MessageFormat.format(Messages.PatrolEditor_EditError_PatrolToOld, new Object[]{ops.getEditTime() }) ;
+				return MessageFormat.format(Messages.PatrolEditor_EditError_PatrolToOld2, new Object[]{ops.getEditTime() }) ;
 			}
 		}else{
 			return null;
@@ -139,7 +139,7 @@ public class PatrolManager {
 				if (!runDeleteHandlers(patrol, session, progress.split(1))){
 					return false;
 				}
-				progress.subTask(Messages.PatrolManager_Progress_SubDeletingPatrol);
+				progress.subTask(Messages.PatrolManager_Progress_SubDeletingPatrol2);
 				
 				if(deleteWaypoints) {
 					//waypoint deletion is not cascaded; we must delete this explicitly

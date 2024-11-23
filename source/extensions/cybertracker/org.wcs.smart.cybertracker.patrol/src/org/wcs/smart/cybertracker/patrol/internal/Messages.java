@@ -26,34 +26,34 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	public static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.patrol.internal.messages"; //$NON-NLS-1$
 	
-	public static String DataQueueCtPatrolJob_ErrorMsg;
+	public static String DataQueueCtPatrolJob_ErrorMsg2;
 	public static String PatrolDialog_ActionLabel;
-	public static String PatrolDialog_AddExistingLabel;
-	public static String PatrolDialog_DialogMsg;
+	public static String PatrolDialog_AddExistingLabel2;
+	public static String PatrolDialog_DialogMsg2;
 	public static String PatrolDialog_DialogTitle;
-	public static String PatrolDialog_DifferentType;
-	public static String PatrolDialog_DifferentTypeError;
+	public static String PatrolDialog_DifferentType2;
+	public static String PatrolDialog_DifferentTypeError2;
 	public static String PatrolDialog_ErrorTitle;
-	public static String PatrolDialog_ImportedMessage;
-	public static String PatrolDialog_InvalidMergeDates;
+	public static String PatrolDialog_ImportedMessage2;
+	public static String PatrolDialog_InvalidMergeDates2;
 	public static String PatrolDialog_LeaderLabel;
-	public static String PatrolDialog_NewPatrolLabel;
-	public static String PatrolDialog_NoTransportType;
+	public static String PatrolDialog_NewPatrolLabel2;
+	public static String PatrolDialog_NoTransportType2;
 	public static String PatrolDialog_PageErrors;
-	public static String PatrolDialog_PatrolRequiredError;
 	public static String PatrolDialog_PatrolRequiredError2;
+	public static String PatrolDialog_PatrolRequiredError22;
 	public static String PatrolDialog_SaveErrors;
 	public static String PatrolDialog_ShellTitle;
 	public static String PatrolDialog_StartDateLabel;
-	public static String PatrolDialog_SummaryLabel;
+	public static String PatrolDialog_SummaryLabel2;
 	public static String PatrolDialog_TypeLabel;
 	public static String PatrolJsonProcessor_ErrorDialog;
-	public static String PatrolJsonProcessor_ErrorMesg;
+	public static String PatrolJsonProcessor_ErrorMesg2;
 	public static String PatrolJsonProcessor_ErrorTitle;
-	public static String PatrolJsonProcessor_UserCancelled;
+	public static String PatrolJsonProcessor_UserCancelled22;
 	public static String PatrolJsonProcessor_UserCancelled2;
 	public static String PatrolJsonProcessor_WarningsLabel;
-	public static String PatrolJsonProcessor_WarningsMsg;
+	public static String PatrolJsonProcessor_WarningsMsg2;
 	public static String CtPatrolPackageConfigurator_CmLabel;
 
 	public static String CtPatrolPackageConfigurator_CmRequired;
@@ -72,9 +72,9 @@ public class Messages extends NLS {
 
 	public static String CtPatrolPackageConfigurator_FrequencyTooltip;
 
-	public static String CtPatrolPackageConfigurator_InvalidPackageType;
+	public static String CtPatrolPackageConfigurator_InvalidPackageType2;
 
-	public static String CtPatrolPackageConfigurator_InvalidTrackTimerOption;
+	public static String CtPatrolPackageConfigurator_InvalidTrackTimerOption2;
 
 	public static String CtPatrolPackageConfigurator_NameLabel;
 
@@ -104,14 +104,14 @@ public class Messages extends NLS {
 	public static String PatrolCTPackageDialog_CtProfileLbl;
 	public static String PatrolCTPackageDialog_DmLbl;
 	public static String PatrolCTPackageDialog_DmToCmTaskName;
-	public static String PatrolCTPackageDialog_PatrolConfigurationLabel;
+	public static String PatrolCTPackageDialog_PatrolConfigurationLabel2;
 	public static String PatrolCTPackageDialog_ProfileLoadError;
 	public static String PatrolCTPackageDialog_TaskName;
-	public static String PatrolCtPackageManager_DefaultName;
-	public static String PatrolCtPackageManager_PatrolType;
-	public static String PatrolCyberTrackerLabelProvider_CaErrorMessage;
+	public static String PatrolCtPackageManager_DefaultName2;
+	public static String PatrolCtPackageManager_PatrolType2;
+	public static String PatrolCyberTrackerLabelProvider_CaErrorMessage2;
 
-	public static String PatrolCyberTrackerLabelProvider_CreatedMessage;
+	public static String PatrolCyberTrackerLabelProvider_CreatedMessage2;
 
 	public static String PatrolCyberTrackerLabelProvider_DeviceIdQueryOption;
 
@@ -123,33 +123,33 @@ public class Messages extends NLS {
 
 	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning4;
 
-	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning5;
+	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning52;
 
-	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning6;
+	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning62;
 
-	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning7;
+	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning72;
 
-	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning8;
+	public static String PatrolCyberTrackerLabelProvider_JsonProcessingWarning82;
 
-	public static String PatrolCyberTrackerLabelProvider_ModifiedMessage;
+	public static String PatrolCyberTrackerLabelProvider_ModifiedMessage2;
 
 	public static String PatrolEditorContribution_loadingmobiledetails;
 
-	public static String PatrolEditorContribution_objectType;
+	public static String PatrolEditorContribution_objectType2;
 
-	public static String PatrolEditorContribution_PatrolLegField;
+	public static String PatrolEditorContribution_PatrolLegField2;
 
 	public static String PatrolMetadataPackageContribution_ArmedLabel;
 
-	public static String PatrolMetadataPackageContribution_CommentLabel;
+	public static String PatrolMetadataPackageContribution_CommentLabel2;
 
-	public static String PatrolMetadataPackageContribution_EmployeeRequired;
+	public static String PatrolMetadataPackageContribution_EmployeeRequired2;
 
 	public static String PatrolMetadataPackageContribution_Employees;
 
 	public static String PatrolMetadataPackageContribution_FieldLabel;
 
-	public static String PatrolMetadataPackageContribution_FieldTooltip;
+	public static String PatrolMetadataPackageContribution_FieldTooltip2;
 
 	public static String PatrolMetadataPackageContribution_FilterMsg;
 
@@ -157,17 +157,17 @@ public class Messages extends NLS {
 
 	public static String PatrolMetadataPackageContribution_FixedTooltip;
 
-	public static String PatrolMetadataPackageContribution_InvalidDefaultValue;
+	public static String PatrolMetadataPackageContribution_InvalidDefaultValue2;
 
-	public static String PatrolMetadataPackageContribution_LeaderLabel;
+	public static String PatrolMetadataPackageContribution_LeaderLabel2;
 
 	public static String PatrolMetadataPackageContribution_LeaderRequired;
 
-	public static String PatrolMetadataPackageContribution_MandateLabel;
+	public static String PatrolMetadataPackageContribution_MandateLabel2;
 
-	public static String PatrolMetadataPackageContribution_MandateRequired;
+	public static String PatrolMetadataPackageContribution_MandateRequired2;
 
-	public static String PatrolMetadataPackageContribution_MemberMsg;
+	public static String PatrolMetadataPackageContribution_MemberMsg2;
 
 	public static String PatrolMetadataPackageContribution_MembersLabel;
 
@@ -175,9 +175,9 @@ public class Messages extends NLS {
 
 	public static String PatrolMetadataPackageContribution_NoOption;
 
-	public static String PatrolMetadataPackageContribution_ObjectiveLabel;
+	public static String PatrolMetadataPackageContribution_ObjectiveLabel2;
 
-	public static String PatrolMetadataPackageContribution_PilotLabel;
+	public static String PatrolMetadataPackageContribution_PilotLabel2;
 
 	public static String PatrolMetadataPackageContribution_RequiredField;
 
@@ -187,15 +187,15 @@ public class Messages extends NLS {
 
 	public static String PatrolMetadataPackageContribution_StationLabel;
 
-	public static String PatrolMetadataPackageContribution_TabName;
+	public static String PatrolMetadataPackageContribution_TabName2;
 
 	public static String PatrolMetadataPackageContribution_TeamLabel;
 
 	public static String PatrolMetadataPackageContribution_Teams;
 
-	public static String PatrolMetadataPackageContribution_TransportRequired;
+	public static String PatrolMetadataPackageContribution_TransportRequired2;
 
-	public static String PatrolMetadataPackageContribution_TransportTypeLabel;
+	public static String PatrolMetadataPackageContribution_TransportTypeLabel2;
 
 	public static String PatrolMetadataPackageContribution_UserSelectedLabel;
 
@@ -205,32 +205,32 @@ public class Messages extends NLS {
 
 	public static String PatrolPackageExporter_ArmedPageLabel;
 
-	public static String PatrolPackageExporter_attributeTypeNotSupported;
+	public static String PatrolPackageExporter_attributeTypeNotSupported2;
 	public static String PatrolPackageExporter_CommentPageLabel;
 	public static String PatrolPackageExporter_LeaderPageLabel;
 	public static String PatrolPackageExporter_MandatePageLabel;
 
-	public static String PatrolPackageExporter_MandatesRequired;
+	public static String PatrolPackageExporter_MandatesRequired2;
 
-	public static String PatrolPackageExporter_NoPatrolTypes;
+	public static String PatrolPackageExporter_NoPatrolTypes2;
 	public static String PatrolPackageExporter_ObjectivePageLabel;
 	public static String PatrolPackageExporter_PilotPageLabel;
 	public static String PatrolPackageExporter_StationFieldKey;
-	public static String PatrolPackageExporter_TaskName;
+	public static String PatrolPackageExporter_TaskName2;
 	public static String PatrolPackageExporter_TeamPageLabel;
-	public static String PatrolPackageExporter_TransportTypePageLabel;
+	public static String PatrolPackageExporter_TransportTypePageLabel2;
 	
-	public static String PatrolTrackNavigationTargetProvider_ProviderType;
+	public static String PatrolTrackNavigationTargetProvider_ProviderType2;
 
-	public static String PatrolTrackWizardPage_Message;
+	public static String PatrolTrackWizardPage_Message2;
 
-	public static String PatrolTrackWizardPage_PatrolLabel;
+	public static String PatrolTrackWizardPage_PatrolLabel2;
 
-	public static String PatrolTrackWizardPage_SelectPatrol;
+	public static String PatrolTrackWizardPage_SelectPatrol2;
 
-	public static String PatrolTrackWizardPage_Title;
+	public static String PatrolTrackWizardPage_Title2;
 
-	public static String PatrolTrackWizardPage_TracksLabel;
+	public static String PatrolTrackWizardPage_TracksLabel2;
 
 	static {
 		// initialize resource bundle

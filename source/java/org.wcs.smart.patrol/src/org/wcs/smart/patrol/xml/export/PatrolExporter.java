@@ -88,7 +88,7 @@ public class PatrolExporter {
 	 * @throws Exception 
 	 */
 	public static Path exportPatrol(Patrol patrol, Path file, boolean includeAttachments, Map<Object,Object> options, IProgressMonitor monitor) throws Exception{
-		monitor.beginTask(Messages.PatrolExporter_Progress_Exporting, includeAttachments ? 4 : 2);
+		monitor.beginTask(Messages.PatrolExporter_Progress_Exporting2, includeAttachments ? 4 : 2);
 		
 		List<Path> additionalFiles = new ArrayList<>();
 		
@@ -98,7 +98,7 @@ public class PatrolExporter {
 		try {
 			session.refresh(patrol);
 			
-			monitor.subTask(Messages.PatrolExporter_Progress_Converting);
+			monitor.subTask(Messages.PatrolExporter_Progress_Converting2);
 			PatrolType xml = PatrolToXmlConverter.toXml(patrol);
 			
 			
@@ -143,7 +143,7 @@ public class PatrolExporter {
 	 * Writes the patrol without including attachments
 	 */
 	private static Path exportPatrolWithoutAttachments(PatrolType xml, Path file, IProgressMonitor monitor) throws Exception {
-		monitor.subTask(Messages.PatrolExporter_Progress_WritingToFile);
+		monitor.subTask(Messages.PatrolExporter_Progress_WritingToFile2);
 		try(BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file))) {
 			PatrolXmlManager.writeDataModel(xml, out);
 		}

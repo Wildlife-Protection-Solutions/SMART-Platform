@@ -151,7 +151,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @param title
 	 */
 	public TeamPropertyPage(Shell parent) {
-		super(parent, Messages.TeamPropertyPage_Dialog_Title);
+		super(parent, Messages.TeamPropertyPage_Dialog_Title2);
 		this.currentCa = SmartDB.getCurrentConservationArea();
 		
 		/* get mandates */
@@ -166,7 +166,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			Collections.sort(ms);
 			ms.forEach(m -> m.getNames().size());
 		}catch (Exception ex){
-			SmartPatrolPlugIn.displayLog(Messages.TeamPropertyPage_Error_LoadingMandates, ex);
+			SmartPatrolPlugIn.displayLog(Messages.TeamPropertyPage_Error_LoadingMandates2, ex);
 			return;
 		}
 		
@@ -390,7 +390,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		}});
 		
 		setTitle(Messages.TeamPropertyPage_PageName);
-		setMessage(Messages.TeamPropertyPage_Dialog_Message);
+		setMessage(Messages.TeamPropertyPage_Dialog_Message2);
 		return container;
 	}
 	

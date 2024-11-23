@@ -151,7 +151,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 	private void mergePatrol(UUID ctUuid, CtPatrolLink newPatrolLink, Patrol addToPatrol) throws Exception{
 		Patrol newPatrol = newPatrolLink.getPatrolLeg().getPatrol();
 		if (!newPatrol.getPatrolType().equals(addToPatrol.getPatrolType())){
-			throw new Exception(MessageFormat.format(Messages.PatrolDialog_DifferentType, 
+			throw new Exception(MessageFormat.format(Messages.PatrolDialog_DifferentType2, 
 					newPatrol.getPatrolType().getName(), addToPatrol.getPatrolType().getName()));
 		}
 		
@@ -279,7 +279,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			if (newPatrol.getFirstLeg().getType() != null){
 				newPatrol.setPatrolType(newPatrol.getFirstLeg().getType().getPatrolType());
 			}else{
-				throw new Exception(Messages.PatrolDialog_NoTransportType);
+				throw new Exception(Messages.PatrolDialog_NoTransportType2);
 			}
 		}
 		PatrolHibernateManager.savePatrol(newPatrol, session, true);
@@ -327,7 +327,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 		
 		uiItems = new HashMap<UUID, PatrolDialog.UiData>();
 		Label header1 = new Label(main, SWT.NONE);
-		header1.setText(Messages.PatrolDialog_SummaryLabel);
+		header1.setText(Messages.PatrolDialog_SummaryLabel2);
 		Label header2 = new Label(main, SWT.NONE);
 		header2.setText(Messages.PatrolDialog_ActionLabel);
 		Label spacer = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -357,7 +357,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 		//assign temporary patrol ids
 		int cnt = 1;
 		for (PatrolLeg p : newPatrols){
-			p.getPatrol().setId(MessageFormat.format(Messages.PatrolDialog_ImportedMessage, cnt++));
+			p.getPatrol().setId(MessageFormat.format(Messages.PatrolDialog_ImportedMessage2, cnt++));
 		}
 		
 		for (PatrolLeg pl : newPatrols){
@@ -405,12 +405,12 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			((GridData)op.getLayoutData()).horizontalIndent = 2;
 			
 			Button btnNew = new Button(op, SWT.RADIO);
-			btnNew.setText(Messages.PatrolDialog_NewPatrolLabel);
+			btnNew.setText(Messages.PatrolDialog_NewPatrolLabel2);
 			btnNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 			btnNew.setSelection(true);
 			
 			Button btnExisting = new Button(op, SWT.RADIO);
-			btnExisting.setText(Messages.PatrolDialog_AddExistingLabel);
+			btnExisting.setText(Messages.PatrolDialog_AddExistingLabel2);
 			btnExisting.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 			btnExisting.setSelection(false);
 			
@@ -447,7 +447,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 		scroll.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
 		setTitle(Messages.PatrolDialog_DialogTitle);
-		setMessage(Messages.PatrolDialog_DialogMsg);
+		setMessage(Messages.PatrolDialog_DialogMsg2);
 		getShell().setText(Messages.PatrolDialog_ShellTitle);
 		return composite;
 
@@ -464,7 +464,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			UUID ctPatrol = entry.getKey();
 			entry.getValue().errItem.hide();
 			if (!entry.getValue().btnExisting.getSelection() && !entry.getValue().btnNew.getSelection()){
-				entry.getValue().errItem.setDescriptionText(Messages.PatrolDialog_PatrolRequiredError);
+				entry.getValue().errItem.setDescriptionText(Messages.PatrolDialog_PatrolRequiredError2);
 				entry.getValue().errItem.show();
 				error = true;
 			}
@@ -479,7 +479,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 					Patrol p = entry.getValue().cmbPatrol.getSelection();
 					Patrol ctP = patrols.get(ctPatrol).getPatrolLeg().getPatrol();
 					if (!p.getPatrolType().equals(ctP.getPatrolType())){
-						entry.getValue().errItem.setDescriptionText(MessageFormat.format(Messages.PatrolDialog_DifferentTypeError, p.getPatrolType().getName(), ctP.getPatrolType().getName()));
+						entry.getValue().errItem.setDescriptionText(MessageFormat.format(Messages.PatrolDialog_DifferentTypeError2, p.getPatrolType().getName(), ctP.getPatrolType().getName()));
 						entry.getValue().errItem.show();
 						error = true;
 					}
@@ -502,7 +502,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 							}
 						}
 						if (addtoDate.isAfter(addfromDate)){
-							entry.getValue().errItem.setDescriptionText(Messages.PatrolDialog_InvalidMergeDates);
+							entry.getValue().errItem.setDescriptionText(Messages.PatrolDialog_InvalidMergeDates2);
 							entry.getValue().errItem.show();
 							error = true;
 						}

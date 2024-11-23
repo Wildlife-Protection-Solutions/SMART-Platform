@@ -54,14 +54,14 @@ public class DeletePatrolFoldersJob extends Job {
 	private Collection<PatrolFolder> foldersToDel;
 
 	public DeletePatrolFoldersJob(List<PatrolFolder> roots, Collection<PatrolFolder> foldersToDel) {
-		super(Messages.DeletePatrolFoldersJob_Title);
+		super(Messages.DeletePatrolFoldersJob_Title2);
 		this.roots = roots;
 		this.foldersToDel = foldersToDel;
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		monitor.beginTask(Messages.DeletePatrolFoldersJob_Title, 1);
+		monitor.beginTask(Messages.DeletePatrolFoldersJob_Title2, 1);
 		try (Session s = HibernateManager.openSession()) {
 			s.beginTransaction();
 

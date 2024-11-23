@@ -225,7 +225,7 @@ public class PatrolEditorContribution implements IPatrolEditorContribution {
 	}
 	@Override
 	public String getName() {
-		return Messages.PatrolEditorContribution_PatrolMotiviated;
+		return "Motivated By Profile Record";
 	}
 
 	

@@ -79,7 +79,7 @@ public class ParentIdPlanWizardPage extends PlanWizardPage {
 		
 		setControl(panel);
 		setTitle(panel.getTitle());		
-		setMessage(Messages.ParentIdPlanWizardPage_Message);
+		setMessage(Messages.ParentIdPlanWizardPage_Message2);
 	
 	}
 

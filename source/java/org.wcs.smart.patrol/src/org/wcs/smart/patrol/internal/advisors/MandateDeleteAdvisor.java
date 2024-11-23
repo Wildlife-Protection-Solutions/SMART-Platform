@@ -50,7 +50,7 @@ public class MandateDeleteAdvisor implements IDeleteAdvisor {
 		Long cnt = QueryFactory.buildCountQuery(session, PatrolLeg.class,new Object[] {"mandate", object}); //$NON-NLS-1$
 		if (cnt > 0){
 			return MessageFormat.format(
-					Messages.MandateDeleteAdvisor_DeleteError_Patrol,
+					Messages.MandateDeleteAdvisor_DeleteError_Patrol2,
 					new Object[]{cnt, ((PatrolMandate)object).getName()}
 					);
 		}

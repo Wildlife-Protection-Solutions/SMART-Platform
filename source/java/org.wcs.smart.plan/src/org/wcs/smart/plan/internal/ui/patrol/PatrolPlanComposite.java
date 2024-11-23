@@ -49,7 +49,7 @@ import org.wcs.smart.plan.ui.tree.PlanViewer;
  *
  */
 public class PatrolPlanComposite extends PlanComposite implements IPlanFilterItem  {
-	public static final String TITLE = Messages.PatrolPlanComposite_Title;
+	public static final String TITLE = Messages.PatrolPlanComposite_Title2;
 	
 	private PlanFilter currentFilter; 
 	private PlanViewer pv;
@@ -58,7 +58,7 @@ public class PatrolPlanComposite extends PlanComposite implements IPlanFilterIte
 	
 	public PatrolPlanComposite(Composite parent, int style) {
 		super(parent, style);
-		setMessage(Messages.PatrolPlanComposite_Message);
+		setMessage(Messages.PatrolPlanComposite_Message2);
 		currentFilter = new PlanFilter();
 		createControl();
 	}

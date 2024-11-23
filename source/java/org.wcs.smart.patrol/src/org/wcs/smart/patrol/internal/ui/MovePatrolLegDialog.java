@@ -91,16 +91,16 @@ public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 		patrolIdComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		lbl = new Label(patrolIdComp, SWT.NONE);
-		lbl.setText(Messages.MovePatrolLegDialog_NewPatrolID);
+		lbl.setText(Messages.MovePatrolLegDialog_NewPatrolID2);
 		txtPatrolId = new Text(patrolIdComp, SWT.BORDER);
 		txtPatrolId.setTextLimit(PatrolLeg.ID_MAX_SIZE);
 		txtPatrolId.setText(Messages.MovePatrolLegDialog_SplitText + legsToMove.get(0).getPatrol().getId() );
 		txtPatrolId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtPatrolId.setTextLimit(32);
 	
-		setMessage(Messages.MovePatrolLegDialog_SelectNewID);
-		getShell().setText(Messages.MovePatrolLegDialog_SplitLegsButton);
-		setTitle(Messages.MovePatrolLegDialog_CreateNewPatrol);
+		setMessage(Messages.MovePatrolLegDialog_message);
+		getShell().setText(Messages.MovePatrolLegDialog_shell);
+		setTitle(Messages.MovePatrolLegDialog_title);
 		return parent;
 	}
 	

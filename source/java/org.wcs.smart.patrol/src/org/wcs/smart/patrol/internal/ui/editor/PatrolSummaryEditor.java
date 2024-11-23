@@ -118,6 +118,7 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.patrol.ui.PatrolAttributeComposite;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
@@ -250,7 +251,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
 			lblImage.setImage(x);
 			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
-			lblWarning.setText(MessageFormat.format(Messages.PatrolSummaryEditor_Error_CannotEdit, new Object[]{ canEdit }));
+			lblWarning.setText(MessageFormat.format(Messages.PatrolDayEditor_CanNotEditPatrol2, new Object[]{ canEdit }));
 		}
 		
 		sashForm = new SashForm(frmPatrolSummary.getBody(), SWT.VERTICAL);
@@ -258,8 +259,8 @@ public class PatrolSummaryEditor extends EditorPart {
 		toolkit.adapt(sashForm);
 		
 		Section patrolSection = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED );
-		patrolSection.setText(Messages.PatrolSummaryEditor_PatrolInfo_SectionHeader);
-		patrolSection.setDescription(Messages.PatrolSummaryEditor_PatrolInfo_SectionDescription);
+		patrolSection.setText(Messages.PatrolSummaryEditor_MetadataSection);
+		patrolSection.setDescription(Messages.PatrolSummaryEditor_Description);
 
 		scrolltop = new ScrolledComposite(patrolSection, SWT.V_SCROLL | SWT.H_SCROLL);
 		scrolltop.setExpandHorizontal(true);
@@ -301,14 +302,14 @@ public class PatrolSummaryEditor extends EditorPart {
 		txtPatrolType.adapt(toolkit);
 		txtPatrolType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
-		lbl = toolkit.createLabel(left, "Transport Group:");
+		lbl = toolkit.createLabel(left, LabelConstants.ENVIRONMENT_NAME + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtGroup = new TextImageField(left, SWT.NONE);
 		txtGroup.adapt(toolkit);
 		txtGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
-		transportTypelbl = toolkit.createLabel(left, Messages.PatrolSummaryEditor_TransportType_Label);
+		transportTypelbl = toolkit.createLabel(left, LabelConstants.TRANSPORT_MODE + ":"); //$NON-NLS-1$
 		transportTypelbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		txtTransport = new TextImageField(left);
 		txtTransport.adapt(toolkit);
@@ -386,7 +387,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		//note: layout data on employeeTable is set up below
 		
 		/* right side */
-		toolkit.createLabel(right, Messages.PatrolSummaryEditor_PatrolId_Label);
+		toolkit.createLabel(right, LabelConstants.ID);
 		txtPatrolId = toolkit.createFormText(right, false);
 		txtPatrolId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)txtPatrolId.getLayoutData()).widthHint = WIDTH_HINT;
@@ -424,8 +425,8 @@ public class PatrolSummaryEditor extends EditorPart {
 		/* ----- Patrol Days / Legs Section ------- */
 		Section dataSection = toolkit.createSection(sashForm, Section.TITLE_BAR | Section.EXPANDED  );
 		dataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		dataSection.setText(Messages.PatrolSummaryEditor_PatrolData_SectionName);
-		dataSection.setDescription(Messages.PatrolSummaryEditor_PatrolData_SectionDescription);
+		dataSection.setText(Messages.PatrolSummaryEditor_ObservationSection);
+		dataSection.setDescription(Messages.PatrolSummaryEditor_ObservationDescription);
 		
 		dataSection.setLayout(new GridLayout(1, false));
 		
@@ -461,7 +462,7 @@ public class PatrolSummaryEditor extends EditorPart {
 							Composite main = super.createComponent(parent, style);
 							
 							Link link = new Link((Composite)main.getChildren()[0], SWT.NONE);
-							link.setText("<a>" + Messages.PatrolSummaryEditor_ConvertToMultiLeg + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+							link.setText("<a>" + Messages.PatrolSummaryEditor_ConvertToMulti + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 							link.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1));
 							link.addListener(SWT.MouseUp, event -> {
 								//close this dialog
@@ -494,7 +495,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		((GridData)employeeTable.getLayoutData()).widthHint = WIDTH_HINT;
 		((GridData)employeeTable.getLayoutData()).heightHint = EMPLOYEE_LIST_HEIGHT_HINT;
 		
-		multiLegTextlbl = toolkit.createLabel(top, Messages.PatrolSummaryEditor_MultiLegPatrol_Label,SWT.WRAP);
+		multiLegTextlbl = toolkit.createLabel(top, Messages.PatrolSummaryEditor_MultiLegInfo,SWT.WRAP);
 		multiLegTextlbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		((GridData)multiLegTextlbl.getLayoutData()).widthHint = 200;
 
@@ -615,7 +616,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			editLink.setVisible(false);
 		}else {
 			if (partEditor != null){
-				editLink.setToolTipText(MessageFormat.format(Messages.PatrolSummaryEditor_Edit_Tooltip, new Object[]{partEditor.getTitle()}));
+				editLink.setToolTipText(MessageFormat.format(Messages.PatrolSummaryEditor_Edit_Tooltip, partEditor.getTitle()));
 			}
 		}
 		
@@ -692,7 +693,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				if (session.getTransaction().isActive()){
 					session.getTransaction().rollback();
 				}
-				SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_Error_SavingPatrol + ex.getLocalizedMessage(), ex);
+				SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.PatrolSummaryEditor_SaveError,  ex.getLocalizedMessage()), ex);
 				return;
 			}
 		}
@@ -725,7 +726,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		
 			Section dataSection = toolkit.createSection(customAttributes, Section.TITLE_BAR | Section.EXPANDED );
 			dataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			dataSection.setText(Messages.PatrolSummaryEditor_SectionName);
+			dataSection.setText(LabelConstants.CUSTOM_METADATA_NAME);
 			
 			Composite core = toolkit.createComposite(dataSection, SWT.NONE);
 			core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -972,7 +973,7 @@ public class PatrolSummaryEditor extends EditorPart {
 				activeTime += pld.getFieldHoursWorked();
 			}
 		}
-		final String statText = MessageFormat.format(Messages.PatrolSummaryEditor_OverallStatistics,
+		final String statText = MessageFormat.format(Messages.PatrolSummaryEditor_StatsMessage,
 				PatrolEditor.formatDistance(distance), PatrolEditor.formatTimeRange(totalTime),
 				PatrolEditor.formatTimeRange(activeTime));
 		Display.getDefault().syncExec(new Runnable() {
@@ -1065,8 +1066,8 @@ public class PatrolSummaryEditor extends EditorPart {
 		START(Messages.PatrolSummaryEditor_LegStart_ColumnName, 1, false),
 		END(Messages.PatrolSummaryEditor_LegEnd_ColumnName, 1, false),
 		DISTANCE(Messages.PatrolSummaryEditor_LegDistance_ColumnName, 1, false),
-		TOTALPATROLHOURS(Messages.PatrolSummaryEditor_LegTotalPatrolHours_ColumnName, 1, false),
-		TOTALHOURSINFIELD(Messages.PatrolSummaryEditor_LegTotalActivePatrolHours_ColumnName, 1, false),
+		TOTALPATROLHOURS(Messages.PatrolSummaryEditor_TotalTime, 1, false),
+		TOTALHOURSINFIELD(Messages.PatrolSummaryEditor_ActiveTime, 1, false),
 		TRANSPORT(Messages.PatrolSummaryEditor_LegTransport_ColumnName, 1, true),
 		MANDATE(Messages.PatrolSummaryEditor_Mandate_ColumnName, 1, true),
 		LEADER(Messages.PatrolSummaryEditor_LegLeader_ColumnName, 1, true),

@@ -111,7 +111,7 @@ public class PatrolAttributeComposite extends PatrolItemComposite {
 		PatrolType pt = session.get(PatrolType.class, p.getPatrolType().getUuid());
 		if (pt.getCustomAttributes().isEmpty()) {
 			Label l = new Label(ctemp, SWT.NONE);
-			l.setText(MessageFormat.format("No custom attributes defined for track type {0}", pt.getName()));
+			l.setText(MessageFormat.format(Messages.PatrolAttributeComposite_NoCustomMetadata, pt.getName()));
 			l.setBackground(l.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		}
 		
@@ -294,7 +294,7 @@ public class PatrolAttributeComposite extends PatrolItemComposite {
 
 	@Override
 	public String getTitle() {
-		return Messages.PatrolAttributeComposite_Title;
+		return LabelConstants.CUSTOM_METADATA_NAME;
 	}
 
 	@Override

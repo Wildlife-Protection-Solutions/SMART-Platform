@@ -39,7 +39,7 @@ public class PatrolOptionsLabelUtil {
 
 	public static void updateLabels(ImportOptionsWizardPage page, PatrolImportGpsDataWizard w) {
 		if (w.getCurrentDay().getPatrolLeg().getPatrol().getLegs().size() > 1) {
-			page.setWarningMessage(MessageFormat.format(Messages.ImportOptionsComposite_ImportAllWarning , new Object[]{w.getType().guiName}));
+			page.setWarningMessage(MessageFormat.format(Messages.ImportOptionsComposite_ImportAllWarning2, new Object[]{w.getType().guiName}));
 			ImportOption[] validOptions = new ImportOption[]{ImportOption.ALL, ImportOption.DATE, ImportOption.SELECT};
 			String op = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(w.getCurrentDay().getDate());
 			op += " (" + Messages.ImportOptionsComposite_LegPrefix + ": " + w.getCurrentDay().getPatrolLeg().getId() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

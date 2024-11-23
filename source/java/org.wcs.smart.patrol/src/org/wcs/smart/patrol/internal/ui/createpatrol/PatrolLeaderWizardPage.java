@@ -86,11 +86,11 @@ public class PatrolLeaderWizardPage extends NewPatrolWizardPage {
 	public void initModel(Patrol p, Session session) {
 		leaderComposite.setValues(p, session);
     	if (p.hasPilot()){
-    		setMessage(Messages.PatrolLeaderWizardPage_PageMessage_LeaderPilot);
-    		setTitle(Messages.PatrolLeaderWizardPage_LeaderPilotTitle);
+    		setMessage(Messages.PatrolLeaderWizardPage_PageMessage_LeaderPilot2);
+    		setTitle(Messages.PatrolLeaderWizardPage_LeaderPilotTitle2);
     	}else{
-    		setMessage(Messages.PatrolLeaderWizardPage_PageMessage_Leader);
-    		setTitle(Messages.PatrolLeaderWizardPage_LeaderTitle);
+    		setMessage(Messages.PatrolLeaderWizardPage_PageMessage_Leader2);
+    		setTitle(Messages.PatrolLeaderWizardPage_LeaderTitle2);
     	}	
 	}
 }

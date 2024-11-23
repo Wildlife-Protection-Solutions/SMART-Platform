@@ -143,7 +143,7 @@ public class PatrolPackageExporter {
 	private void exportPackageInternal(IProgressMonitor monitor) throws Exception{
 
 		//TODO: support cancelling
-		SubMonitor sub = SubMonitor.convert(monitor, Messages.PatrolPackageExporter_TaskName, 8);
+		SubMonitor sub = SubMonitor.convert(monitor, Messages.PatrolPackageExporter_TaskName2, 8);
 		workingDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		Set<Path> toIncludeInZip = new HashSet<>();
 		
@@ -354,8 +354,8 @@ public class PatrolPackageExporter {
 		}
 		JSONObject transportScreen = CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.TRANSPORT.name()), 
 				activett, PatrolMetadataField.TRANSPORT.getJsonKey(), 
-				Messages.PatrolPackageExporter_TransportTypePageLabel,
-				getTranslations(Messages.PatrolPackageExporter_TransportTypePageLabel, "PatrolPackageExporter_TransportTypePageLabel"), //$NON-NLS-1$
+				Messages.PatrolPackageExporter_TransportTypePageLabel2,
+				getTranslations(Messages.PatrolPackageExporter_TransportTypePageLabel2, "PatrolPackageExporter_TransportTypePageLabel"), //$NON-NLS-1$
 				PatrolMetadataField.TRANSPORT.getIcon(set),
 				false, session, ctpackage.getConservationArea(),
 				set, workingDir,
@@ -366,7 +366,7 @@ public class PatrolPackageExporter {
 			);
 		JSONObject joo = (JSONObject) transportScreen.get(PatrolMetadataField.TRANSPORT.getJsonKey());
 		JSONArray it = (JSONArray) joo.get(CtJsonExportUtils.JSON_OPTION_PROP_KEY);
-		if (it.size() == 0) throw new IOException(Messages.PatrolPackageExporter_NoPatrolTypes);
+		if (it.size() == 0) throw new IOException(Messages.PatrolPackageExporter_NoPatrolTypes2);
 		
 		if (map.containsKey(TransportTypeTrackTimerSetting.METADATA_KEY)) {
 			List<TransportTypeTrackTimerSetting> tts = TransportTypeTrackTimerSetting.fromString(map.get(TransportTypeTrackTimerSetting.METADATA_KEY).getStringValue(), ctpackage.getConservationArea(), session);
@@ -412,7 +412,7 @@ public class PatrolPackageExporter {
 		metadataScreens.add(mandateScreen);
 		JSONObject mds = (JSONObject) mandateScreen.get(PatrolMetadataField.MANDATE.getJsonKey());
 		JSONArray mit = (JSONArray) mds.get(CtJsonExportUtils.JSON_OPTION_PROP_KEY);
-		if (mit.size() == 0) throw new IOException(Messages.PatrolPackageExporter_MandatesRequired);
+		if (mit.size() == 0) throw new IOException(Messages.PatrolPackageExporter_MandatesRequired2);
 		
 		metadataScreens.add(CtJsonExportUtils.convertStringOp(map.get(PatrolMetadataField.OBJECTIVE.name()), 
 				PatrolMetadataField.OBJECTIVE.getJsonKey(), 
@@ -601,7 +601,7 @@ public class PatrolPackageExporter {
 			optionType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.TEXT.name());
 			break;
 		default:
-			throw new IOException(MessageFormat.format(Messages.PatrolPackageExporter_attributeTypeNotSupported, pa.getType()));
+			throw new IOException(MessageFormat.format(Messages.PatrolPackageExporter_attributeTypeNotSupported2, pa.getType()));
 		}
 		
 		optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, pa.getName());

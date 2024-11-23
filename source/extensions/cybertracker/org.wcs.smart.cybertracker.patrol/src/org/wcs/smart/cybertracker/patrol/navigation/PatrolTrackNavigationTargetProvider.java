@@ -50,7 +50,7 @@ public class PatrolTrackNavigationTargetProvider implements INavigationLayerTarg
 	
 	@Override
 	public String getTypeName() {
-		return Messages.PatrolTrackNavigationTargetProvider_ProviderType;
+		return Messages.PatrolTrackNavigationTargetProvider_ProviderType2;
 	}
 
 	@Override

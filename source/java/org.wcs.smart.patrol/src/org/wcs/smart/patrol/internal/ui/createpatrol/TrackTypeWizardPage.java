@@ -26,6 +26,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.TrackTypeComposite;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
@@ -67,8 +68,8 @@ public class TrackTypeWizardPage extends NewPatrolWizardPage {
 		
 		setControl(main);
 		
-		setTitle("Track Type");
-		setMessage("Select track type");
+		setTitle(Messages.TrackTypeWizardPage_Title);
+		setMessage(Messages.TrackTypeWizardPage_Message);
 	}
 
 	/**

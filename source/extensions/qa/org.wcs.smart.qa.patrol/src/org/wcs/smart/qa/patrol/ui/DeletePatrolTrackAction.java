@@ -59,7 +59,7 @@ public class DeletePatrolTrackAction implements IQaAction {
 				toProcess.add(e);
 			}
 		}
-		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.DeletePatrolTrackAction_DeleteDialogTitle, MessageFormat.format(Messages.DeletePatrolTrackAction_DeleteConfirmMessage, toProcess.size()))){
+		if (!MessageDialog.openConfirm(Display.getDefault().getActiveShell(), Messages.DeletePatrolTrackAction_DeleteDialogTitle, MessageFormat.format(Messages.DeletePatrolTrackAction_DeleteConfirmMessage2, toProcess.size()))){
 			return false;
 		}
 		
@@ -85,7 +85,7 @@ public class DeletePatrolTrackAction implements IQaAction {
 					
 					if (t == null){
 						item.setStatus(QaError.Status.DELETED);
-						item.setFixMessage(Messages.DeletePatrolTrackAction_TrackNotFoundError);
+						item.setFixMessage(Messages.DeletePatrolTrackAction_TrackNotFoundError2);
 					}else{
 						deleted.add(item);
 						trackDeleted.add(t);
@@ -100,13 +100,13 @@ public class DeletePatrolTrackAction implements IQaAction {
 				s.getTransaction().commit();
 			}catch (Exception ex){
 				s.getTransaction().rollback();
-				QaPlugIn.displayLog(Messages.DeletePatrolTrackAction_DeleteError + "\n\n", ex); //$NON-NLS-1$
+				QaPlugIn.displayLog(Messages.DeletePatrolTrackAction_DeleteError2 + "\n\n", ex); //$NON-NLS-1$
 				return false;
 			}
 		}
 
 		for (QaError item : deleted){
-			item.setFixMessage(Messages.DeletePatrolTrackAction_DeletedMsg);
+			item.setFixMessage(Messages.DeletePatrolTrackAction_DeletedMsg2);
 			item.setStatus(QaError.Status.DELETED);
 		}
 		//fire patrol events

@@ -80,7 +80,7 @@ public class PatrolDayEditorInput  implements IEditorInput {
 	 */
 	@Override
 	public String getName() {	
-		return Messages.PatrolDayEditorInput_DayEditorName_Prefix + "_" + patrolDay.toString(); //$NON-NLS-1$
+		return patrolDay.toString(); 
 	}
 
 	/**
@@ -96,7 +96,7 @@ public class PatrolDayEditorInput  implements IEditorInput {
 	 */
 	@Override
 	public String getToolTipText() {
-		return MessageFormat.format(Messages.PatrolDayEditorInput_DayEditor_Tooltip, 
+		return MessageFormat.format(Messages.PatrolDayEditorInput_DayEditor_Tooltip2, 
 				new Object[]{ DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format( patrolDay )});
 	}
 

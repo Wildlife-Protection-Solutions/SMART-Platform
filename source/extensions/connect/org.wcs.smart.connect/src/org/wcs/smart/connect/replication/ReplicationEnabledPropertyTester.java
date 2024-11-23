@@ -38,8 +38,8 @@ public class ReplicationEnabledPropertyTester extends PropertyTester {
 			Object expectedValue) {
 		
 		if (property.equals("isEnabled")){ //$NON-NLS-1$
-			return DerbyReplicationManager.INSTANCE.getCachedReplicationState();
-			//return true;
+			Boolean value = DerbyReplicationManager.INSTANCE.getCachedReplicationState();
+			return value != null && value;
 		}
 		return false;
 	}

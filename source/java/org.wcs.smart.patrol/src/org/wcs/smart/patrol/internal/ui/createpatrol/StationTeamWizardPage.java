@@ -67,7 +67,7 @@ public class StationTeamWizardPage extends NewPatrolWizardPage {
 		stationList.createComponent(main,  SWT.NONE);
    		
 		setTitle(Messages.StationTeamWizardPage_Title);
-		setMessage(Messages.StationTeamWizardPage_PageMessage);
+		setMessage(Messages.StationTeamWizardPage_PageMessage2);
 		super.setControl(main);
 		super.setPageComplete(true);
 	}

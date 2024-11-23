@@ -374,7 +374,7 @@ public class PlanHibernateManager{
 		if (plans.size() == 1) {
 			return plans.get(0).getPlan();
 		} else if (plans.size() > 1) {
-			SmartPlanPlugIn.displayLog(Messages.PlanHibernateManager_ErrorMatchingPatrolToPlan, null);
+			SmartPlanPlugIn.displayLog(Messages.PlanHibernateManager_ErrorMatchingPatrolToPlan2, null);
 		}
 		return null;
 	}

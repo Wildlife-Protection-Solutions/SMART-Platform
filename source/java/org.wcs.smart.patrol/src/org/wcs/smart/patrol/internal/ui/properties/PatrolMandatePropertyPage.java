@@ -143,7 +143,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 * Creates new page
 	 */
 	public PatrolMandatePropertyPage(Shell parentShell) {
-		super(parentShell, Messages.PatrolMandatePropertyPage_Dialog_Title);
+		super(parentShell, Messages.PatrolMandatePropertyPage_Dialog_Title2);
 		this.currentCa = SmartDB.getCurrentConservationArea();
 	}
 
@@ -344,8 +344,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		btnDelete.setEnabled(false);
 		btnDelete.addListener(SWT.Selection, e->deleteMandate());
 		
-		setTitle(Messages.PatrolMandatePropertyPage_PageName);
-		setMessage(Messages.PatrolMandatePropertyPage_Dialog_Message);
+		setTitle(Messages.PatrolMandatePropertyPage_PageName2);
+		setMessage(Messages.PatrolMandatePropertyPage_Dialog_Message2);
 		return container;
 	}
 
@@ -376,7 +376,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			siblings.add(pm);
 			if (error != null){
 				SmartPatrolPlugIn.displayLog(
-						Messages.PatrolMandatePropertyPage_Error_SavingUpdates + error, null);
+						Messages.PatrolMandatePropertyPage_Error_SavingUpdates2 + error, null);
 				return false;
 			}
 		}
@@ -410,7 +410,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 					s.getTransaction().rollback();
 				}
 				SmartPatrolPlugIn.displayLog(
-						Messages.PatrolMandatePropertyPage_Error_SavingUpdates + ex.getLocalizedMessage(),
+						Messages.PatrolMandatePropertyPage_Error_SavingUpdates2 + ex.getLocalizedMessage(),
 						ex);
 			}
 		}
@@ -424,7 +424,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 		PatrolMandate mandate = new PatrolMandate();
 		mandate.setConservationArea(currentCa);
 		mandate.setIsActive(true);
-		mandate.updateName(currentCa.getDefaultLanguage(), Messages.PatrolMandatePropertyPage_DefaultNewMandateName);
+		mandate.updateName(currentCa.getDefaultLanguage(), Messages.PatrolMandatePropertyPage_DefaultNewMandateName2);
 		mandate.setName(mandate.findName(currentCa.getDefaultLanguage()));
 		mandates.add(mandate);
 		setChangesMade(true);

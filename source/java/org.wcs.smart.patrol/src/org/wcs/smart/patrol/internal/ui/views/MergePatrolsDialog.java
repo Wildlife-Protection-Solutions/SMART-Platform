@@ -117,7 +117,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 		}
 		idOptionsPlusCustom.add(Messages.MergePatrolsDialog_EnterCustomId.toString());
 		
-		patrolId = createCombo(patrolIdComp, Messages.MergePatrolsDialog_PatrolId, idOptionsPlusCustom, patrolsToMerge.get(0));
+		patrolId = createCombo(patrolIdComp, Messages.MergePatrolsDialog_PatrolId2, idOptionsPlusCustom, patrolsToMerge.get(0));
 		patrolId.addPostSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -132,7 +132,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 		});
 		
 		lbl = new Label(patrolIdComp, SWT.NONE);
-		lbl.setText(Messages.MergePatrolsDialog_CustomPatrolId);
+		lbl.setText(Messages.MergePatrolsDialog_CustomPatrolId2);
 		txtPatrolId = new Text(patrolIdComp, SWT.BORDER);
 		txtPatrolId.setTextLimit(Patrol.MAX_ID_LENGTH);
 		txtPatrolId.setText(patrolsToMerge.get(0).getId());
@@ -140,21 +140,21 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 		
 		txtPatrolId.setEnabled(false);
 	
-		getStationFromID = createCombo(patrolIdComp, Messages.MergePatrolsDialog_StationAndTeam1, idOptions, patrolsToMerge.get(0));
-		getObjectiveFromID = createCombo(patrolIdComp, Messages.MergePatrolsDialog_ObjectiveAndMandate, idOptions, patrolsToMerge.get(0));
+		getStationFromID = createCombo(patrolIdComp, Messages.MergePatrolsDialog_StationAndTeam12, idOptions, patrolsToMerge.get(0));
+		getObjectiveFromID = createCombo(patrolIdComp, Messages.MergePatrolsDialog_ObjectiveAndMandate2, idOptions, patrolsToMerge.get(0));
 
 		
 		Composite notesComp = new Composite(parent, SWT.NONE);
 		notesComp.setLayout(new GridLayout(1, false));
 		notesComp.setLayoutData(new GridData(SWT.WRAP, SWT.CENTER, true, false));
 		Label notes = new Label(notesComp, SWT.NONE);
-		notes.setText(Messages.MergePatrolsDialog_Note1);
+		notes.setText(Messages.MergePatrolsDialog_Note12);
 		Label notes2 = new Label(notesComp, SWT.NONE);
-		notes2.setText(Messages.MergePatrolsDialog_Note2);
+		notes2.setText(Messages.MergePatrolsDialog_Note22);
 		
-		setMessage(Messages.MergePatrolsDialog_MergeInstructions);
-		getShell().setText(Messages.MergePatrolsDialog_MergePatrols);
-		setTitle(Messages.MergePatrolsDialog_MergePatrols); 
+		setMessage(Messages.MergePatrolsDialog_MergeInstructions2);
+		getShell().setText(Messages.MergePatrolsDialog_MergePatrols2);
+		setTitle(Messages.MergePatrolsDialog_MergePatrols2); 
 		return parent;
 	}
 	
@@ -237,7 +237,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 			allComments += p.getComment() + " -- "; //$NON-NLS-1$
 		}
 		if (allComments.length() > Patrol.MAX_COMMENT_LENGTH){
-			MessageDialog.openInformation(getShell(), Messages.MergePatrolsDialog_WarningDialogTitle, MessageFormat.format(Messages.MergePatrolsDialog_MergeCommentWarning, Patrol.MAX_COMMENT_LENGTH));
+			MessageDialog.openInformation(getShell(), Messages.MergePatrolsDialog_WarningDialogTitle, MessageFormat.format(Messages.MergePatrolsDialog_MergeCommentWarning2, Patrol.MAX_COMMENT_LENGTH));
 			allComments = allComments.substring(0, Patrol.MAX_COMMENT_LENGTH);
 		}
 		
@@ -261,7 +261,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 
 		if (ChronoUnit.DAYS.between(newPatrol.getStartDate(), newPatrol.getEndDate()) > Patrol.MAX_PATROL_LENGTH_DAYS){
 			MessageDialog.openError(getShell(), Messages.MergePatrolsDialog_ErrorDialogTitle, 
-					MessageFormat.format(Messages.MergePatrolsDialog_PatrolToLong, Patrol.MAX_PATROL_LENGTH_DAYS));
+					MessageFormat.format(Messages.MergePatrolsDialog_PatrolToLong2, Patrol.MAX_PATROL_LENGTH_DAYS));
 			return;
 		}
 		
@@ -281,7 +281,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException,
 						InterruptedException {
-					SubMonitor progress = SubMonitor.convert(monitor, Messages.MergePatrolsDialog_MergingPatrols, patrolsToMerge.size()+1);
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.MergePatrolsDialog_MergingPatrols2, patrolsToMerge.size()+1);
 					
 					try {
 						session.beginTransaction();
@@ -398,7 +398,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 						
 						session.getTransaction().commit();
 					}catch (Exception ex) {
-						SmartPatrolPlugIn.displayLog(Messages.MergePatrolsDialog_MergeError, ex);
+						SmartPatrolPlugIn.displayLog(Messages.MergePatrolsDialog_MergeError2, ex);
 						session.getTransaction().rollback();
 						
 						//try to remove folder 
@@ -422,14 +422,14 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 							PatrolManager.getInstance().deletePatrol(p.getUuid(), false, progress.split(1));
 						} catch (Exception e) {
 							SmartPatrolPlugIn.displayLog(
-									Messages.DeletePatrolHandler_Error_CouldNotDeletePatrol, e);
+									Messages.DeletePatrolHandler_Error_CouldNotDeletePatrol2, e);
 						}
 					}
 				}
 			});
 		} catch (Exception ex) {
 			SmartPatrolPlugIn.displayLog(
-					Messages.MergePatrolsDialog_MergeError,
+					Messages.MergePatrolsDialog_MergeError2,
 					ex);
 			session.getTransaction().rollback();
 		}

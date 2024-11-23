@@ -64,7 +64,7 @@ public class PatrolMandateWizardPage extends NewPatrolWizardPage {
 		mandateComp.createComponent(main, SWT.NONE);
 	
 		setTitle(Messages.PatrolMandateWizardPage_Title);
-		setMessage(Messages.PatrolMandateWizardPage_PageMessage);
+		setMessage(Messages.PatrolMandateWizardPage_PageMessage2);
 		super.setControl(main);
 	}
 	

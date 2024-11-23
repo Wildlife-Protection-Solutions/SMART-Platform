@@ -50,6 +50,7 @@ import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -60,8 +61,8 @@ import org.wcs.smart.ui.SmartLabelProvider;
  */
 public class LeaderPilotComposite extends PatrolLegItemComposite{
 
-	private static final String ERROR_PILOT_REQUIRED = Messages.LeaderPilotComposite_Error_PilotRequired;
-	private static final String ERROR_LEADER_REQUIRED = Messages.LeaderPilotComposite_Error_LeaderRequired;
+	private static final String ERROR_PILOT_REQUIRED = Messages.LeaderPilotComposite_pilotrequired;
+	private static final String ERROR_LEADER_REQUIRED = Messages.LeaderPilotComposite_leaderrequired;
 	
 	private TableViewer patrolLeaderViewer = null;
 	private TableViewer patrolPilotViewer = null;
@@ -84,7 +85,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText(Messages.LeaderPilotComposite_LeaderLabel);
+		lbl.setText(LabelConstants.LEADER + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		lblPilot = new Label(center, SWT.NONE);
@@ -351,7 +352,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return Messages.LeaderPilotComposite_Title;
+		return Messages.LeaderPilotComposite_Title2;
 	}
 	
 	/**

@@ -102,7 +102,7 @@ public class DeletePatrolWaypointAction implements IQaAction {
 	
 			}catch (Exception ex){
 				s.getTransaction().rollback();
-				QaPlugIn.displayLog(Messages.DeletePatrolWaypointAction_DeleteError + "\n\n", ex);  //$NON-NLS-1$
+				QaPlugIn.displayLog(Messages.DeletePatrolWaypointAction_DeleteError2 + "\n\n", ex);  //$NON-NLS-1$
 				return false;
 			}
 		}

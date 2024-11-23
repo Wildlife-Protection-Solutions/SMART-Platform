@@ -54,7 +54,7 @@ public class PatrolArmedWizardPage extends NewPatrolWizardPage {
 	public void createControl(Composite parent) {
 		compArmed = new ArmedComposite();
 		setTitle(Messages.PatrolArmedWizardPage_Title);
-		setMessage(Messages.PatrolArmedWizardPage_PageMessage);
+		setMessage(Messages.PatrolArmedWizardPage_PageMessage2);
 		super.setControl(compArmed.createComponent(parent, SWT.NONE));
 	}
    

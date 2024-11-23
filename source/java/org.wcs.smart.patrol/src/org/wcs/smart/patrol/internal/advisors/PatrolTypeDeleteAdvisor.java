@@ -48,7 +48,7 @@ public class PatrolTypeDeleteAdvisor implements IDeleteAdvisor {
 		Long cnt = QueryFactory.buildCountQuery(session, Patrol.class,new Object[] {"patrolType", object}); //$NON-NLS-1$
 		if (cnt != 0){
 			return MessageFormat.format(
-					Messages.PatrolTypeDeleteAdvisor_patrolswithtypeexist,
+					Messages.PatrolTypeDeleteAdvisor_patrolswithtypeexist2,
 					new Object[]{cnt, type.getName()});
 		}
 		

@@ -145,6 +145,7 @@ import org.wcs.smart.patrol.udig.catalog.PatrolService;
 import org.wcs.smart.patrol.udig.catalog.StyleUtils;
 import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
 import org.wcs.smart.patrol.ui.IPatrolPresentationContribution;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.udig.style.StyleManager;
@@ -310,14 +311,14 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
     /**
      * Job to refresh the service and map.
      */
-    private Job refreshJob = new Job(Messages.PatrolMapPageEditor_RefreshPatrolLayers_Job){
+    private Job refreshJob = new Job(LabelConstants.REFRESH_JOB_NAME){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (patrolService != null){
 				try {
 					patrolService.refresh(parentEditor.getPatrol(), null);
 				} catch (IOException e) {
-					SmartPatrolPlugIn.log(Messages.PatrolMapPageEditor_Error_RefreshingLayers, e);
+					SmartPatrolPlugIn.log("Error refreshing map layers.", e); //$NON-NLS-1$
 				}
 			}
 			//clear selection
@@ -470,7 +471,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 					(new ShowStyleDialogHandler()).showDialog(getSite().getShell(), waypointLayer);
 					}, SWT.PUSH, Boolean.TRUE);
 		
-		mapTools.addCustomToolItem(trackStyleId, Messages.PatrolPresentationPart_changetrackstyletooltip, 
+		mapTools.addCustomToolItem(trackStyleId, Messages.PatrolPresentationPart_changeTrackPointStyle, 
 				SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.STYLETRACK_ICON), l->{
 					(new ShowStyleDialogHandler()).showDialog(getSite().getShell(), trackLayer);
 					}, SWT.PUSH, Boolean.TRUE);
@@ -916,7 +917,7 @@ public class PatrolPresentationPart extends SmartMapEditorPart {
 
     	//scroll.setContent(scrollComposite);
     	summaryArea = toolkit.createSection(scrollComposite, Section.TITLE_BAR);
-    	summaryArea.setText(Messages.PatrolPresentationPart_SummaryAreaLabel);
+    	summaryArea.setText(Messages.PatrolPresentationPart_SummarySection);
     	summaryArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
     	    	
     	Composite sarea = toolkit.createComposite(summaryArea);

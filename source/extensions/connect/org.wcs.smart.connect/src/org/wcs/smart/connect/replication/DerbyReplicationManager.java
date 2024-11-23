@@ -295,6 +295,21 @@ public enum DerbyReplicationManager {
 		return handlers;
 	}
 	
+	Job j = new Job("replicationstatus") { //$NON-NLS-1$						
+		@Override
+		public IStatus run(IProgressMonitor monitor) {
+			if (!SmartHibernateManager.isSessionFactorySet()){
+				//for performance in particular for connect; skip this check if we don't have a session factory
+				cachedReplicationEnabled = false;
+				return Status.OK_STATUS;
+			}
+			try(Session s = HibernateManager.openSession()){
+				cachedReplicationEnabled = DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), s);
+			}
+			return Status.OK_STATUS;
+		}
+	};
+	
 	/**
 	 * Get the cached replication state. Will return null
 	 * if cached state unknown.
@@ -304,20 +319,7 @@ public enum DerbyReplicationManager {
 		if (cachedReplicationEnabled == null){
 			synchronized (this) {
 				if (cachedReplicationEnabled == null){
-					Job j = new Job("replicationstatus") { //$NON-NLS-1$						
-						@Override
-						public IStatus run(IProgressMonitor monitor) {
-							if (!SmartHibernateManager.isSessionFactorySet()){
-								//for performance in particular for connect; skip this check if we don't have a session factory
-								cachedReplicationEnabled = false;
-								return Status.OK_STATUS;
-							}
-							try(Session s = HibernateManager.openSession()){
-								cachedReplicationEnabled = DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), s);
-							}
-							return Status.OK_STATUS;
-						}
-					};
+					
 					j.schedule();
 				}
 			}

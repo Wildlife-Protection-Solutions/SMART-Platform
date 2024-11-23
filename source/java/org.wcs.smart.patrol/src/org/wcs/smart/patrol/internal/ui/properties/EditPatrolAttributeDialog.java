@@ -352,12 +352,12 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 		selectPanel();
 		
 		if (pAttribute.getKeyId() == null){
-			getShell().setText(Messages.EditPatrolAttributeDialog_newshelltext);
-			setTitle(Messages.EditPatrolAttributeDialog_newshelltitle);
-			setMessage(Messages.EditPatrolAttributeDialog_newshellmessage);
+			getShell().setText(Messages.EditPatrolAttributeDialog_newshelltext2);
+			setTitle(Messages.EditPatrolAttributeDialog_newshelltitle2);
+			setMessage(Messages.EditPatrolAttributeDialog_newshellmessage2);
 		}else{
-			getShell().setText(Messages.EditPatrolAttributeDialog_editshelltext);
-			setMessage(Messages.EditPatrolAttributeDialog_editshellmessage);
+			getShell().setText(Messages.EditPatrolAttributeDialog_editshelltext2);
+			setMessage(Messages.EditPatrolAttributeDialog_editshellmessage2);
 		}
 
 		initValues.schedule();

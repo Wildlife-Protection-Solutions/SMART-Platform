@@ -137,7 +137,7 @@ public class PartolTracksComposite extends TracksComposite {
 				return tblInput;
 			}
 		} catch (ParseException e) {
-			SmartPlugIn.displayLog(Messages.PartolTracksComposite_ParseGeometry_Error, e);
+			SmartPlugIn.displayLog(Messages.PartolTracksComposite_ParseGeometry_Error2, e);
 		}
 		return new ArrayList<>();
 	}
@@ -155,7 +155,7 @@ public class PartolTracksComposite extends TracksComposite {
 				return super.getText(element);
 			}
 		});
-		columnId.getColumn().setText(Messages.PartolTracksComposite_TrackPart);
+		columnId.getColumn().setText(Messages.PartolTracksComposite_TrackPart2);
 		columnId.getColumn().setResizable(true);
 		columnId.getColumn().setMoveable(false);
 		layout.setColumnData(columnId.getColumn(), new ColumnWeightData(50));
@@ -324,7 +324,7 @@ public class PartolTracksComposite extends TracksComposite {
 		
 			refresh(true);
 		}catch (ParseException ex){
-			SmartPlugIn.displayLog(Messages.PartolTracksComposite_ParseGeometry_Error, ex);
+			SmartPlugIn.displayLog(Messages.PartolTracksComposite_ParseGeometry_Error2, ex);
 		}
 	}
 
@@ -362,7 +362,7 @@ public class PartolTracksComposite extends TracksComposite {
 						Point intersection = null;
 						Geometry g = ls1.intersection(ls2);
 						if (g == null){
-							setError(Messages.PartolTracksComposite_NoLineIntercection_Error);
+							setError(Messages.PartolTracksComposite_NoLineIntercection_Error2);
 							return;
 						}else if (g instanceof Point){
 							intersection = (Point)g;
@@ -376,7 +376,7 @@ public class PartolTracksComposite extends TracksComposite {
 						LineString[] newLs = GeometryUtils.splitSimple(ls1, new Coordinate(intersection.getX(), intersection.getY()));
 
 						if (newLs == null || newLs.length != 2){
-							setError(Messages.PartolTracksComposite_Split_Error);
+							setError(Messages.PartolTracksComposite_Split_Error2);
 							return;
 						}
 
@@ -388,7 +388,7 @@ public class PartolTracksComposite extends TracksComposite {
 							}
 							patrolLegDay.getTrack().setLineStrings(newLsList);
 						} catch (ParseException e) {
-							setError(Messages.PartolTracksComposite_SplitAssign_Error);
+							setError(Messages.PartolTracksComposite_SplitAssign_Error2);
 							return;
 						}
 						
@@ -401,7 +401,7 @@ public class PartolTracksComposite extends TracksComposite {
 					
 				}
 			});
-			setInfo(Messages.PartolTracksComposite_SplitToolInfo);
+			setInfo(Messages.PartolTracksComposite_SplitToolInfo2);
 			ApplicationGIS.getToolManager().getToolAction(SplitTrackTool.ID, SplitTrackTool.CATEGORY_ID).run();	
 		}
 	}
@@ -421,7 +421,7 @@ public class PartolTracksComposite extends TracksComposite {
 			return;
 		}
 		
-		if (!MessageDialog.openQuestion(getShell(), Messages.PartolTracksComposite_ConfirmDelete_Title, MessageFormat.format(Messages.PartolTracksComposite_ConfirmDelete_Message, new Object[]{toDelete.size()}))){
+		if (!MessageDialog.openQuestion(getShell(), Messages.PartolTracksComposite_ConfirmDelete_Title, MessageFormat.format(Messages.PartolTracksComposite_ConfirmDelete_Message2, new Object[]{toDelete.size()}))){
 			return;
 		}
 		
@@ -434,7 +434,7 @@ public class PartolTracksComposite extends TracksComposite {
 			}
 			patrolLegDay.getTrack().setLineStrings(lsList);
 		} catch (ParseException e) {
-			SmartPlugIn.displayLog(Messages.PartolTracksComposite_ParseGeometry_Error, e);
+			SmartPlugIn.displayLog(Messages.PartolTracksComposite_ParseGeometry_Error2, e);
 		}
 		refresh(true);
 	}
@@ -452,10 +452,10 @@ public class PartolTracksComposite extends TracksComposite {
 					tpd.open();
 					changed = !ls.equalsExact(patrolLegDay.getTrack().getLineStrings().get(index));
 				} else {
-					SmartPlugIn.displayLog(Messages.PartolTracksComposite_PartNotInTrack_Error, null);
+					SmartPlugIn.displayLog(Messages.PartolTracksComposite_PartNotInTrack_Error2, null);
 				}
 			} catch (ParseException e) {
-				SmartPlugIn.displayLog(Messages.PartolTracksComposite_ParseGeometry_Error, e);
+				SmartPlugIn.displayLog(Messages.PartolTracksComposite_ParseGeometry_Error2, e);
 			}
 			ApplicationGIS.getToolManager().setCurrentEditor(this);
 			selectLastTool();

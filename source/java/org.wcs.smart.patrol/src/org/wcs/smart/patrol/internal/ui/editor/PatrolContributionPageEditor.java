@@ -126,7 +126,7 @@ public class PatrolContributionPageEditor extends EditorPart{
 			Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
 			lblImage.setImage(x);
 			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
-			lblWarning.setText(MessageFormat.format(Messages.PatrolSummaryEditor_Error_CannotEdit, new Object[]{ canEdit }));
+			lblWarning.setText(MessageFormat.format(Messages.PatrolDayEditor_CanNotEditPatrol2, new Object[]{ canEdit }));
 		}
 		
 		parts = findContributions();

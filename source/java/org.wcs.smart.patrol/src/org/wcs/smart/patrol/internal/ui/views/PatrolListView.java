@@ -84,6 +84,7 @@ import org.wcs.smart.common.folder.FolderTreeUtils;
 import org.wcs.smart.common.folder.NoneFolder;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
+import org.wcs.smart.patrol.PatrolDynamicMenuManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
@@ -136,10 +137,10 @@ public class PatrolListView implements IPatrolFilteringView {
 	/*
 	 * Job that updates the patrol list based on the current filter
 	 */
-	private Job updateJob = new Job(Messages.PatrolListView_UpdatePatrolJobName) {
+	private Job updateJob = new Job(Messages.PatrolListView_UpdatePatrolJobName2) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			monitor.beginTask(Messages.PatrolListView_Progress_LoadingPatrols, 1);
+			monitor.beginTask(Messages.PatrolListView_Progress_LoadingPatrols2, 1);
 			patrolListViewer.getControl().getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
@@ -201,6 +202,7 @@ public class PatrolListView implements IPatrolFilteringView {
 	 * Creates a new vies
 	 */
 	public PatrolListView() {
+		
 	}
 
 	@Inject
@@ -208,6 +210,7 @@ public class PatrolListView implements IPatrolFilteringView {
 	public void partActivation(@UIEventTopic(UIEvents.UILifeCycle.BRINGTOTOP) Event event) {
 		if (event.getProperty(UIEvents.EventTags.ELEMENT) != localPart) return;
 		ShowFieldDataPerspective.enableToolbarItem(ID, context);
+		localPart.setLabel(PatrolDynamicMenuManager.INSTANCE.getCurrentTerm());
 	}
 	
 	private String getPreferenceKey(String part) {
@@ -231,6 +234,8 @@ public class PatrolListView implements IPatrolFilteringView {
 				pService.bringToTop(localPart);
 				pService.activate(activePart);
 			}
+			
+			//localPart.setLabel(PatrolDynamicMenuManager.INSTANCE.getCurrentTerm());
 		}finally {
 			processevent = true;
 		}
@@ -268,6 +273,7 @@ public class PatrolListView implements IPatrolFilteringView {
 
 	@PostConstruct
 	public void createPartControl(Composite parent, final MApplication application) {
+	
 		localPart.getContext().set(PatrolViewFilter.class, filter);
 		
 		((FillLayout)parent.getLayout()).marginHeight = 0;
@@ -477,7 +483,7 @@ public class PatrolListView implements IPatrolFilteringView {
 	}
 
 	protected void handleFolderDelete() {
-		String message = MessageFormat.format(Messages.PatrolListView_DeleteFolderConfirm_Message, Messages.PatrolListView_NoneFolder_Name);
+		String message = MessageFormat.format(Messages.PatrolListView_DeleteFolderConfirm_Message2, Messages.PatrolListView_NoneFolder_Name);
 		if (!MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), Messages.PatrolListView_DeleteFolderConfirm_Title, message)) {
 			return;
 		}
@@ -490,7 +496,7 @@ public class PatrolListView implements IPatrolFilteringView {
 		try {
 			deleteJob.join();
 		} catch (InterruptedException ex) {
-			SmartPlugIn.displayError(Messages.PatrolListView_DeleteFoldersJob_Error, ex);
+			SmartPlugIn.displayError(Messages.PatrolListView_DeleteFoldersJob_Error2, ex);
 		}
 		contentProvider.applyCurrentGrouping();
 	}

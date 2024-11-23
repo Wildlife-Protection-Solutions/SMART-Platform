@@ -43,9 +43,11 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -71,22 +73,12 @@ public class TrackTypeComposite extends PatrolLegItemComposite{
 	 */
 	public Composite createComponent(Composite parent, int style) {
 
-//		Composite center = new Composite(parent, SWT.NONE);
-//		center.setLayout(new GridLayout());
-//		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//		((GridLayout)center.getLayout()).marginWidth = 0;
-//		((GridLayout)center.getLayout()).marginHeight = 0;
-//		
-//		Label lbl = new Label(center, SWT.NONE);
-//		lbl.setText(Messages.PatrolTransportComposite_TransportType_Lable);
-//		lbl.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
-//		
 		Composite table = new Composite(parent, SWT.NONE);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		table.setLayout(new TableColumnLayout());
 		((GridData)table.getLayoutData()).heightHint = 100;
 		
-		tblTrackType = new TableViewer(table,SWT.SINGLE);
+		tblTrackType = new TableViewer(table,SWT.SINGLE | SWT.BORDER);
 		tblTrackType.setContentProvider(ArrayContentProvider.getInstance());
 		tblTrackType.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.SMALL));
 		
@@ -164,7 +156,7 @@ public class TrackTypeComposite extends PatrolLegItemComposite{
 				if (p.getPatrol().getUuid() != null) {
 					MessageDialog.openError(tblTrackType.getControl().getShell(), 
 							DialogConstants.ERROR_STRING,
-							MessageFormat.format("{0} is not a valid transport type for track type {1}", l.getType().getName(), p.getPatrol().getPatrolType().getName()));
+							MessageFormat.format(Messages.TrackTypeComposite_invalidmode, l.getType().getName(), p.getPatrol().getPatrolType().getName()));
 					return false;
 				}else {
 					l.setType(null);
@@ -179,7 +171,7 @@ public class TrackTypeComposite extends PatrolLegItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return "Track Type";
+		return LabelConstants.TRACK_TYPE;
 	}
 	
 	

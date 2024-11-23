@@ -51,6 +51,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.PatrolDynamicMenuManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 
 /**
@@ -71,7 +72,8 @@ public class PatrolCtPackageManager implements ICtPackageManager {
 
 	@Override
 	public String getTypeName() {
-		return Messages.PatrolCtPackageManager_PatrolType;
+		//return Messages.PatrolCtPackageManager_PatrolType2;
+		return PatrolDynamicMenuManager.INSTANCE.getCurrentTerm();
 	}
 	
 	@Override
@@ -90,7 +92,7 @@ public class PatrolCtPackageManager implements ICtPackageManager {
 	public ICtPackage createPackage() {
 		PatrolCtPackage ctpackage = new PatrolCtPackage();
 		ctpackage.setConservationArea(SmartDB.getCurrentConservationArea());
-		ctpackage.setName(Messages.PatrolCtPackageManager_DefaultName);
+		ctpackage.setName(Messages.PatrolCtPackageManager_DefaultName2);
 		ctpackage.setMetadataValues(new ArrayList<>());
 		return ctpackage;
 	}

@@ -29,7 +29,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
@@ -79,10 +78,6 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		main.setLayout(new GridLayout(1, false));
 		
-		
-		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText(Messages.PatrolMemberWizardPage_SelectEmployees_Label);
-		
 		members = new EmployeeSelectComposite(main, SWT.NONE);
 		members.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -101,8 +96,8 @@ public class PatrolMemberWizardPage extends NewPatrolWizardPage  {
 		});
 		
 		setErrorMessage(null);
-		setTitle(Messages.PatrolMemberWizardPage_Title);
-		setMessage(Messages.PatrolMemberWizardPage_PageMessage);
+		setTitle(Messages.PatrolMemberWizardPage_Title2);
+		setMessage(Messages.PatrolMemberWizardPage_PageMessage2);
 		super.setControl(main);
 	}
 	

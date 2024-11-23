@@ -159,7 +159,7 @@ public class MoveWaypointDialog extends SmartStyledTitleDialog{
 		((GridLayout)legPart.getLayout()).marginHeight = 0;
 		
 		lbl = new Label(legPart, SWT.NONE);
-		lbl.setText(Messages.MoveWaypointDialog_PatrolLeg_Label );
+		lbl.setText(Messages.MoveWaypointDialog_PatrolLeg_Label2 );
 		
 		cmbLegPart = new ComboViewer(legPart, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbLegPart.setContentProvider(ArrayContentProvider.getInstance());;
@@ -202,7 +202,7 @@ public class MoveWaypointDialog extends SmartStyledTitleDialog{
 			legPart.setVisible(true);
 		}
 		
-		setMessage(Messages.MoveWaypointDialog_DialogMessage);
+		setMessage(Messages.MoveWaypointDialog_DialogMessage2);
 		setTitle(Messages.MoveWaypointDialog_DialogTitle);
 		getShell().setText(Messages.MoveWaypointDialog_DialogTitle);
 		return parent;

@@ -518,16 +518,15 @@ public class PatrolLegDayInputComposite {
 			}
 		});
 		
-		
 		c = toolkit.createComposite(timeInfo);
 		c.setLayout(new GridLayout(2, false));
 		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		
-		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_TotalPatrolHours_Label);
+		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_TotalTime);
 		lblTotalPatrolHours = toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_InvalidTotalHoursPatrolled);
-		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_TotalActivePatrolHours_Label);
+		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_ActiveTime);
 		lblTotalFieldHours = toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_InvalidTotalHoursPatrolled);
 		okayFont = lblTotalFieldHours.getFont();
 		
@@ -539,8 +538,6 @@ public class PatrolLegDayInputComposite {
 		gd.widthHint = 30;
 		lblTotalPatrolHours.setLayoutData(gd);
 		lblTotalFieldHours.setLayoutData(gd);
-
-		
 		
 		Composite trackComp = toolkit.createComposite(mainComposite);
 		trackComp.setLayout(new GridLayout(4, false));
@@ -554,7 +551,7 @@ public class PatrolLegDayInputComposite {
 		gd.widthHint = 50;
 		txtDistance.setLayoutData(gd);
 		
-		importTrack = toolkit.createHyperlink(trackComp, Messages.PatrolLegDayInputComposite_SetTrackLabel, SWT.NONE);
+		importTrack = toolkit.createHyperlink(trackComp, Messages.PatrolLegDayInputComposite_SetTrack, SWT.NONE);
 		importTrack.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
 				showImportTrackWizard();

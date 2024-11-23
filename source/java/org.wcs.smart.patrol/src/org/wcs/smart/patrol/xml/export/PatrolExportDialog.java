@@ -188,10 +188,10 @@ public class PatrolExportDialog extends SmartStyledTitleDialog {
 		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
 		gd.widthHint = lbl.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 		lbl.setLayoutData(gd);
-		lbl.setText("*" + Messages.PatrolExportDialog_AttachmentInfoLabel); //$NON-NLS-1$
+		lbl.setText("*" + Messages.PatrolExportDialog_AttachmentInfoLabel2); //$NON-NLS-1$
 
-		setMessage(MessageFormat.format(Messages.PatrolExportDialog_DialogMessage, new Object[]{patrol.getId()}));
-		getShell().setText(Messages.PatrolExportDialog_DialogTitle);
+		setMessage(MessageFormat.format(Messages.PatrolExportDialog_DialogMessage2, new Object[]{patrol.getId()}));
+		getShell().setText(Messages.PatrolExportDialog_DialogTitle2);
 		return composite;
 
 	}

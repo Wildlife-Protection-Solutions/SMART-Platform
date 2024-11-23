@@ -69,7 +69,7 @@ public class PatrolGpxImportEngine extends GpxImportEngine {
 				if (tracks.size() == expectedCnt){
 					message = MessageFormat.format(Messages.GpxImportEngine_ImportMultiTrack, new Object[]{tracks.size()});	
 				}else{
-					message = MessageFormat.format(Messages.PatrolGpxImportEngine_NotAllTracksImported, new Object[]{tracks.size(), expectedCnt - tracks.size()});
+					message = MessageFormat.format(Messages.PatrolGpxImportEngine_NotAllTracksImported2, new Object[]{tracks.size(), expectedCnt - tracks.size()});
 				}
 				if (tracks.size() == 0){
 					message += "\n" + Messages.PatrolGpxImportEngine_NotracksFound; //$NON-NLS-1$

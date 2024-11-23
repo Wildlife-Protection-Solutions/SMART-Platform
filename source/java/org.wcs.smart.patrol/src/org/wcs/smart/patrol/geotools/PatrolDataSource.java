@@ -41,6 +41,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.LabelConstants;
 
 /**
  * Geotools data store for SMART area layers.
@@ -125,7 +126,7 @@ public class PatrolDataSource extends ContentDataStore{
 	}
 
 	public String getName(String typeName) {
-		if (typeName.equals(PatrolDataSource.TRACK_PART_TYPE)) return Messages.PatrolFeatureSource_TrackLayerName;
+		if (typeName.equals(PatrolDataSource.TRACK_PART_TYPE)) return LabelConstants.TRACKPOINTS;
 		if (typeName.equals(PatrolDataSource.WAYPOINT_TYPE)) return Messages.PatrolFeatureSource_WaypointLayerName;
 		if (typeName.equals(PatrolDataSource.WAYPOINT_PRJ_TYPE)) return Messages.PatrolFeatureSource_ProjectedWaypointLayerName;
 		if (isGeometryAttribute(typeName)) {

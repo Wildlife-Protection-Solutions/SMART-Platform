@@ -144,7 +144,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	
 	@Override
 	public String getTabName() { 
-		return Messages.PatrolMetadataPackageContribution_TabName; 
+		return Messages.PatrolMetadataPackageContribution_TabName2; 
 	}
 	
 	private void setImage(Label label, PatrolMetadataField field, IconSet iconSet) {
@@ -185,7 +185,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		
 		Label col1 = new Label(headerComp, SWT.NONE);
 		col1.setText(Messages.PatrolMetadataPackageContribution_FieldLabel);
-		col1.setToolTipText(Messages.PatrolMetadataPackageContribution_FieldTooltip);
+		col1.setToolTipText(Messages.PatrolMetadataPackageContribution_FieldTooltip2);
 		col1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 
 		Label col2 = new Label(headerComp, SWT.NONE);
@@ -243,7 +243,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			
 			
 			// transport type
-			Object[] d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TransportTypeLabel, core, PatrolMetadataField.TRANSPORT, false, true, defaultIs);
+			Object[] d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_TransportTypeLabel2, core, PatrolMetadataField.TRANSPORT, false, true, defaultIs);
 			btnTT = (Button) d[0];
 			btnTTrq = (Button) d[1];
 			cmbTt = (TableComboViewer) d[2];
@@ -297,20 +297,20 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			cmbStation = (TableComboViewer) d[2];
 			
 			// mandate
-			d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_MandateLabel, core, PatrolMetadataField.MANDATE, false, true, defaultIs);
+			d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_MandateLabel2, core, PatrolMetadataField.MANDATE, false, true, defaultIs);
 			btnMandate = (Button) d[0];
 			btnMandaterq = (Button) d[1];
 			cmbMandate = (TableComboViewer) d[2];
 					
 			// objective
-			d = createTextSection(Messages.PatrolMetadataPackageContribution_ObjectiveLabel, core, PatrolMetadataField.OBJECTIVE, true, defaultIs);
+			d = createTextSection(Messages.PatrolMetadataPackageContribution_ObjectiveLabel2, core, PatrolMetadataField.OBJECTIVE, true, defaultIs);
 			btnObj = (Button) d[0];
 			btnObjrq = (Button) d[1];
 			btnObjrq.setSelection(false);
 			txtObj = (Text) d[2];
 			
 			// comment
-			d = createTextSection(Messages.PatrolMetadataPackageContribution_CommentLabel, core, PatrolMetadataField.COMMENT, true, defaultIs);
+			d = createTextSection(Messages.PatrolMetadataPackageContribution_CommentLabel2, core, PatrolMetadataField.COMMENT, true, defaultIs);
 			btnCmt = (Button) d[0];
 			btnCmtrq = (Button) d[1];
 			btnCmtrq.setSelection(false);
@@ -389,7 +389,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			});
 			
 			// leader
-			d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_LeaderLabel, core, PatrolMetadataField.LEADER, false, false, defaultIs);
+			d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_LeaderLabel2, core, PatrolMetadataField.LEADER, false, false, defaultIs);
 			btnLeader = (Button) d[0];
 			btnLeaderrq = (Button)d[1];
 			cmbLeader = (ComboViewer) d[2];
@@ -397,7 +397,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			btnLeader.setEnabled(false);
 			cmbLeader.getControl().setEnabled(false);
 			// pilot
-			d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_PilotLabel, core, PatrolMetadataField.PILOT, false, false, defaultIs);
+			d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_PilotLabel2, core, PatrolMetadataField.PILOT, false, false, defaultIs);
 			btnPilot = (Button) d[0];
 			btnPilotrq = (Button) d[1];		
 			cmbPilot = (ComboViewer) d[2];
@@ -413,7 +413,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 					cmbLeader.getControl().setEnabled(false);
 					cmbPilot.getControl().setEnabled(false);
 				}else {
-					elabel.setText(Messages.PatrolMetadataPackageContribution_MemberMsg);
+					elabel.setText(Messages.PatrolMetadataPackageContribution_MemberMsg2);
 					
 					btnLeader.setEnabled(true);
 					btnPilot.setEnabled(true);
@@ -808,7 +808,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 			}
 		}
 		if (!ok) {
-			return Messages.PatrolMetadataPackageContribution_EmployeeRequired;
+			return Messages.PatrolMetadataPackageContribution_EmployeeRequired2;
 		}
 		
 		if (!btnMembers.getSelection() && !btnLeader.getSelection() && cmbLeader.getStructuredSelection().isEmpty()) {
@@ -816,10 +816,10 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		}
 		
 		if (!btnMandate.getSelection() && cmbMandate.getStructuredSelection().isEmpty()) {
-			return Messages.PatrolMetadataPackageContribution_MandateRequired;
+			return Messages.PatrolMetadataPackageContribution_MandateRequired2;
 		}
 		if (!btnTT.getSelection() && cmbTt.getStructuredSelection().isEmpty()) {
-			return Messages.PatrolMetadataPackageContribution_TransportRequired;
+			return Messages.PatrolMetadataPackageContribution_TransportRequired2;
 		}
 
 		for (Entry<PatrolAttribute, Object[]> item : customAttributes.entrySet()) {
@@ -831,7 +831,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				try {
 					Double.parseDouble(txt.getText());
 				}catch (Exception ex) {
-					return MessageFormat.format(Messages.PatrolMetadataPackageContribution_InvalidDefaultValue, pa.getName(), txt.getText()); 
+					return MessageFormat.format(Messages.PatrolMetadataPackageContribution_InvalidDefaultValue2, pa.getName(), txt.getText()); 
 				}
 			}
 		}

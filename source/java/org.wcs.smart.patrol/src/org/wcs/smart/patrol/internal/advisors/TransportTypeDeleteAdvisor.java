@@ -47,9 +47,10 @@ public class TransportTypeDeleteAdvisor implements IDeleteAdvisor {
 		if (cnt == 0){
 			return null;
 		}else{
+			PatrolTransportType pt = ((PatrolTransportType)object);
 			return MessageFormat.format(
-					Messages.TransportTypeDeleteAdvisor_DeleteError,
-					new Object[]{cnt, ((PatrolTransportType)object).getName()});
+					Messages.TransportTypeDeleteAdvisor_message,
+					new Object[]{cnt, pt.getPatrolType().getName(), pt.getName()});
 		}
 	}
 

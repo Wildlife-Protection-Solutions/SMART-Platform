@@ -39,11 +39,11 @@ public class PatrolLabelProvider extends ILabelProvider {
 		case LoadingString:
 			return Messages.PatrolLabelProvider_LoadingDataMsg;
 		case PatrolSpeedRoutineType_Desc:
-			return Messages.PatrolLabelProvider_MaxSpeedDescription;
+			return Messages.PatrolLabelProvider_MaxSpeedDescription2;
 		case PatrolSpeedRoutineType_InvalidMaxSpeed:
 			return Messages.PatrolLabelProvider_InvalidMaxSpeed;
 		case PatrolSpeedRoutineType_Name:
-			return Messages.PatrolLabelProvider_MaxSpeedName;
+			return Messages.PatrolLabelProvider_MaxSpeedName2;
 		case PatrolSpeedRoutineType_Param_MaxSpeedName:
 			return Messages.PatrolLabelProvider_MaxSpeedLbl;
 		case PatrolSpeedRoutineType_Param_SpeedUnits:
@@ -51,33 +51,33 @@ public class PatrolLabelProvider extends ILabelProvider {
 		case PatrolSpeedRoutineType_Param_TypeName:
 			return Messages.PatrolLabelProvider_PatrolTypes;
 		case PatrolSpeedRoutineType_TrackSpeedExceeded:
-			return Messages.PatrolLabelProvider_TrackSpeedExceeded;
+			return Messages.PatrolLabelProvider_TrackSpeedExceeded2;
 		case PatrolSpeedRoutineType_WpSpeedExceeded:
-			return Messages.PatrolLabelProvider_WpSpeedExceeded;
+			return Messages.PatrolLabelProvider_WpSpeedExceeded2;
 		case PatrolTrackDataProvider_Name:
-			return Messages.PatrolLabelProvider_PatrolProviderName;
+			return Messages.PatrolLabelProvider_PatrolProviderName2;
 		case PatrolTrackDataProvider_TrackNotFound:
-			return Messages.PatrolLabelProvider_TrackNotFound;
+			return Messages.PatrolLabelProvider_TrackNotFound2;
 		case PatrolTrackDataProvider_LegLabel:
 			return Messages.PatrolLabelProvider_LegLabel;
 		case PatrolWaypointDataProvider_WpNotFound:
-			return Messages.PatrolLabelProvider_WaypointNotFound;
+			return Messages.PatrolLabelProvider_WaypointNotFound2;
 		case PatrolWaypointDataProvider_Name:
-			return Messages.PatrolLabelProvider_WaypointDataProviderName;
+			return Messages.PatrolLabelProvider_WaypointDataProviderName2;
 		case PatrolWaypointDataProvider_WpIdLabel:
 			return Messages.PatrolLabelProvider_WaypointIdLbl;
 		case PatrolSpeedRoutineType_TrackError:
-			return Messages.PatrolLabelProvider_ErrorValidatingPatrolTrack;
+			return Messages.PatrolLabelProvider_ErrorValidatingPatrolTrack2;
 		case EmptyEndPatrolDaysType_Name: 
-			return Messages.PatrolLabelProvider_EmptyEndDaysRoutineName;
+			return Messages.PatrolLabelProvider_EmptyEndDaysRoutineName2;
 		case EmptyEndPatrolDaysType_Desc: 
-			return Messages.PatrolLabelProvider_EmptyEndDaysRoutineDesc;
+			return Messages.PatrolLabelProvider_EmptyEndDaysRoutineDesc2;
 		case PatrolDataProvider_Name:
-			return Messages.PatrolLabelProvider_PatrolDataProviderName;
+			return Messages.PatrolLabelProvider_PatrolDataProviderName2;
 		case PatrolDataProvider_PatrolNotFound:
-			return Messages.PatrolLabelProvider_PatrolNotFoundMsg;
+			return Messages.PatrolLabelProvider_PatrolNotFoundMsg2;
 		case EmptyEndPatrolDaysType_EmptyDays:
-			return Messages.PatrolLabelProvider_EmpytDaysMsg;
+			return Messages.PatrolLabelProvider_EmpytDaysMsg2;
 		}
 		return ""; //$NON-NLS-1$
 	}

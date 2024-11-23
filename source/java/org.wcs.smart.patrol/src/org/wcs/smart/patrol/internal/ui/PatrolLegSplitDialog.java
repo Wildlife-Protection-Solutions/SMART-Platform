@@ -66,6 +66,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -265,9 +266,9 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 		
 		sc.setMinSize(gB.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
-		setMessage(Messages.PatrolLegSplitDialog_Dialog_Message);
-		super.getShell().setText(Messages.PatrolLegSplitDialog_Dialog_Title);
-		setTitle(MessageFormat.format(Messages.PatrolLegSplitDialog_DialogTitle2, existingLeg.getId()));
+		setMessage(Messages.PatrolLegSplitDialog_message);
+		super.getShell().setText(Messages.PatrolLegSplitDialog_shell);
+		setTitle(MessageFormat.format(Messages.PatrolLegSplitDialog_title, existingLeg.getId()));
 		return parent;
 	}
 	
@@ -380,7 +381,7 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 		ttype.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(ttype, SWT.NONE);
-		lbl.setText(Messages.PatrolLegSplitDialog_TransportType_Label);
+		lbl.setText(LabelConstants.TRANSPORT_MODE + ":"); //$NON-NLS-1$
 		
 		TableComboViewer cmbTransportType = new TableComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 		cmbTransportType.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.ICON));
@@ -561,10 +562,10 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 		}
 		
 		if (  ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).isEmpty() ){
-			return Messages.PatrolLegSplitDialog_Error_GroupANoTransportType;
+			return Messages.PatrolLegSplitDialog_modearequired;
 		}
 		if (  ((IStructuredSelection)this.cmbTransportTypeB.getSelection()).isEmpty() ){
-			return Messages.PatrolLegSplitDialog_Error_GroupBNoTransportType;
+			return Messages.PatrolLegSplitDialog_modebrequired;
 		}
 		
 		LocalDate sdate  = SmartUtils.toDate(startDate);

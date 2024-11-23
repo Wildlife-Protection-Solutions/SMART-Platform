@@ -48,7 +48,7 @@ public class PatrolTypeDeleteAdvisor implements IDeleteAdvisor {
 		.uniqueResult();
 		
 		if (numpackages > 0) {
-			return MessageFormat.format("There are {0} SMART Mobile patrol packages associated with the ''{1}'' track type. These must be deleted before you can delete the track type.", numpackages, pt.getName());
+			return MessageFormat.format("There are {0} SMART Mobile packages associated with the ''{1}'' track type. These must be deleted before you can delete the track type.", numpackages, pt.getName());
 		}
 		
 		return null;

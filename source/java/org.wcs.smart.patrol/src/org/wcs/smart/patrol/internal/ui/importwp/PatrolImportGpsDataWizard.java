@@ -80,7 +80,8 @@ public class PatrolImportGpsDataWizard extends ImportGpsDataWizard {
 			if (currentOption == ImportOption.DATE || currentOption == ImportOption.SELECT){
 				if (currentDay.getTrack() != null){
 					//warn user
-					if (!MessageDialog.openConfirm(getShell(), IMPORT_DIALOG_TITLE, Messages.PatrolLegDayInputComposite_SetTrackDialog_Message)){
+					if (!MessageDialog.openConfirm(getShell(), IMPORT_DIALOG_TITLE, 
+							Messages.PatrolImportGpsDataWizard_verify1)){
 						return false;
 					}
 				}
@@ -102,7 +103,8 @@ public class PatrolImportGpsDataWizard extends ImportGpsDataWizard {
 				}					
 				if (warn){
 					//warn user
-					if (!MessageDialog.openConfirm(getShell(), IMPORT_DIALOG_TITLE, Messages.ImportGpsDataWizard_TrackWarningOverwriteNew)){
+					if (!MessageDialog.openConfirm(getShell(), IMPORT_DIALOG_TITLE, 
+							Messages.PatrolImportGpsDataWizard_verify2)){
 						return false;
 					}
 				}

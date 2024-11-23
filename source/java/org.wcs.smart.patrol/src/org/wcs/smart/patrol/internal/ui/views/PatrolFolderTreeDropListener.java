@@ -68,18 +68,18 @@ public class PatrolFolderTreeDropListener extends FolderTreeDropListener {
 	@Override
 	protected void moveObjectToFolder(Object obj, IFolder targetFolder) {
 		if (!(obj instanceof PatrolEditorInput)) {
-			SmartPlugIn.displayError(Messages.PatrolFolderTreeDropListener_UnexpectedSource, null);
+			SmartPlugIn.displayError(Messages.PatrolFolderTreeDropListener_UnexpectedSource2, null);
 			return;
 		}
 		if (targetFolder != null && !(targetFolder instanceof PatrolFolder)) {
-			SmartPlugIn.displayError(Messages.PatrolFolderTreeDropListener_UnexpectedTarget, null);
+			SmartPlugIn.displayError(Messages.PatrolFolderTreeDropListener_UnexpectedTarget2, null);
 			return;
 		}
 		moveObjectToFolder((PatrolEditorInput)obj, (PatrolFolder)targetFolder);
 	}
 
 	private void moveObjectToFolder(PatrolEditorInput obj, PatrolFolder targetFolder) {
-		Job j = new Job(Messages.PatrolFolderTreeDropListener_MovePatrolJob_Title) {
+		Job j = new Job(Messages.PatrolFolderTreeDropListener_MovePatrolJob_Title2) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try(Session s = HibernateManager.openSession()) {
@@ -96,7 +96,7 @@ public class PatrolFolderTreeDropListener extends FolderTreeDropListener {
 		try {
 			j.join();
 		} catch (InterruptedException e) {
-			SmartPlugIn.displayError(Messages.PatrolFolderTreeDropListener_MovePatrolJob_Error, e);
+			SmartPlugIn.displayError(Messages.PatrolFolderTreeDropListener_MovePatrolJob_Error2, e);
 		}
 	}
 	

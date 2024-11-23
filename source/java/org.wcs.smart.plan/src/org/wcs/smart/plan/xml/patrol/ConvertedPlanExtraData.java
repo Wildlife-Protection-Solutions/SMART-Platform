@@ -99,7 +99,7 @@ public class ConvertedPlanExtraData implements IConvertedExtraData {
 		Plan plan = null;
 		if (Files.exists(planFile)) {
 			PlanFromXml xml = new PlanFromXml();
-			xml.setAllDuplicateMessage(Messages.ConvertedPlanExtraData_AllPlansFound);
+			xml.setAllDuplicateMessage(Messages.ConvertedPlanExtraData_AllPlansFound2);
 
 			try {
 				if (xml.convertPlan(planFile)) {
@@ -145,11 +145,11 @@ public class ConvertedPlanExtraData implements IConvertedExtraData {
 		try(Session session = HibernateManager.openSession()) {
 			List<Plan> plans = PlanHibernateManager.getPlansById(session, SmartDB.getCurrentConservationArea(), id);
 			if (plans.isEmpty()) {
-				warnings.add(MessageFormat.format(Messages.ConvertedPlanExtraData_PlanNotFound, id));
+				warnings.add(MessageFormat.format(Messages.ConvertedPlanExtraData_PlanNotFound2, id));
 				return null;
 			}
 			if (plans.size() > 1) {
-				warnings.add(MessageFormat.format(Messages.ConvertedPlanExtraData_MultiplePlansFound, id));
+				warnings.add(MessageFormat.format(Messages.ConvertedPlanExtraData_MultiplePlansFound2, id));
 			}
 			return plans.get(0);
 		}

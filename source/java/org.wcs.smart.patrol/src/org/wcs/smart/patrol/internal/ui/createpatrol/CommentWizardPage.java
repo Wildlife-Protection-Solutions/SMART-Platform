@@ -63,7 +63,7 @@ public class CommentWizardPage extends NewPatrolWizardPage {
 			}
 		});
 		setTitle(Messages.CommentWizardPage_Title);
-		setMessage(Messages.CommentWizardPage_PageMessage);
+		setMessage(Messages.CommentWizardPage_PageMessage2);
 		super.setControl(commentComp.createComponent(parent, SWT.NONE));
 	}
 	

@@ -65,7 +65,7 @@ public class PatrolTrackFromWaypointEngine extends TrackFromWaypointEngine {
 		}else{
 			Track t = PatrolGPSDataImport.computeTrackFromWaypoints(currentLeg);
 			if (t == null){
-				return Messages.PatrolLegDayInputComposite_ImportTrackError_DialogMessage;
+				return Messages.PatrolLegDayInputComposite_ImportTrackError_DialogMessage2;
 			}else{
 				tracks.put(currentLeg, t);
 			}

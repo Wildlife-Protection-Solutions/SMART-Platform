@@ -40,7 +40,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Station;
@@ -80,11 +79,6 @@ public class StationComposite extends PatrolItemComposite{
 		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)center.getLayout()).marginWidth = 0;
 		((GridLayout)center.getLayout()).marginHeight = 0;
-		
-		
-		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText(Messages.StationComposite_Station_Label);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Composite table = new Composite(center, SWT.NONE);
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -155,7 +149,7 @@ public class StationComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return Messages.StationComposite_Title;
+		return LabelConstants.STATION_NAME;
 	}
 	
 	

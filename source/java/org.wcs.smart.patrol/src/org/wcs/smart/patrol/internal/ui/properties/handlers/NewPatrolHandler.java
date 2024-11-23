@@ -82,7 +82,7 @@ public class NewPatrolHandler {
 			});
 		} catch (Exception ex) {
 			dialog = null;
-			SmartPatrolPlugIn.displayLog(Messages.NewPatrolHandler_Error_LoadingWizard
+			SmartPatrolPlugIn.displayLog(Messages.NewPatrolHandler_Error_LoadingWizard2
 					+ ex.getLocalizedMessage(), ex);
 		}
 		if (dialog != null) {

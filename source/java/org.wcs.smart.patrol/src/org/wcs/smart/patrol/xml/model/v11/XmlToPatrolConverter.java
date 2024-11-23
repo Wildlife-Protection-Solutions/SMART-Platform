@@ -175,7 +175,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		try(InputStream is = Files.newInputStream(xmlFile)){
 			xml = readDataModel(is);
 		}
-		if (xml == null) throw new Exception(Messages.XmlToPatrolConverter2_ReadError);
+		if (xml == null) throw new Exception(Messages.XmlToPatrolConverter2_ReadError2);
 		
 		this.session = session;
 		this.ca = ca;
@@ -202,7 +202,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				//ERROR
 				throw new Exception(
 						MessageFormat.format(
-								Messages.XmlToPatrolConverter_Error_MandateNotFound,
+								Messages.XmlToPatrolConverter_Error_MandateNotFound2,
 								new Object[]{xml.getMandate().getValue(), xml.getMandate().getLanguageCode()})
 								);	
 			}
@@ -248,7 +248,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				
 		if (ttype == null){
 			throw new Exception(MessageFormat.format(
-				Messages.XmlToPatrolConverter_Error_TranpsortTypeNotFound1, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(), 
+				Messages.XmlToPatrolConverter_Error_TranpsortTypeNotFound12, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(), 
 						patrol.getPatrolType().getName()}));
 		}
 		boolean found = false;
@@ -269,7 +269,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		}
 		if (!found){
 			throw new Exception(MessageFormat.format(
-					Messages.XmlToPatrolConverter_Error_InvalidTransportType1, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(),
+					Messages.XmlToPatrolConverter_Error_InvalidTransportType12, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(),
 							patrol.getPatrolType().getName()}));
 		}
 		leg.setType(ttype);
@@ -321,7 +321,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				//ensure leg day is included in leg date range, if not don't include it
 				leg.getPatrolLegDays().add(pld);
 			}else{
-				warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_DayOutsideLegRange, new Object[]{leg.getId(), pld.getDate(), leg.getStartDate(), leg.getEndDate()}));
+				warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_DayOutsideLegRange2, new Object[]{leg.getId(), pld.getDate(), leg.getStartDate(), leg.getEndDate()}));
 			}
 			
 			

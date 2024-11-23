@@ -153,7 +153,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		
 		this.onValidate = onValidate;
 		this.onModified = onModified;
-		if (!(ctitem instanceof PatrolCtPackage)) throw new IllegalStateException(Messages.CtPatrolPackageConfigurator_InvalidPackageType);
+		if (!(ctitem instanceof PatrolCtPackage)) throw new IllegalStateException(Messages.CtPatrolPackageConfigurator_InvalidPackageType2);
 		this.ctpackage = (PatrolCtPackage) ctitem;
 	
 		
@@ -181,7 +181,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		SmartUiUtils.createHeaderLabel(g, Messages.PatrolCTPackageDialog_PatrolConfigurationLabel);
+		SmartUiUtils.createHeaderLabel(g, Messages.PatrolCTPackageDialog_PatrolConfigurationLabel2);
 		
 		g = new Composite(g, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));
@@ -564,14 +564,14 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				for (Entry<PatrolTransportType, Object[]> value : typeControls.entrySet()) {
 					ComboViewer cm = (ComboViewer) value.getValue()[0];
 					if (!(cm.getStructuredSelection().getFirstElement() instanceof CyberTrackerPropertiesProfileOption.TrackTimerOp)) {
-						throw new Exception(MessageFormat.format(Messages.CtPatrolPackageConfigurator_InvalidTrackTimerOption, value.getKey().getName()));
+						throw new Exception(MessageFormat.format(Messages.CtPatrolPackageConfigurator_InvalidTrackTimerOption2, value.getKey().getName()));
 					}
 					Text txt = (Text) value.getValue()[1];
 					try {
 						int v = Integer.parseInt(txt.getText());
 						if (v < 0) throw new Exception();
 					}catch (Exception ex) {
-						throw new Exception(MessageFormat.format(Messages.CtPatrolPackageConfigurator_InvalidTrackTimerOption, value.getKey().getName()));
+						throw new Exception(MessageFormat.format(Messages.CtPatrolPackageConfigurator_InvalidTrackTimerOption2, value.getKey().getName()));
 					}
 				}
 			}

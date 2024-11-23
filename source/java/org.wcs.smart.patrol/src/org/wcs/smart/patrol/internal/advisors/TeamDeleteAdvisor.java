@@ -49,7 +49,7 @@ public class TeamDeleteAdvisor  implements IDeleteAdvisor {
 		}else{
 			return 
 				MessageFormat.format(	
-					Messages.TeamDeleteAdvisor_DeleteError,
+					Messages.TeamDeleteAdvisor_DeleteError2,
 					new Object[]{cnt, ((Team)object).getName()});
 		}
 	}

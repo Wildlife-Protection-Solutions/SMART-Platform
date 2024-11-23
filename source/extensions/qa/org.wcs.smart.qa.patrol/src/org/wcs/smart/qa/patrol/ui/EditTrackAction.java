@@ -74,8 +74,8 @@ public class EditTrackAction  implements IQaAction {
 		
 		if (track == null){
 			item.setStatus(Status.ERROR);
-			item.setFixMessage(Messages.EditTrackAction_TrackNotFoundMsg);
-			MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EditTrackAction_NotFoundDialogTitle, Messages.EditTrackAction_NotFoundDialogMsg);
+			item.setFixMessage(Messages.EditTrackAction_TrackNotFoundMsg2);
+			MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EditTrackAction_NotFoundDialogTitle, Messages.EditTrackAction_NotFoundDialogMsg2);
 			return true;
 		}
 
@@ -84,7 +84,7 @@ public class EditTrackAction  implements IQaAction {
 			lsList = track.getLineStrings();
 		}catch (Exception ex){
 			QaPlugIn.log(ex.getMessage(), ex);
-			MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EditTrackAction_NotFoundDialogTitle, Messages.EditTrackAction_ParseError);
+			MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EditTrackAction_NotFoundDialogTitle, Messages.EditTrackAction_ParseError2);
 			return false;
 		}
 
@@ -106,14 +106,14 @@ public class EditTrackAction  implements IQaAction {
 
 			if (!isSame){
 				item.setStatus(Status.FIXED);
-				item.setFixMessage(Messages.EditTrackAction_ModifiedMsg);
+				item.setFixMessage(Messages.EditTrackAction_ModifiedMsg2);
 				item.setGeometryObject(editTrack.getGeometry());			
 				PatrolEventManager.getInstance().patrolSaved(p, true);
 				return true;
 			}
 		}catch (Exception ex){
 			QaPlugIn.log(ex.getMessage(), ex);
-			MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EditTrackAction_NotFoundDialogTitle, Messages.EditTrackAction_ParseError);
+			MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EditTrackAction_NotFoundDialogTitle, Messages.EditTrackAction_ParseError2);
 			return false;
 		}
 		return false;
@@ -131,7 +131,7 @@ public class EditTrackAction  implements IQaAction {
 
 	@Override
 	public String getName(Locale l) {
-		return Messages.EditTrackAction_ActionName;
+		return Messages.EditTrackAction_ActionName2;
 	}
 
 }

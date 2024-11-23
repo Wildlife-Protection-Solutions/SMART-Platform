@@ -40,6 +40,7 @@ import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeSelectComposite;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.ui.LabelConstants;
 
 /**
  * Patrol item composite that allows users
@@ -177,7 +178,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return Messages.EmployeeLeaderPilotComposite_Title;
+		return LabelConstants.MEMBERS;
 	}
 	
 	/**

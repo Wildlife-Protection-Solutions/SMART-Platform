@@ -50,11 +50,11 @@ public class PatrolCaDeleteHandler implements ICaDeleteHandler{
 			throws Exception {
 		monitor.subTask(Messages.PatrolCaDeleteHandler_DeletePatrolAttributes);
 		deleteCustomAttributes(ca, session);	
-		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingPatrols);
+		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingPatrols2);
 		deletePatrols(ca, session);
-		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingTeams);
+		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingTeams2);
 		deletePatrolTeams(ca, session);
-		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingMandates);
+		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingMandates2);
 		deleteMandates(ca, session);		
 		monitor.subTask(Messages.PatrolCaDeleteHandler_Progress_DeletingTypes1);
 		deletePatrolTypes(ca, session);		

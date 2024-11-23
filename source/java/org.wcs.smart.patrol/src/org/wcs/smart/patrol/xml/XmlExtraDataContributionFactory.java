@@ -55,7 +55,7 @@ public class XmlExtraDataContributionFactory {
 				}
 				contributions = items;
 			} catch (Exception ex) {
-				SmartPatrolPlugIn.displayLog(Messages.XmlExtraDataContributionFactory_ErrorParsingExtraData, ex);
+				SmartPatrolPlugIn.displayLog(Messages.XmlExtraDataContributionFactory_ErrorParsingExtraData2, ex);
 				return Collections.emptyList();
 			}
 		}
@@ -72,7 +72,7 @@ public class XmlExtraDataContributionFactory {
 				items.add(contribution);
 			}
 		} catch (Exception ex) {
-			SmartPatrolPlugIn.displayLog(Messages.XmlExtraDataContributionFactory_ErrorParsingExtraData, ex);
+			SmartPatrolPlugIn.displayLog(Messages.XmlExtraDataContributionFactory_ErrorParsingExtraData2, ex);
 			return Collections.emptyList();
 		}
 		return items;

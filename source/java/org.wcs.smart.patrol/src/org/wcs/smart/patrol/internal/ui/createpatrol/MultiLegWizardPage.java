@@ -76,7 +76,7 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		center.setLayout(new GridLayout(1, false));
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText(Messages.MultiLegWizardPage_IsMulti_Label);
+		lbl.setText(Messages.MultiLegWizardPage_IsMulti_Label2);
 		
 		Composite buttonPanel = new Composite(center, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(1, false));
@@ -108,12 +108,12 @@ public class MultiLegWizardPage  extends NewPatrolWizardPage {
 		});
 		
 		lbl = new Label(center, SWT.WRAP);
-		lbl.setText(Messages.MultiLegWizardPage_LegInfo_Label);
+		lbl.setText(Messages.MultiLegWizardPage_LegInfo_Label2);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		lbl.setLayoutData(gd);
 		
-		setTitle(Messages.MultiLegWizardPage_Title);
-		setMessage(Messages.MultiLegWizardPage_PageMessage);
+		setTitle(Messages.MultiLegWizardPage_Title2);
+		setMessage(Messages.MultiLegWizardPage_PageMessage2);
 		super.setControl(main);
 	}
     

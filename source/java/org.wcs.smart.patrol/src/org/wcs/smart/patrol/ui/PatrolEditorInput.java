@@ -147,7 +147,7 @@ public class PatrolEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getName() {	
-		return Messages.PatrolEditorInput_EditorNamePrefix + "_" + id; //$NON-NLS-1$
+		return id; 
 	}
 
 	/**
@@ -163,7 +163,7 @@ public class PatrolEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getToolTipText() {
-		return MessageFormat.format(Messages.PatrolEditorInput_Editor_Tooltip, new Object[]{ id});
+		return MessageFormat.format(Messages.PatrolEditorInput_Editor_Tooltip2, new Object[]{ id});
 	}
 
 	public int hashCode() {

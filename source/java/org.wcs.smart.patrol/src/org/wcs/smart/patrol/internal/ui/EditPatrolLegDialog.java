@@ -62,6 +62,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -203,6 +204,8 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 		Composite leaderComp = new Composite(right, SWT.NONE);
 		leaderComp.setLayout(new GridLayout(2, false));
 		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		((GridLayout)leaderComp.getLayout()).marginWidth = 0;
+		((GridLayout)leaderComp.getLayout()).marginHeight = 0;
 		
 		Label lblGroupALeader = new Label(leaderComp, SWT.NONE);
 		lblGroupALeader.setText(Messages.EditPatrolLegDialog_GroupALeader_Label);
@@ -221,9 +224,9 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 		});
 		updateGroupAPilotState();
 		
-		setMessage(Messages.EditPatrolLegDialog_DialogMessage);
-		getShell().setText(Messages.EditPatrolLegDialog_DialogTitle);
-		setTitle(MessageFormat.format(Messages.EditPatrolLegDialog_DialogTitle2, editLeg.getId()));
+		setMessage(Messages.EditPatrolLegDialog_DialogMessage2);
+		getShell().setText(Messages.EditPatrolLegDialog_DialogTitle3);
+		setTitle(MessageFormat.format(Messages.EditPatrolLegDialog_DialogTitle22, editLeg.getId()));
 		return parent;
 	}
 	
@@ -262,11 +265,11 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 		btn.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		Button btnAddA = new Button(btn, SWT.PUSH);
 		btnAddA.setText("->"); //$NON-NLS-1$
-		btnAddA.setToolTipText(Messages.EditPatrolLegDialog_AddEmployees_ToolTip);
+		btnAddA.setToolTipText(Messages.EditPatrolLegDialog_AddEmployees_ToolTip2);
 		
 		Button btnRemoveA = new Button(btn, SWT.PUSH);
 		btnRemoveA.setText("<-"); //$NON-NLS-1$
-		btnRemoveA.setToolTipText(Messages.EditPatrolLegDialog_RemoveEmployees_ToolTip);
+		btnRemoveA.setToolTipText(Messages.EditPatrolLegDialog_RemoveEmployees_ToolTip2);
 		
 		
 		final TableViewer groupList = new TableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
@@ -323,9 +326,11 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 		Composite ttype = new Composite(parent, SWT.NONE);
 		ttype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		ttype.setLayout(new GridLayout(2, false));
+		((GridLayout)ttype.getLayout()).marginWidth = 0;
+		((GridLayout)ttype.getLayout()).marginHeight = 0;
 		
 		Label lbl = new Label(ttype, SWT.NONE);
-		lbl.setText(Messages.EditPatrolLegDialog_TransportType_Label);
+		lbl.setText(LabelConstants.TRANSPORT_MODE);
 		
 		TableComboViewer cmbTransportType = new TableComboViewer(ttype, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 		cmbTransportType.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.ICON));
@@ -343,6 +348,8 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 		Composite ttype = new Composite(parent, SWT.NONE);
 		ttype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		ttype.setLayout(new GridLayout(2, false));
+		((GridLayout)ttype.getLayout()).marginWidth = 0;
+		((GridLayout)ttype.getLayout()).marginHeight = 0;
 		
 		Label lbl = new Label(ttype, SWT.NONE);
 		lbl.setText(Messages.EditPatrolLegDialog_MandateLabel);
@@ -518,22 +525,22 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 		
 		if (legStart.toLocalDate().isBefore(patrolStartDate)){
 			return MessageFormat.format(
-					Messages.EditPatrolLegDialog_Error_StartAfterPStart,
+					Messages.EditPatrolLegDialog_Error_StartAfterPStart2,
 					new Object[]{ dateFormatter.format(patrolStartDate)});
 		}
 		if (legStart.toLocalDate().isAfter(patrolEndDate) ){
 			return MessageFormat.format(
-					Messages.EditPatrolLegDialog_Error_StartBeforePEnd,
+					Messages.EditPatrolLegDialog_Error_StartBeforePEnd2,
 					new Object[]{ dateFormatter.format(patrolEndDate)});
 		}
 		if (legEnd.toLocalDate().isBefore(patrolStartDate)){
 			return MessageFormat.format(
-					Messages.EditPatrolLegDialog_Error_EndAfterPStart,
+					Messages.EditPatrolLegDialog_Error_EndAfterPStart2,
 					new Object[]{ dateFormatter.format(patrolStartDate)});
 		}
 		if (legEnd.toLocalDate().isAfter(patrolEndDate)){
 			return MessageFormat.format(
-					Messages.EditPatrolLegDialog_Error_EndBeforePStart,
+					Messages.EditPatrolLegDialog_Error_EndBeforePStart2,
 					new Object[]{ dateFormatter.format(patrolEndDate)});
 		}
 		if (legEnd.isBefore(legStart)){

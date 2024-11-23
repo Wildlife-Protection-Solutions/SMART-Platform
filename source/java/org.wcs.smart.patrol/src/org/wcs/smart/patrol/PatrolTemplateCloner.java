@@ -55,14 +55,14 @@ public class PatrolTemplateCloner implements
 
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.PatrolTemplateCloner_ProgressPatrols, 3);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.PatrolTemplateCloner_ProgressPatrols2, 3);
 		
 		//	need to clone: team, mandate,  types, transport types
-		progress.subTask(Messages.PatrolTemplateCloner_ProgressCopyMandates);
+		progress.subTask(Messages.PatrolTemplateCloner_ProgressCopyMandates2);
 		cloneMandates(engine);
 		progress.worked(1);
 		
-		progress.subTask(Messages.PatrolTemplateCloner_ProgressCopyTeams);
+		progress.subTask(Messages.PatrolTemplateCloner_ProgressCopyTeams2);
 		cloneTeams(engine);
 		progress.worked(1);
 		
@@ -70,7 +70,7 @@ public class PatrolTemplateCloner implements
 		clonePatrolTypes(engine);
 		progress.worked(1);
 		
-		progress.subTask(Messages.PatrolTemplateCloner_copycustomattributes);
+		progress.subTask(Messages.PatrolTemplateCloner_copycustomattributes2);
 		cloneCustomAttributes(engine);
 		progress.worked(1);
 		

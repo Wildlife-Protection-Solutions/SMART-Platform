@@ -182,13 +182,13 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 		
 		private void addTrackPoints(IProgressMonitor monitor) throws IOException{
 			final PatrolQuery pq = PatrolQueryFactory.createPatrolQuery();
-			pq.updateName(SmartDB.getCurrentLanguage(), Messages.MapPlanEditorPage_QueryName);
-			pq.setName(Messages.MapPlanEditorPage_QueryName);
+			pq.updateName(SmartDB.getCurrentLanguage(), Messages.MapPlanEditorPage_QueryName2);
+			pq.setName(Messages.MapPlanEditorPage_QueryName2);
 			pq.setDateFilter(new DateFilter(PatrolStartDateField.INSTANCE, AllDatesFilter.INSTANCE));
 			pq.setQueryFilter(generateQueryString());
 			pq.setConservationArea(SmartDB.getCurrentConservationArea());
 			
-			Job runQueryJob = new Job(Messages.MapPlanEditorPage_ExecutingPatrolQuery){
+			Job runQueryJob = new Job(Messages.MapPlanEditorPage_ExecutingPatrolQuery2){
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try(Session s = HibernateManager.openSession()){
@@ -258,7 +258,7 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
     private Job refreshPatrolsJob = new Job(Messages.MapPlanEditorPage_RefreshMapJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			SubMonitor progress = SubMonitor.convert(monitor, Messages.MapPlanEditorPage_UpadingPatrolLayer, 2);
+			SubMonitor progress = SubMonitor.convert(monitor, Messages.MapPlanEditorPage_UpadingPatrolLayer2, 2);
 			synchronized (lockObj) {
 				if (patrolLayer != null){
 					try{

@@ -125,7 +125,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 	 * job to load the patrol links; done inside a job
 	 * as it may take time and requies an active hibernate session
 	 */
-	private Job loadPatrolsLinksJob = new Job(Messages.PlanEditor_LoadPatrolsJob_Title){
+	private Job loadPatrolsLinksJob = new Job(Messages.PlanEditor_LoadPatrolsJob_Title2){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -443,7 +443,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 		bottomContent.setLayout(glayout);
 		bottomContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 	
-		Label l = toolkit.createLabel(bottomContent, Messages.PlanEditor_PatrolLabel);
+		Label l = toolkit.createLabel(bottomContent, Messages.PlanEditor_PatrolLabel2);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		((GridData)l.getLayoutData()).verticalIndent = 4;
 		patrolLinks  = toolkit.createComposite(bottomContent);
@@ -454,7 +454,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 		
 		patrolLinks.setLayout(layout);
 		
-		final Label lc = toolkit.createLabel(bottomContent, "*" + Messages.PlanEditor_ChildPatrolLabel); //$NON-NLS-1$
+		final Label lc = toolkit.createLabel(bottomContent, "*" + Messages.PlanEditor_ChildPatrolLabel2); //$NON-NLS-1$
 		lc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
 		summaryScroll.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));

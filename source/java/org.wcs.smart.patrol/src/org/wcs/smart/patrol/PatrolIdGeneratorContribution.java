@@ -106,7 +106,7 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 		((GridLayout)part.getLayout()).marginWidth = 0;
 		((GridLayout)part.getLayout()).marginHeight = 0;
 
-		SmartUiUtils.createHeaderLabel(part, Messages.PatrolIdGeneratorContribution_SectionHeader);
+		SmartUiUtils.createHeaderLabel(part, Messages.PatrolIdGeneratorContribution_SectionHeader2);
 		
 		Composite inner = new Composite(part, SWT.NONE);
 		inner.setLayout(new GridLayout(2, false));
@@ -167,7 +167,7 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 		info.setEditable(false);
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append(Messages.PatrolIdGeneratorContribution_PatrolTokens);
+		sb.append(Messages.PatrolIdGeneratorContribution_PatrolTokens2);
 		sb.append("\n"); //$NON-NLS-1$
 		IdGeneratorEngine.Token[] tokens = new IdGeneratorEngine.Token[] {
 				IdGeneratorEngine.Token.LEADER_FAMILY, 

@@ -51,6 +51,7 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 
 /**
@@ -71,7 +72,7 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 		TEAM (Messages.PatrolTreeContentProvider_TeamOption),
 		PATROLTYPE (Messages.PatrolTreeContentProvider_TypeOption1),
 		MANDATE (Messages.PatrolTreeContentProvider_MandateOption),
-		TRANSPORTTYPE (Messages.PatrolTreeContentProvider_TransportOption),
+		TRANSPORTTYPE (LabelConstants.TRANSPORT_MODE),
 		YEAR(Messages.PatrolTreeContentProvider_YearOption),
 		MONTH(Messages.PatrolTreeContentProvider_MonthOption),
 		NONE(Messages.PatrolTreeContentProvider_NoneOption);
@@ -256,7 +257,7 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 				PatrolEditorInput[] patrols = (PatrolEditorInput[]) input;
 				List<ITreeElement> result = new ArrayList<>();
 				
-				Job j = new Job(Messages.PatrolTreeContentProvider_JobName) {
+				Job j = new Job(Messages.PatrolTreeContentProvider_JobName2) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						Map<PatrolMandate, TreeElement> obj2Element = new HashMap<>();
@@ -297,7 +298,7 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 				try {
 					j.join();
 				} catch (InterruptedException e) {
-					SmartPlugIn.displayError(Messages.PatrolTreeContentProvider_SortMandateJob_Error, e);
+					SmartPlugIn.displayError(Messages.PatrolTreeContentProvider_SortJobInterrupted, e);
 				}
 				result.sort(new ObjectNameComparator() {
 					@Override
@@ -318,7 +319,7 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 				PatrolEditorInput[] patrols = (PatrolEditorInput[]) input;
 				List<ITreeElement> result = new ArrayList<>();
 				
-				Job j = new Job(Messages.PatrolTreeContentProvider_JobName) {
+				Job j = new Job(Messages.PatrolTreeContentProvider_JobName2) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						Map<PatrolTransportType, TreeElement> obj2Element = new HashMap<>();
@@ -357,7 +358,7 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 				try {
 					j.join();
 				} catch (InterruptedException e) {
-					SmartPlugIn.displayError(Messages.PatrolTreeContentProvider_SortTransportJob_Error, e);
+					SmartPlugIn.displayError(Messages.PatrolTreeContentProvider_SortJobInterrupted, e);
 				}
 				result.sort(new ObjectNameComparator());
 				return result;
@@ -380,7 +381,7 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 				PatrolEditorInput[] patrols = (PatrolEditorInput[]) input;
 				List<ITreeElement> result = new ArrayList<>();
 				
-				Job j = new Job(Messages.PatrolTreeContentProvider_JobName) {
+				Job j = new Job(Messages.PatrolTreeContentProvider_JobName2) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						Map<Team, TreeElement> obj2Element = new HashMap<>();
@@ -409,7 +410,7 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 				try {
 					j.join();
 				} catch (InterruptedException e) {
-					SmartPlugIn.displayError(Messages.PatrolTreeContentProvider_SortTeamJob_Error, e);
+					SmartPlugIn.displayError(Messages.PatrolTreeContentProvider_SortJobInterrupted, e);
 				}
 				
 				result.sort(new ObjectNameComparator() {
@@ -439,7 +440,7 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 				PatrolEditorInput[] patrols = (PatrolEditorInput[]) input;
 				List<ITreeElement> result = new ArrayList<>();
 				
-				Job j = new Job(Messages.PatrolTreeContentProvider_JobName) {
+				Job j = new Job(Messages.PatrolTreeContentProvider_JobName2) {
 					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						Map<Station, TreeElement> obj2Element = new HashMap<>();
@@ -468,7 +469,7 @@ public class PatrolTreeContentProvider extends FolderTreeContentProvider {
 				try {
 					j.join();
 				} catch (InterruptedException e) {
-					SmartPlugIn.displayError(Messages.PatrolTreeContentProvider_SortStationJob_Error, e);
+					SmartPlugIn.displayError(Messages.PatrolTreeContentProvider_SortJobInterrupted, e);
 				}
 				
 				result.sort(new ObjectNameComparator() {

@@ -60,6 +60,7 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -170,9 +171,10 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 			groupPilot = createLeaderPilot(patrolIdComp, Messages.MergePatrolLegDialog_Pilot, employeeList, null);
 		}
 		
-		setMessage(Messages.MergePatrolLegDialog_DialogMessage);
-		getShell().setText(Messages.MergePatrolLegDialog_ShellText);
-		setTitle(Messages.MergePatrolLegDialog_DialogTitle);
+		setMessage(Messages.MergePatrolLegDialog_Merge);
+		String title = Messages.MergePatrolLegDialog_Title;
+		getShell().setText(title);
+		setTitle(title);
 		return parent;
 	}
 	
@@ -200,7 +202,7 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 	private TableComboViewer createTransportTypeComboViewer(Composite parent){
 
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText(Messages.EditPatrolLegDialog_TransportType_Label);
+		lbl.setText(LabelConstants.TRANSPORT_MODE + ":"); //$NON-NLS-1$
 		
 		TableComboViewer cmbTransportType = new TableComboViewer(parent, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 		cmbTransportType.setLabelProvider(new NamedIconItemLabelProvider(IconManager.Size.ICON));

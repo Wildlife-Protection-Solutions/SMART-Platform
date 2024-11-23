@@ -69,8 +69,8 @@ public class PatrolAttributeWizardPage extends NewPatrolWizardPage implements IP
 		
 		super.setControl(scroll);
 		
-		setTitle(Messages.PatrolAttributeWizardPage_Title);
-		setMessage(Messages.PatrolAttributeWizardPage_Message);
+		setTitle(Messages.PatrolAttributeWizardPage_Title2);
+		setMessage(Messages.PatrolAttributeWizardPage_Message2);
 	}
 	
 	/**

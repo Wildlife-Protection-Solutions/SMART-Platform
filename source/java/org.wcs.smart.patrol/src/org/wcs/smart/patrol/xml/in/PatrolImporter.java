@@ -63,7 +63,7 @@ import org.wcs.smart.util.ZipUtil;
  */
 public class PatrolImporter {
 	
-	private static final String IMPORTING_PATROL_TASKNAME = Messages.PatrolImporter_Progress_TaskName;
+	private static final String IMPORTING_PATROL_TASKNAME = Messages.PatrolImporter_Progress_TaskName2;
 
 
 	/**
@@ -129,7 +129,7 @@ public class PatrolImporter {
 			}catch (Exception ex){
 				SmartPatrolPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
 			}
-			throw new Exception (Messages.PatrolImporter_Error_XmlFileNotFound);
+			throw new Exception (Messages.PatrolImporter_Error_XmlFileNotFound2);
 		}
 		
 		Patrol p = convertAndSave(converter, config, directory, xmlFile, progress.split(1));
@@ -155,7 +155,7 @@ public class PatrolImporter {
 	private static Patrol importPatrolFromFile(Path xmlFile, ImportConfig config, IProgressMonitor monitor) throws Exception{
 		IXmlToPatrolConverter converter = PatrolXmlManager.findVersion(xmlFile);
 		if (converter == null){
-			throw new Exception(MessageFormat.format(Messages.PatrolImporter_UnableToProcessFile, xmlFile));
+			throw new Exception(MessageFormat.format(Messages.PatrolImporter_UnableToProcessFile2, xmlFile));
 		}
 		return convertAndSave(converter, config, null, xmlFile, monitor);
 	}
@@ -177,7 +177,7 @@ public class PatrolImporter {
 	 */
 	private static Patrol  convertAndSave(IXmlToPatrolConverter converter, final ImportConfig config, 
 			Path attachmentDirectory, Path sourceFile, IProgressMonitor monitor) throws Exception {
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.PatrolImporter_ReadingProgress, 5);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.PatrolImporter_ReadingProgress2, 5);
 		
 		
 		try(Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())) {
@@ -196,7 +196,7 @@ public class PatrolImporter {
 				
 				if (!SmartUtils.isSimpleString(imported.getId(), 
 						SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Patrol.MAX_ID_LENGTH) ) {
-					throw new Exception(MessageFormat.format(Messages.XmlToPatrolConverter_InvalidPatrolId,
+					throw new Exception(MessageFormat.format(Messages.XmlToPatrolConverter_InvalidPatrolId2,
 							imported.getId(), Patrol.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc));
 				}
 				
@@ -210,8 +210,8 @@ public class PatrolImporter {
 
 							@Override
 							public void run() {
-								String message = config.isKeepIDs() ? MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage_SameId, pid) : MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage, pid);
-								MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), Messages.PatrolImporter_ImportPatrol_DialogTitle, 
+								String message = config.isKeepIDs() ? MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage_SameId2, pid) : MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage, pid);
+								MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), Messages.PatrolImporter_ImportPatrol_DialogTitle2, 
 										null, message,
 										MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 								int ret = dialog.open();
@@ -230,7 +230,7 @@ public class PatrolImporter {
 						//duplicate patrol id but user chose to ignore warnings
 						String pid = imported.getId();
 						String fileName = sourceFile.getFileName().toString();
-						String message = config.isKeepIDs() ? MessageFormat.format(Messages.PatrolImporter_Warn_SameId, imported.getId(), fileName) : MessageFormat.format(Messages.PatrolImporter_Warn_DataDuplicate, pid, fileName);
+						String message = config.isKeepIDs() ? MessageFormat.format(Messages.PatrolImporter_Warn_SameId2, imported.getId(), fileName) : MessageFormat.format(Messages.PatrolImporter_Warn_DataDuplicate2, pid, fileName);
 						config.addWarning(message, sourceFile);
 					}
 				}
@@ -261,7 +261,7 @@ public class PatrolImporter {
 				public void run() {
 					ConfirmInputDialog dialog = new ConfirmInputDialog(
 							Display.getDefault().getActiveShell(),
-							Messages.PatrolImporter_PatrolImport_ErrorDialogTitle,
+							Messages.PatrolImporter_PatrolImport_ErrorDialogTitle2,
 							Messages.PatrolImporter_PatrolImport_ErrorMessage,
 							message, null);
 					if (dialog.open() != ConfirmInputDialog.OK){
@@ -295,7 +295,7 @@ public class PatrolImporter {
 				session.getTransaction().commit();
 			} catch (Exception ex) {
 				session.getTransaction().rollback();
-				SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol + ex.getLocalizedMessage(), ex);
+				SmartPatrolPlugIn.displayLog(Messages.PatrolHibernateManager_Error_CouldNoSavePatrol2 + ex.getLocalizedMessage(), ex);
 				return null;
 			}
 		}

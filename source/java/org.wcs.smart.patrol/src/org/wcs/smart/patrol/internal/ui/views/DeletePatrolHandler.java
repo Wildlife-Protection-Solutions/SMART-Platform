@@ -73,7 +73,7 @@ public class DeletePatrolHandler {
 		String message = null;
 		if (toDelete.size() == 1){
 			message = MessageFormat.format(
-					Messages.DeletePatrolHandler_ConfirmDeletePatrol_DialogMessage, new Object[]{toDelete.get(0).getPatrolId()});
+					Messages.DeletePatrolHandler_ConfirmDeletePatrol_DialogMessage2, new Object[]{toDelete.get(0).getPatrolId()});
 		}else if (toDelete.size() > 1){
 			StringBuilder sb = new StringBuilder();
 			for (PatrolEditorInput in : toDelete){
@@ -86,13 +86,13 @@ public class DeletePatrolHandler {
 				sb.delete(1000, sb.length()-1);
 				sb.append(" ..."); //$NON-NLS-1$
 			}
-			message = MessageFormat.format(Messages.DeletePatrolHandler_MultiDeleteConfirmation + "\n\n" + sb.toString(), new Object[]{toDelete.size()}); //$NON-NLS-1$
+			message = MessageFormat.format(Messages.DeletePatrolHandler_MultiDeleteConfirmation2 + "\n\n" + sb.toString(), new Object[]{toDelete.size()}); //$NON-NLS-1$
 		}else{
 			return;
 		}
 		
 		MessageDialog dialog = new MessageDialog(activeShell,
-				Messages.DeletePatrolHandler_ConfirmDeletePatrol_DialogTitle,
+				Messages.DeletePatrolHandler_ConfirmDeletePatrol_DialogTitle2,
 				null,
 				message,
 				MessageDialog.CONFIRM, 
@@ -111,7 +111,7 @@ public class DeletePatrolHandler {
 						throws InvocationTargetException,
 						InterruptedException {
 					int deleted = 0;
-					SubMonitor progress = SubMonitor.convert(monitor, Messages.DeletePatrolHandler_ProgressTaskName, toDelete.size());
+					SubMonitor progress = SubMonitor.convert(monitor, Messages.DeletePatrolHandler_ProgressTaskName2, toDelete.size());
 					for (PatrolEditorInput delete : toDelete){
 						try {
 							if (PatrolManager.getInstance().deletePatrol(delete.getUuid(), true, progress.split(1))){
@@ -119,29 +119,29 @@ public class DeletePatrolHandler {
 							}
 						}catch (Exception ex){
 							SmartPatrolPlugIn.displayLog(
-									MessageFormat.format(Messages.DeletePatrolHandler_DeletePatrol_ErrorMessage, new Object[]{delete.getPatrolId()}) + "\n\n" + ex.getLocalizedMessage(),ex); //$NON-NLS-1$
+									MessageFormat.format(Messages.DeletePatrolHandler_DeletePatrol_ErrorMessage2, new Object[]{delete.getPatrolId()}) + "\n\n" + ex.getLocalizedMessage(),ex); //$NON-NLS-1$
 
 						}
 					}
 					String message = null;
 					if (deleted == toDelete.size()){
-						message = MessageFormat.format(Messages.DeletePatrolHandler_DeleteSuccessMessage, new Object[]{deleted});;
+						message = MessageFormat.format(Messages.DeletePatrolHandler_DeleteSuccessMessage2, new Object[]{deleted});;
 					}else{
-						message = MessageFormat.format(Messages.DeletePatrolHandler_DeleteErrorMessage, new Object[]{deleted, toDelete.size()});
+						message = MessageFormat.format(Messages.DeletePatrolHandler_DeleteErrorMessage2, new Object[]{deleted, toDelete.size()});
 					}
 					final String dMessage = message;
 					activeShell.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
 							MessageDialog.openInformation(activeShell,
-									Messages.DeletePatrolHandler_DeletePatrol_DialogTitle,
+									Messages.DeletePatrolHandler_DeletePatrol_DialogTitle2,
 									dMessage);
 						}});
 				}
 			});
 		} catch (Exception ex) {
 			SmartPatrolPlugIn.displayLog(
-					Messages.DeletePatrolHandler_Error_CouldNotDeletePatrol,
+					Messages.DeletePatrolHandler_Error_CouldNotDeletePatrol2,
 					ex);
 		}
 		return;

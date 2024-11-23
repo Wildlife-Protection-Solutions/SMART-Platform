@@ -149,7 +149,7 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
 		btnFilter = new ToolItem(temp, SWT.PUSH);
 		Image image = SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.FILTER_ICON);
 		btnFilter.setImage(image);
-		btnFilter.setToolTipText(Messages.PatrolFilteredComboViewerComposite_Filter_Tooltip);
+		btnFilter.setToolTipText(Messages.PatrolFilteredComboViewerComposite_Filter_Tooltip2);
 		btnFilter.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				PatrolFilterDialog pfd = new PatrolFilterDialog(getShell(), PatrolFilteredComboViewer.this, session);
@@ -244,7 +244,7 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
         private Patrol preselectedPatrol;
     	
         public LoadPatrolIdJob() {
-            super(Messages.LoadPatrolIdJob_Name);
+            super(Messages.LoadPatrolIdJob_Name2);
         }
 
         @Override

@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.ui.LabelConstants;
 
 /**
  * Simple composite that asks if
@@ -65,7 +66,7 @@ public class ArmedComposite  extends PatrolItemComposite{
 		center.setLayout(new GridLayout(1, false));
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		Label lbl = new Label(center, SWT.NONE);
-		lbl.setText(Messages.ArmedComposite_Message);
+		lbl.setText(Messages.ArmedComposite_Message2);
 
 		Composite buttonPanel = new Composite(center, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(1, false));
@@ -117,7 +118,7 @@ public class ArmedComposite  extends PatrolItemComposite{
 	 */
 	@Override
 	public String getTitle() {
-		return Messages.ArmedComposite_Title;
+		return LabelConstants.ARMED;
 	}
 
 	/**

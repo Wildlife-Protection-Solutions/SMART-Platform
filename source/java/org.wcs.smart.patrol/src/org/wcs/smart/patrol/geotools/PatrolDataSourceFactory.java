@@ -43,7 +43,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 
-	public static final Param PATROL_UUID = new Param("patroluuid", String.class, Messages.PatrolDataSourceFactory_PatrolUuidParameterName, true);  //$NON-NLS-1$
+	public static final Param PATROL_UUID = new Param("patroluuid", String.class, Messages.PatrolDataSourceFactory_PatrolUuidParameterName2, true);  //$NON-NLS-1$
 	  
 	/* (non-Javadoc)
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
@@ -61,7 +61,7 @@ public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDescription() {
-		return Messages.PatrolDataSourceFactory_PatrolDataSourceDescription;
+		return Messages.PatrolDataSourceFactory_PatrolDataSourceDescription2;
 	}
 
 	/* (non-Javadoc)
@@ -69,7 +69,7 @@ public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 	 */
 	@Override
 	public String getDisplayName() {
-		return Messages.PatrolDataSourceFactory_PatrolDataSourceName;
+		return Messages.PatrolDataSourceFactory_PatrolDataSourceName2;
 	}
 
 	/* (non-Javadoc)
@@ -112,7 +112,7 @@ public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 			throw new IOException(ex);
 		}
 		if (patrol == null ){
-			throw new IOException(Messages.PatrolDataSourceFactory_Error_UnableReadPatrolDataSource);
+			throw new IOException(Messages.PatrolDataSourceFactory_Error_UnableReadPatrolDataSource2);
 		}
 		return new PatrolDataSource(patrol);
 	}
@@ -123,7 +123,7 @@ public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createNewDataStore(Map<String, ?> arg0)
 			throws IOException {
-		throw new UnsupportedOperationException(Messages.PatrolDataSourceFactory_Error_ReadOnlyStore);
+		throw new UnsupportedOperationException(Messages.PatrolDataSourceFactory_Error_ReadOnlyStore2);
 	}
 
 }

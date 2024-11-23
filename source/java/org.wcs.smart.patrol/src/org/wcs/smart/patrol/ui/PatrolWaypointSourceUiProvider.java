@@ -66,7 +66,7 @@ public class PatrolWaypointSourceUiProvider implements
 			if (pw == null){
 				MessageDialog.openError(Display.getDefault().getActiveShell(),
 						ERROR_STR, 
-						Messages.PatrolWaypointSourceUiProvider_WaypointNotFound);
+						Messages.PatrolWaypointSourceUiProvider_WaypointNotFound2);
 				return;
 			}
 			Patrol p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();

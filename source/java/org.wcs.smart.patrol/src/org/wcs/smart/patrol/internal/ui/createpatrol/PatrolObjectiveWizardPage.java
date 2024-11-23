@@ -66,7 +66,7 @@ public class PatrolObjectiveWizardPage extends NewPatrolWizardPage {
 		});
 		
 		setTitle(Messages.PatrolObjectiveWizardPage_Title);
-		setMessage(Messages.PatrolObjectiveWizardPage_PageMessage);
+		setMessage(Messages.PatrolObjectiveWizardPage_PageMessage2);
 		super.setControl(objectiveComp.createComponent(parent, SWT.NONE));
 	}
 	

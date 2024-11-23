@@ -49,7 +49,7 @@ public class StationDeleteAdvisor implements IDeleteAdvisor {
 		if (cnt == 0){
 			return null;
 		}else{
-			return MessageFormat.format(Messages.StationDeleteAdvisor_DeleteError,
+			return MessageFormat.format(Messages.StationDeleteAdvisor_DeleteError2,
 					new Object[]{cnt,((Station)object).getName() });
 		}
 	}

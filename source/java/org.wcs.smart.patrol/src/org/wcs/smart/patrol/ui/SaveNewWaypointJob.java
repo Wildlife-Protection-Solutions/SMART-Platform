@@ -126,7 +126,7 @@ public class SaveNewWaypointJob extends Job {
 				}
 				SmartPatrolPlugIn
 						.displayLog(
-								Messages.PatrolEditor_Error_SavingWaypoints
+								Messages.PatrolEditor_Error_SavingWaypoints2
 										+ ex.getLocalizedMessage(), ex);
 			}
 		}

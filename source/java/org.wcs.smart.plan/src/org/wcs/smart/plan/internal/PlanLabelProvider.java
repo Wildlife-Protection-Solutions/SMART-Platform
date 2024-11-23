@@ -49,9 +49,9 @@ public class PlanLabelProvider implements IPlanLabelProvider {
 	@Override
 	public String getLabel(Object item, Locale l) {
 		if (item == NumericPlanTarget.TargetType.DISTANCE) return Messages.NumericPlanTarget_TargetType_DistanceTraveled;
-		if (item == NumericPlanTarget.TargetType.PATROL_HOURS) return Messages.NumericPlanTarget_TargetType_PatrolHours;
-		if (item == NumericPlanTarget.TargetType.PATROL_DAYS) return Messages.NumericPlanTarget_TargetType_PatrolDays;
-		if (item == NumericPlanTarget.TargetType.PATROL_MANHOURS) return Messages.NumericPlanTarget_TargetType_PatrolManHours;
+		if (item == NumericPlanTarget.TargetType.PATROL_HOURS) return Messages.NumericPlanTarget_TargetType_PatrolHours2;
+		if (item == NumericPlanTarget.TargetType.PATROL_DAYS) return Messages.NumericPlanTarget_TargetType_PatrolDays2;
+		if (item == NumericPlanTarget.TargetType.PATROL_MANHOURS) return Messages.NumericPlanTarget_TargetType_PatrolManHours2;
 		
 		if (item == NumericPlanTarget.Unit.KM) return Messages.NumericPlanTarget_km;
 		if (item == NumericPlanTarget.Unit.HOURS) return Messages.NumericPlanTarget_hours;
@@ -60,7 +60,7 @@ public class PlanLabelProvider implements IPlanLabelProvider {
 		if (item == Plan.PlanType.CA) return Messages.PlanType_ConservationArea;
 		if (item == Plan.PlanType.STATION) return Messages.PlanType_Station;
 		if (item == Plan.PlanType.TEAM) return Messages.PlanType_Team;
-		if (item == Plan.PlanType.PATROL) return Messages.PlanType_Patrol;
+		if (item == Plan.PlanType.PATROL) return Messages.PlanType_Patrol2;
 				
 		if (item == PlanTargetStatus.Status.COMPLETE) return Messages.PlanTargetStatus_Complete;
 		if (item == PlanTargetStatus.Status.INCOMPLETE) return  Messages.PlanTargetStatus_Incomplete;

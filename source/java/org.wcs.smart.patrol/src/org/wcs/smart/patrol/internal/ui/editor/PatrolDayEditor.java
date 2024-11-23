@@ -142,7 +142,7 @@ public class PatrolDayEditor extends EditorPart {
 					Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
 					lblImage.setImage(x);
 					Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
-					lblWarning.setText(MessageFormat.format(Messages.PatrolDayEditor_CanNotEditPatrol, new Object[]{canEdit})) ;
+					lblWarning.setText(MessageFormat.format(Messages.PatrolDayEditor_CanNotEditPatrol2, new Object[]{canEdit})) ;
 				}
 				
 				DateTimeFormatter dayFormat = DateTimeFormatter.ofPattern("EEEE"); //$NON-NLS-1$
@@ -192,7 +192,7 @@ public class PatrolDayEditor extends EditorPart {
 					GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 					gd.widthHint =lbl.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
 					lbl.setLayoutData(gd);
-					lbl.setText(Messages.PatrolDayEditor_Error_LoadingPatrolData);
+					lbl.setText(Messages.PatrolDayEditor_Error_LoadingPatrolData2);
 					
 				}else if (plds.size() == 1){
 					children = new PatrolLegDayInputComposite[1];

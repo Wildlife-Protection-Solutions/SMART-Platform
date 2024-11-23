@@ -78,7 +78,7 @@ public class OpenSourcePatrolAction implements IQaAction {
 				pw = QueryFactory.buildQuery(s, PatrolWaypoint.class, "id.waypoint.uuid", item.getSourceId()).uniqueResult(); //$NON-NLS-1$
 				if (pw == null){
 					//not found
-					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenSourcePatrolAction_NotFoundDialogTitle, MessageFormat.format(Messages.OpenSourcePatrolAction_WpNotFound, item.getErrorId()));
+					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenSourcePatrolAction_NotFoundDialogTitle, MessageFormat.format(Messages.OpenSourcePatrolAction_WpNotFound2, item.getErrorId()));
 					return false;
 				}
 				p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
@@ -88,7 +88,7 @@ public class OpenSourcePatrolAction implements IQaAction {
 				Track track = s.get(Track.class, item.getSourceId());
 				if (track == null){
 					//not found
-					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenSourcePatrolAction_NotFoundDialogTitle, MessageFormat.format(Messages.OpenSourcePatrolAction_TrackNotFound, item.getErrorId()));
+					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenSourcePatrolAction_NotFoundDialogTitle, MessageFormat.format(Messages.OpenSourcePatrolAction_TrackNotFound2, item.getErrorId()));
 					return false;
 				}
 				
@@ -102,7 +102,7 @@ public class OpenSourcePatrolAction implements IQaAction {
 					//not found
 					MessageDialog.openError(Display.getDefault().getActiveShell(),
 							Messages.OpenSourcePatrolAction_NotFoundDialogTitle, 
-							MessageFormat.format(Messages.OpenSourcePatrolAction_PatrolNotFound, item.getErrorId()));
+							MessageFormat.format(Messages.OpenSourcePatrolAction_PatrolNotFound2, item.getErrorId()));
 					return false;
 				}
 			}

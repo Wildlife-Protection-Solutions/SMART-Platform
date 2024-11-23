@@ -111,7 +111,7 @@ public class OpenPatrolHandler {
 				}
 			}
 		} catch (PartInitException e) {
-			SmartPatrolPlugIn.displayLog(Messages.OpenPatrolHandler_OpenPatrolError + e.getLocalizedMessage(), e);
+			SmartPatrolPlugIn.displayLog(Messages.OpenPatrolHandler_OpenPatrolError2 + e.getLocalizedMessage(), e);
 		}
 	}
 	
@@ -134,14 +134,14 @@ public class OpenPatrolHandler {
 		if ( patrolLengthDays > Patrol.MAX_PATROL_LENGTH_DAYS){
 			//warning with an option to edit dates
 			String[] buttons = new String[]{Messages.OpenPatrolHandler_CancelBtn, Messages.OpenPatrolHandler_ProceedBtn};
-			String message = MessageFormat.format(Messages.OpenPatrolHandler_TooLongProceed, pi.getPatrolId(), patrolLengthDays, Patrol.MAX_PATROL_LENGTH_DAYS);
+			String message = MessageFormat.format(Messages.OpenPatrolHandler_TooLongProceed2, pi.getPatrolId(), patrolLengthDays, Patrol.MAX_PATROL_LENGTH_DAYS);
 			if (canEdit){
 				buttons = new String[]{Messages.OpenPatrolHandler_CancelBtn, Messages.OpenPatrolHandler_ProceedBtn, Messages.OpenPatrolHandler_EditButtons};
-				message = MessageFormat.format(Messages.OpenPatrolHandler_TooLongError, pi.getPatrolId(), patrolLengthDays, Patrol.MAX_PATROL_LENGTH_DAYS);
+				message = MessageFormat.format(Messages.OpenPatrolHandler_TooLongError2, pi.getPatrolId(), patrolLengthDays, Patrol.MAX_PATROL_LENGTH_DAYS);
 			}
 			
 			MessageDialog md = new MessageDialog(activeShell,
-					Messages.OpenPatrolHandler_DialogTitle, null, message, MessageDialog.WARNING,
+					Messages.OpenPatrolHandler_DialogTitle2, null, message, MessageDialog.WARNING,
 					buttons, buttons.length - 1);
 			int ret = md.open();
 			if (ret == 0){

@@ -41,7 +41,7 @@ public class PatrolMapWaypointDefaultStyle implements IMapLayerDefaultStyle {
 
 	@Override
 	public String getMapName() {
-		return Messages.PatrolMapWaypointDefaultStyle_MapName;
+		return Messages.PatrolMapWaypointDefaultStyle_MapName2;
 	}
 
 	@Override

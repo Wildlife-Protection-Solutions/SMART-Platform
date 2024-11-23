@@ -93,8 +93,8 @@ public class EditPatrolDatesDialog extends SmartStyledTitleDialog{
 		setTitle(MessageFormat.format(Messages.EditPatrolDatesDialog_Title, input.getPatrolId(), 
 				DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(input.getStartDate()), 
 				DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(input.getEndDate())));
-		getShell().setText(Messages.EditPatrolDatesDialog_ShellTitle);
-		setMessage(Messages.EditPatrolDatesDialog_Message);
+		getShell().setText(Messages.EditPatrolDatesDialog_ShellTitle2);
+		setMessage(Messages.EditPatrolDatesDialog_Message2);
 		
 		Composite main = new Composite(composite, SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
@@ -122,7 +122,7 @@ public class EditPatrolDatesDialog extends SmartStyledTitleDialog{
 				final Patrol fpatrol = patrol;
 				Display.getDefault().syncExec(()->{
 					if (fpatrol == null){
-						setErrorMessage(Messages.EditPatrolDatesDialog_LoadError);
+						setErrorMessage(Messages.EditPatrolDatesDialog_LoadError2);
 					}else{
 						comp.setEnabled(true);
 						dateComp.setValues(fpatrol.getStartDate(), fpatrol.getEndDate());
@@ -165,7 +165,7 @@ public class EditPatrolDatesDialog extends SmartStyledTitleDialog{
 				}
 			});
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(Messages.EditPatrolDatesDialog_SaveError + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(Messages.EditPatrolDatesDialog_SaveError2 + ex.getMessage(), ex);
 			return;
 		}
 		if (cont[0]) super.okPressed();
@@ -302,7 +302,7 @@ public class EditPatrolDatesDialog extends SmartStyledTitleDialog{
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(Messages.EditPatrolDatesDialog_SaveError + ex.getMessage(), ex);
+				SmartPlugIn.displayLog(Messages.EditPatrolDatesDialog_SaveError2 + ex.getMessage(), ex);
 				try{
 					session.getTransaction().rollback();
 				}catch (Exception ex1){}

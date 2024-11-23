@@ -132,8 +132,8 @@ public class PlanPatrolQuery extends SmartQuery {
 	
 	public static PatrolQuery createQuery() {
 		PatrolQuery pq = PatrolQueryFactory.createPatrolQuery();
-		pq.updateName(SmartDB.getCurrentLanguage(), Messages.MapPlanEditorPage_QueryName);
-		pq.setName(Messages.MapPlanEditorPage_QueryName);
+		pq.updateName(SmartDB.getCurrentLanguage(), Messages.MapPlanEditorPage_QueryName2);
+		pq.setName(Messages.MapPlanEditorPage_QueryName2);
 		pq.setDateFilter(new DateFilter(PatrolStartDateField.INSTANCE, AllDatesFilter.INSTANCE));
 		return pq;
 	}

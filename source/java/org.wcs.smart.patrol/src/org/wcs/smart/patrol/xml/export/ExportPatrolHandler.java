@@ -120,14 +120,14 @@ public class ExportPatrolHandler {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.beginTask(Messages.ExportPatrolHandler_Progress_ExportingPatrols, patrols.size());
+					monitor.beginTask(Messages.ExportPatrolHandler_Progress_ExportingPatrols2, patrols.size());
 					int exportCnt = 0;
 					for (int i = 0; i < patrols.size(); i++) {
 						if (monitor.isCanceled()) break;
 						UUID puuid = patrols.get(i);
 						String id = null;
 						try {
-							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_LoadingPatrol,new Object[]{ UuidUtils.uuidToString(puuid)}));
+							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_LoadingPatrol2,new Object[]{ UuidUtils.uuidToString(puuid)}));
 							Patrol p = null;
 							try(Session s = HibernateManager.openSession()){
 								s.beginTransaction();
@@ -135,34 +135,34 @@ public class ExportPatrolHandler {
 									p = s.get(Patrol.class, puuid);
 									id = p.getId();
 								} catch (Exception ex) {
-									SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ExportPatrolHandler_Error_CouldNotFindPatrol, new Object[]{UuidUtils.uuidToString(puuid)}), ex);
+									SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ExportPatrolHandler_Error_CouldNotFindPatrol2, new Object[]{UuidUtils.uuidToString(puuid)}), ex);
 									continue;
 								} finally {
 									s.getTransaction().commit();
 								}
 							}
 
-							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_ExportingPatrol,new Object[]{ id }));
+							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_ExportingPatrol2,new Object[]{ id }));
 
 							Path outFile = PatrolExporter.getOutputFile(dir, p.getId(), includeAtt);
 							PatrolExporter.exportPatrol(p, outFile, includeAtt, options, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {
-							SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ExportPatrolHandler_Error_ExportingPatrol , new Object[]{id!= null ? id : UuidUtils.uuidToString(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+							SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ExportPatrolHandler_Error_ExportingPatrol2 , new Object[]{id!= null ? id : UuidUtils.uuidToString(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 						}
 						monitor.worked(1);
 					}
 					if (monitor.isCanceled()){
-						displayInfo(shell, Messages.ExportPatrolHandler_ExportCancelledDialogTitle, MessageFormat.format(Messages.ExportPatrolHandler_ExportComplete_DialogMessage1, new Object[]{exportCnt,dir.toString(),patrols.size()}));
+						displayInfo(shell, Messages.ExportPatrolHandler_ExportCancelledDialogTitle, MessageFormat.format(Messages.ExportPatrolHandler_ExportComplete_DialogMessage12, new Object[]{exportCnt,dir.toString(),patrols.size()}));
 					}else{
-						displayInfo(shell, Messages.ExportPatrolHandler_ExportComplete_DialogTitle, MessageFormat.format(Messages.ExportPatrolHandler_ExportComplete_DialogMessage1, new Object[]{exportCnt,dir.toString(),patrols.size()}));
+						displayInfo(shell, Messages.ExportPatrolHandler_ExportComplete_DialogTitle, MessageFormat.format(Messages.ExportPatrolHandler_ExportComplete_DialogMessage12, new Object[]{exportCnt,dir.toString(),patrols.size()}));
 					}
 				}
 
 			});
 		} catch (Exception e) {
 			SmartPatrolPlugIn.displayLog(
-					Messages.ExportPatrolHandler_ExportErrorMessage + e.getLocalizedMessage(), e);
+					Messages.ExportPatrolHandler_ExportErrorMessage2 + e.getLocalizedMessage(), e);
 		}
 
 		return ;

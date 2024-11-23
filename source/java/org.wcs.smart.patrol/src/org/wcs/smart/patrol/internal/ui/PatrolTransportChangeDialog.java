@@ -201,9 +201,9 @@ public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implemen
 		compTransportType.addChangeListener(listener);
 		compMandate.addChangeListener(listener);
 		
-		setTitle(MessageFormat.format(Messages.PatrolTransportChangeDialog_DialogTitle2, existingLeg.getId()));
-		super.getShell().setText(Messages.PatrolTransportChangeDialog_DialogTitle);
-		setMessage(Messages.PatrolTransportChangeDialog_DialogMessage);
+		setTitle(MessageFormat.format(Messages.PatrolTransportChangeDialog_title, existingLeg.getId()));
+		super.getShell().setText(Messages.PatrolTransportChangeDialog_shell);
+		setMessage(Messages.PatrolTransportChangeDialog_message);
 		return parent;
 	}
 	
@@ -222,7 +222,7 @@ public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implemen
 		String error = compTransportType.getErrorMessage();
 		
 		if (error == null && compTransportType.getSelectedTransportType().equals(existingLeg.getType())){
-			error = Messages.PatrolTransportChangeDialog_NewTransportTypeError;
+			error = Messages.PatrolTransportChangeDialog_NewTransportTypeError2;
 		}
 		if (error == null)
 			error = compMandate.getErrorMessage();
@@ -255,7 +255,7 @@ public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implemen
 	protected void okPressed() {
 		validate();
 		if (getErrorMessage() != null){
-			MessageDialog.openError(getShell(), Messages.PatrolTransportChangeDialog_DialogTitle, getErrorMessage());
+			MessageDialog.openError(getShell(), Messages.PatrolTransportChangeDialog_DialogTitle2, getErrorMessage());
 			return;
 		}
 		
@@ -279,7 +279,7 @@ public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implemen
 			EmployeeSelectorDialog dialog = new EmployeeSelectorDialog(
 					Display.getDefault().getActiveShell(),
 					Messages.PatrolTransportChangeDialog_PilotSelectDialog_Title,
-					Messages.PatrolTransportChangeDialog_PilotSelectDialog_Message,
+					Messages.PatrolTransportChangeDialog_PilotSelectDialog_Message2,
 					EmployeeSelectorDialog.Type.PILOT, newLeg);
 			if (dialog.open() != Window.OK) {
 				return;
