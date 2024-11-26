@@ -14,9 +14,9 @@ import java.util.HashMap;
 public class Mergei18n {
 
 //	public static final String[] languages = new String[]{"ar", "es", "ka", "pt", "th"};
-	public static final String[] languages = new String[]{"ar", "es", "fr", "hi", "in",  "ka", "km", "lo", "ms", "ru", "pt", "th", "Vi", "zh"};
+	public static final String[] languages = new String[]{"ar", "es", "fr", "hi", "in",  "ka", "km", "lo", "ms", "ru", "pt", "th", "Vi", "zh", "tg"};
 	
-	public static final String ROOT = "C:\\data\\SMART\\Source\\Trunk\\svn\\connect\\org.wcs.smart.connect.server";
+	public static final String ROOT = "C:\\data\\SMART\\Source\\Version8.0.X\\svn\\connect\\org.wcs.smart.connect.server";
 	
 	
 	private void processWebMessages() throws IOException{
