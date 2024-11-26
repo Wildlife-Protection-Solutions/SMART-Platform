@@ -1,22 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature id="org.wcs.smart.event.feature">
+   <feature url="features/org.wcs.smart.plan.feature_8.0.0.qualifier.jar" id="org.wcs.smart.plan.feature" version="8.0.0.qualifier">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.i2.feature_8.0.0.qualifier.jar" id="org.wcs.smart.i2.feature" version="8.0.0.qualifier">
+      <category name="profiles"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.er.feature_8.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.er.feature" version="8.0.0.qualifier">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.feature_8.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.feature" version="8.0.0.qualifier">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.independentincident.feature_8.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.independentincident.feature" version="8.0.0.qualifier">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.cybertracker.feature_8.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.cybertracker.feature" version="8.0.0.qualifier">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.connect.dataqueue.i2.feature_8.0.0.qualifier.jar" id="org.wcs.smart.connect.dataqueue.i2.feature" version="8.0.0.qualifier">
+      <category name="connectdq"/>
+   </feature>
+   <feature url="features/org.wcs.smart.event.i2.feature_8.0.0.qualifier.jar" id="org.wcs.smart.event.i2.feature" version="8.0.0.qualifier">
       <category name="events"/>
    </feature>
-   <feature id="org.wcs.smart.asset.feature">
-      <category name="asset"/>
+   <feature url="features/org.wcs.smart.r.feature_8.0.0.qualifier.jar" id="org.wcs.smart.r.feature" version="8.0.0.qualifier">
+      <category name="r"/>
    </feature>
-   <feature id="org.wcs.smart.feature">
-      <category name="smart"/>
+   <feature url="features/org.wcs.smart.cybertracker.plan.feature_8.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.plan.feature" version="8.0.0.qualifier">
+      <category name="smartmobile"/>
+   </feature>
+   <feature id="org.wcs.smart.independentincident.feature">
+      <category name="independentincident"/>
+   </feature>
+   <feature id="org.wcs.smart.er.feature">
+      <category name="ecologicalrecords"/>
    </feature>
    <feature id="org.wcs.smart.connect.feature">
+      <category name="connect"/>
+   </feature>
+   <feature id="org.wcs.smart.connect.cybertracker.feature">
       <category name="connect"/>
    </feature>
    <feature id="org.wcs.smart.cybertracker.feature">
       <category name="smartmobile"/>
    </feature>
+   <feature id="org.wcs.smart.cybertracker.incident.feature">
+      <category name="smartmobile"/>
+   </feature>
    <feature id="org.wcs.smart.cybertracker.patrol.feature">
       <category name="smartmobile"/>
+   </feature>
+   <feature id="org.wcs.smart.cybertracker.survey.feature">
+      <category name="smartmobile"/>
+   </feature>
+   <feature id="org.wcs.smart.asset.feature">
+      <category name="asset"/>
+   </feature>
+   <feature id="org.wcs.smart.event.feature">
+      <category name="events"/>
+   </feature>
+   <feature id="org.wcs.smart.smartcollect.feature">
+      <category name="smartcollect"/>
    </feature>
    <category-def name="planning" label="SMART Planning Plug-in">
       <description>
@@ -68,10 +113,5 @@
          The SMART R Script plug-in supports the use of R within the SMART Desktop environment.  R Scripts can be imported into and run from within SMART using the results from queries as parameters to the scripts.
       </description>
    </category-def>
-   <category-def name="smartcollect" label="SMART Collect">
-      <description>
-         Tools to support public data collection via the SMART Collect app.
-      </description>
-   </category-def>
-   <category-def name="smart" label="SMART Core"/>
+   <category-def name="smartcollect" label="SMART Collect"/>
 </site>
