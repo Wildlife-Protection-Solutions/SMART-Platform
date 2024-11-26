@@ -121,7 +121,7 @@ public class AttachmentPreviewTagComposite extends Composite {
 	public void deleteAttachments(List<? extends ISmartAttachment> attachments) {
 		for (Iterator<ISmartAttachment> iterator = getSelection().iterator(); iterator.hasNext();) {
 			ISmartAttachment remove = (ISmartAttachment) iterator.next();
-			if (remove instanceof WaypointAttachment) attachments.remove(remove);
+			attachments.remove(remove);
 		}
 		refresh();
 		setSelection(null);
