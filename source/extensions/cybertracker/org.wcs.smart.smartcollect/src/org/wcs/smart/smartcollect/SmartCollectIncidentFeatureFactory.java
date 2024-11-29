@@ -70,7 +70,7 @@ public class SmartCollectIncidentFeatureFactory {
 	 * @return
 	 */
 	public static SimpleFeature createSimpleIncidentFeature(SimpleFeatureType ftype, Waypoint incident) {
-		if (ftype.getName().getLocalPart().equals("smartcollectincident" + UuidUtils.uuidToString(incident.getUuid()))) {
+		if (ftype.getName().getLocalPart().equals("smartcollectincident" + UuidUtils.uuidToString(incident.getUuid()))) { //$NON-NLS-1$
 
 			Object data[] = new Object[3];
 			String name = ftype.getName() + "." + UuidUtils.uuidToString(incident.getUuid()); //$NON-NLS-1$
@@ -80,7 +80,7 @@ public class SmartCollectIncidentFeatureFactory {
 			data[i++] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(incident.getX(), incident.getY()));
 			SimpleFeature f = SimpleFeatureBuilder.build(ftype, data, name);
 			return f;
-		}else if (ftype.getName().getLocalPart().equals("smartcollectincidentprojected" + UuidUtils.uuidToString(incident.getUuid()))) {
+		}else if (ftype.getName().getLocalPart().equals("smartcollectincidentprojected" + UuidUtils.uuidToString(incident.getUuid()))) { //$NON-NLS-1$
 
 			Object data[] = new Object[7];
 			String name = ftype.getName() + "." + UuidUtils.uuidToString(incident.getUuid()); //$NON-NLS-1$

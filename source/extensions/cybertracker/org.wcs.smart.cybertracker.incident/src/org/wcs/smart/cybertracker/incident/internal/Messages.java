@@ -9,7 +9,6 @@ public class Messages extends NLS {
 	public static String CtIncidentPackageConfigurator_ConfigurableModelLabel;
 	public static String CtIncidentPackageConfigurator_ConfigurationSectionHeader;
 	public static String CtIncidentPackageConfigurator_DateLabel;
-	public static String CtIncidentPackageConfigurator_DefaultName;
 	public static String CtIncidentPackageConfigurator_DetailsLabel;
 	public static String CtIncidentPackageConfigurator_DeviceSettingsLabel;
 	public static String CtIncidentPackageConfigurator_EmployeeListDetails;
@@ -17,18 +16,18 @@ public class Messages extends NLS {
 	public static String CtIncidentPackageConfigurator_ErrorLoadingSettings;
 	public static String CtIncidentPackageConfigurator_InvalidType;
 	public static String CtIncidentPackageConfigurator_ModelRequired;
-	public static String CtIncidentPackageConfigurator_NameLabel;
 	public static String CtIncidentPackageConfigurator_NoPackageOp;
 	public static String CtIncidentPackageConfigurator_ObserverHeader;
 	public static String CtIncidentPackageConfigurator_ObserverRequired;
 	public static String CtIncidentPackageConfigurator_OriginalDmOption;
-	public static String CtIncidentPackageConfigurator_PackageRequired;
 	public static String CtIncidentPackageConfigurator_SettingLabel;
 	public static String CtIncidentPackageConfigurator_SettingsRequired;
 	public static String CtIncidentPackageConfigurator_SettingsTabName;
 	public static String CtIncidentPackageConfigurator_Settingstooltip;
 	public static String CtIncidentPackageConfigurator_ShowOnlyChecked;
 	public static String CtIncidentPackageConfigurator_Teams;
+
+	public static String CtIncidentPackageConfigurator_TypesHeader;
 	public static String CtIncidentPackageConfigurator_UnknownOp;
 	public static String CtIncidentPackageConfigurator_VersionLabel;
 	public static String IncidentCyberTrackerLabelProvider_CreatedMessage;
@@ -52,6 +51,8 @@ public class Messages extends NLS {
 	public static String IncidentPackageContribution_OriginalDmLabel;
 	public static String IncidentPackageContribution_TaskName;
 	public static String IncidentPackageExporter_TaskName;
+
+	public static String IncidentPackageExporter_TypesHeader;
 	public static String IncidentPackageManager_CancelMessage;
 	public static String IncidentPackageManager_CancelTitle;
 	public static String IncidentPackageManager_ExportTask;

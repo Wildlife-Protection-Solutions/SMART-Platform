@@ -60,7 +60,7 @@ public class ImportFromWaypointWizardPage extends ImportOptionsWizardPage {
 		super(PAGE_NAME, wizard);
 		String dateStr = wizard.getDateOption() != null ?  DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(wizard.getDateOption()) : ""; //$NON-NLS-1$
 		String[] lblOptions = new String[] {
-				"Generate trackpoints from waypoints for all days",
+				Messages.ImportFromWaypointWizardPage_GenerateTrackpointsAllDays,
 				MessageFormat.format(Messages.ImportFromWaypointWizardPage_OpGenerateDayTracks1, new Object[]{getImportType().guiName.toLowerCase(), dateStr})
 			};
 
@@ -90,8 +90,8 @@ public class ImportFromWaypointWizardPage extends ImportOptionsWizardPage {
 			}});
 		
 		updateComplete();
-		super.setTitle("Import TrackPoint");
-		super.setMessage("Select the days you wish to generate trackpoints for.");
+		super.setTitle(Messages.ImportFromWaypointWizardPage_DialogTitle);
+		super.setMessage(Messages.ImportFromWaypointWizardPage_DialogMessage);
 		super.setControl(comp);
 		
 		SmartUiUtils.makeTransparent(comp);

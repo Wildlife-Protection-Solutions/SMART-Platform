@@ -49,6 +49,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
@@ -157,7 +158,7 @@ public class PatrolAttachmentTooltipProvider extends Job {
 			}
 			
 			Label l = new Label(main, SWT.NONE);
-			l.setText(Messages.PatrolAttachmentTooltipProvider_PatrolIdLbl);
+			l.setText(LabelConstants.ID);
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);

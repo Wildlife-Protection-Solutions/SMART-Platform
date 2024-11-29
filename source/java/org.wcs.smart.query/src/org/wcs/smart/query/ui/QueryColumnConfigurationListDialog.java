@@ -1,13 +1,9 @@
 package org.wcs.smart.query.ui;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -15,28 +11,15 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -45,24 +28,19 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.QueryColumnConfigurationManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryColumnConfiguration;
-import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
-import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 public class QueryColumnConfigurationListDialog extends SmartStyledTitleDialog{
@@ -89,8 +67,8 @@ public class QueryColumnConfigurationListDialog extends SmartStyledTitleDialog{
 	};
 	
 	public enum TableColumn{
-		QUERY_TYPE("Query Type", 250),
-		NAME("Name", 400);
+		QUERY_TYPE(Messages.QueryColumnConfigurationListDialog_QueryTypeOp, 250),
+		NAME(Messages.QueryColumnConfigurationListDialog_ConfigurationName, 400);
 		
 		public String guiName;
 		public int width;
@@ -222,9 +200,9 @@ public class QueryColumnConfigurationListDialog extends SmartStyledTitleDialog{
 		
 		refresh();
 		
-		getShell().setText("Query Column Configurations");
-		setTitle("Query Column Configurations");
-		setMessage("Identifier the visibility and order query columns will appear in the results for the query");
+		getShell().setText(Messages.QueryColumnConfigurationListDialog_Title);
+		setTitle(Messages.QueryColumnConfigurationListDialog_Title);
+		setMessage(Messages.QueryColumnConfigurationListDialog_Message);
 		return tableComp;
 	}
 	
@@ -239,9 +217,9 @@ public class QueryColumnConfigurationListDialog extends SmartStyledTitleDialog{
 	private void add(){
 		QueryColumnConfiguration config = new QueryColumnConfiguration();
 		config.setConservationArea(SmartDB.getCurrentConservationArea());
-		config.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), "Column Configuration");
-		config.updateName(SmartDB.getCurrentLanguage(), "Column Configuration");
-		config.setName("Column Configuration");
+		config.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), Messages.QueryColumnConfigurationListDialog_DefaultName);
+		config.updateName(SmartDB.getCurrentLanguage(), Messages.QueryColumnConfigurationListDialog_DefaultName);
+		config.setName(Messages.QueryColumnConfigurationListDialog_DefaultName);
 		
 		QueryColumnConfigurationDialog dialog = new QueryColumnConfigurationDialog(getShell(), config);
 		dialog.open();
@@ -262,8 +240,8 @@ public class QueryColumnConfigurationListDialog extends SmartStyledTitleDialog{
 		if (toDelete == null) return;
 		
 		if (!MessageDialog.openConfirm(getShell(), 
-				"Delete",
-				MessageFormat.format("Are you sure you want to delete the configuration {0}? This action cannot be undone.", toDelete.getName()))){
+				DialogConstants.DELETE_DIALOG_TITLE,
+				MessageFormat.format(Messages.QueryColumnConfigurationListDialog_DeleteConfirm, toDelete.getName()))){
 			return;
 		}
 		

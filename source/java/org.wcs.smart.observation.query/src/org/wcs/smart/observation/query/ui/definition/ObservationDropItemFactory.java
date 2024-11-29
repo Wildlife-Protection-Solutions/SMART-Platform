@@ -368,7 +368,7 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 		QueryIncidentType found = IncidentTypeProviderManager.INSTANCE.getType(filter.getIncidentTypeKey(), session, SmartDB.getConservationAreaConfiguration().getConservationAreas());
 		DropItem di;
 		if (found == null) {
-			di = new ErrorDropItem(MessageFormat.format("The incident type with key {0} cannot be found.", new Object[]{filter.getIncidentTypeKey()}));
+			di = new ErrorDropItem(MessageFormat.format(Messages.ObservationDropItemFactory_TypeNotFound, new Object[]{filter.getIncidentTypeKey()}));
 		}else {
 			di = new WaypointListOpFilterDropItem(WaypointListOpFilterDropItem.Type.INCIDENTTYPE);
 			di.initializeData(new Object[]{filter.getOperator(), found});

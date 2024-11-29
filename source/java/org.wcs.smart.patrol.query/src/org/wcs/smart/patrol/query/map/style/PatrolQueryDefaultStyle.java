@@ -39,7 +39,7 @@ public class PatrolQueryDefaultStyle implements IMapLayerDefaultStyle {
 
 	@Override
 	public String getLayerName() {
-		return Messages.PatrolQueryDefaultStyle_LayerName;
+		return Messages.PatrolQueryDefaultStyle_LayerName2;
 	}
 
 }

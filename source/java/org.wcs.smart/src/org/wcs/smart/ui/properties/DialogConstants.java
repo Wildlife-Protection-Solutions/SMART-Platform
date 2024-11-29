@@ -32,6 +32,9 @@ import org.wcs.smart.internal.Messages;
  */
 public class DialogConstants {
 
+	public static final String DELETE_DIALOG_TITLE = Messages.DialogConstants_DeleteDialogTitle;
+
+	
 	public static final String ENABLE_BUTTON_TEXT = Messages.DialogConstants_EnableButton_Label;
 	public static final String DISABLE_BUTTON_TEXT = Messages.DialogConstants_DisableButton_Label;
 	

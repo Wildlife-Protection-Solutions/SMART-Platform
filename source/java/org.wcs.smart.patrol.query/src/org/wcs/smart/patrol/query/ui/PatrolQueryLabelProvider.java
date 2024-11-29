@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.query.ui;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.eclipse.swt.graphics.Image;
@@ -41,6 +42,7 @@ import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.TrackGeometryQueryColumn;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
 import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.query.QueryPlugIn;
 
 /**
@@ -57,25 +59,25 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			switch((FixedQueryColumn.FixedColumns)item){
 			case CA_ID: return Messages.FixedQueryColumn_CaIdColumnName;
 			case CA_NAME: return Messages.FixedQueryColumn_CaNameColumnName;
-			case PATROL_ID: return Messages.FixedQueryColumn_PatrolIdColumnName;
-			case PATROL_TYPE: return Messages.PatrolQueryLabelProvider_TrackTypeColumnName;
-			case PATROL_START_DATE: return Messages.FixedQueryColumn_PatrolStartDateColumnName;
-			case PATROL_END_DATE: return Messages.FixedQueryColumn_PatrolEndDateColumnName;
-			case PATROL_STATION: return Messages.FixedQueryColumn_StationColumnName;
-			case PATROL_TEAM: return Messages.FixedQueryColumn_TeamColumnName;
-			case PATROL_OBJETIVE: return Messages.FixedQueryColumn_ObjectiveColumnName;
-			case PATROL_MANDATE: return Messages.FixedQueryColumn_MandateColumnName;
-			case PATROL_ARMED: return Messages.FixedQueryColumn_ArmedColumnName;
-			case PATROL_START_TIME: return Messages.PatrolQueryLabelProvider_PatrolStartTimeColumnName;
-			case PATROL_END_TIME: return Messages.PatrolQueryLabelProvider_PatrolEndTimeColumnName;
-			case PATROL_LEG_ID: return Messages.FixedQueryColumn_LegIdColumnName;
-			case PATROL_LEG_LEADER: return Messages.FixedQueryColumn_LeaderColumnName;
-			case PATROL_LEG_MEMBERS: return Messages.PatrolQueryLabelProvider_MembersColumnName;
-			case PATROL_LEG_PILOT: return Messages.FixedQueryColumn_PilotColumnName;
-			case PATROL_LEG_START_DATE: return Messages.FixedQueryColumn_LegStartDateColumnName;
-			case PATROL_LEG_END_DATE: return Messages.FixedQueryColumn_LegEndDateColumnName;
-			case TRANSPORT_TYPE: return Messages.FixedQueryColumn_TransportColumnName;
-			case TRANSPORT_GROUP: return "Transport Group";
+			case PATROL_ID: return LabelConstants.ID;
+			case PATROL_TYPE: return LabelConstants.TRACK_TYPE;
+			case PATROL_START_DATE: return Messages.PatrolQueryLabelProvider_StartDateColumnName;
+			case PATROL_END_DATE: return Messages.PatrolQueryLabelProvider_EndDateColumnName;
+			case PATROL_STATION: return LabelConstants.STATION_NAME;
+			case PATROL_TEAM: return LabelConstants.TEAM_NAME;
+			case PATROL_OBJETIVE: return LabelConstants.OBJECTIVE;
+			case PATROL_MANDATE: return LabelConstants.MANDATE_NAME;
+			case PATROL_ARMED: return LabelConstants.ARMED;
+			case PATROL_START_TIME: return Messages.PatrolQueryLabelProvider_StartTimeColumnName;
+			case PATROL_END_TIME: return Messages.PatrolQueryLabelProvider_EndTimeColumnName;
+			case PATROL_LEG_ID: return Messages.PatrolQueryLabelProvider_LegIdColumnName;
+			case PATROL_LEG_LEADER: return LabelConstants.LEADER;
+			case PATROL_LEG_MEMBERS: return LabelConstants.MEMBERS;
+			case PATROL_LEG_PILOT: return LabelConstants.PILOT;
+			case PATROL_LEG_START_DATE: return Messages.PatrolQueryLabelProvider_LegStartDateColumnName;
+			case PATROL_LEG_END_DATE: return Messages.PatrolQueryLabelProvider_LegEndDateColumnName;
+			case TRANSPORT_TYPE: return LabelConstants.TRANSPORT_MODE;
+			case TRANSPORT_GROUP: return LabelConstants.ENVIRONMENT_NAME;
 			case WAYPOINT_ID: return Messages.FixedQueryColumn_WaypointIdColumnName;
 			case OBS_GROUP_ID: return Messages.PatrolQueryLabelProvider_ObsGroupColumnName;
 			case WAYPOINT_DATE: return Messages.FixedQueryColumn_WaypointDateColumnName;
@@ -91,7 +93,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case WAYPOINT_LASTMODIFIED: return Messages.PatrolQueryLabelProvider_LastModified_ColumnName;
 			case WAYPOINT_LASTMODIFIEDBY: return Messages.PatrolQueryLabelProvider_LastModifiedBy_ColumnName;
 			case OBSERVATION_UUID: return Messages.PatrolQueryLabelProvider_ObservationUUIDColumnName;
-			case PATROL_UUID: return Messages.PatrolQueryLabelProvider_PatrolUUIDColumnName;
+			case PATROL_UUID: return Messages.PatrolQueryLabelProvider_PatrolUUIDColumnName2;
 			case WAYPOINT_UUID: return Messages.PatrolQueryLabelProvider_WaypointUUIDColumnName;
 			default:
 				break;
@@ -99,45 +101,45 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 		}
 		if (item instanceof PatrolValueOption){
 			switch((PatrolValueOption)item){
-				case NUM_PATROLS: return Messages.PatrolQueryOptions_ValueOpNumPatrols; 
+				case NUM_PATROLS: return Messages.PatrolQueryOptions_ValueOpNumPatrols2; 
 				case NUM_DAYS: return Messages.PatrolQueryOptions_ValueOpNumberDays;    
 				case NUM_NIGHTS: return Messages.PatrolQueryOptions_ValueOpNumberNights;
 				case NUM_CUSTOM: return Messages.PatrolQueryLabelProvider_NumTimeRanges;
 				case DISTANCE: return Messages.PatrolQueryOptions_ValueOpDistance;
 				case AREA_BUFFER: return Messages.PatrolQueryLabelProvider_TrackAreaValueItem;
-				case NUM_PATROLHOURS: return Messages.PatrolQueryOptions_ValueOpNumberPatrolHours;
-				case PATROLHOURS_TRACK: return Messages.PatrolQueryOptions_ValueOpNumberPatrolHours;
-				case NUM_FIELDHOURS: return Messages.PatrolQueryOptions_ValueOpNumberActivePatrolHours;  
+				case NUM_PATROLHOURS: return Messages.PatrolQueryOptions_ValueOpNumberPatrolHours2;
+				case PATROLHOURS_TRACK: return Messages.PatrolQueryOptions_ValueOpNumberPatrolHours2;
+				case NUM_FIELDHOURS: return Messages.PatrolQueryOptions_ValueOpNumberActivePatrolHours2;  
 				case NUM_MEMBERS: return Messages.PatrolQueryOptions_ValueOpNumEmployees;
 				case MAN_HOURS: return Messages.PatrolQueryOptions_ValueOpPersonHrs;    
 				case MAN_DAYS: return Messages.PatrolQueryOptions_ValueOpPersonDays;    
 				case NUM_PATROLS_TOTAL: return Messages.PatrolQueryOptions_TotalNumPatrols;
 				case NUM_DAYS_TOTAL: return Messages.PatrolQueryOptions_TotalNumDays;   
 				case DISTANCE_TOTAL: return Messages.PatrolQueryOptions_TotalDistance;  
-				case NUM_PATROLHOURS_TOTAL: return Messages.PatrolQueryOptions_TotalNumHours1;
-				case NUM_FIELDHOURS_TOTAL: return Messages.PatrolQueryLabelProvider_TotalActivePatrolHours;
+				case NUM_PATROLHOURS_TOTAL: return Messages.PatrolQueryOptions_TotalNumHours12;
+				case NUM_FIELDHOURS_TOTAL: return Messages.PatrolQueryLabelProvider_TotalActivePatrolHours2;
 				case MAN_HOURS_TOTAL: return Messages.PatrolQueryOptions_TotalPersonHours1;
 				case MAN_DAYS_TOTAL: return Messages.PatrolQueryOptions_TotalPersonDays;
 			}
 		}
 		if (item instanceof PatrolQueryOption){
 			switch((PatrolQueryOption)item){
-				case ID: return Messages.PatrolQueryOptions_QueryOpId;
-				case ARMED: return Messages.PatrolQueryOptions_QueryOpArmed;
-				case STATION: return Messages.PatrolQueryOptions_QueryOpStation;
-				case TEAM: return Messages.PatrolQueryOptions_QueryOpTeam;
-				case TEAM_KEY: return Messages.PatrolQueryOptions_QueryOpTeam;
-				case EMPLOYEE: return Messages.PatrolQueryOptions_QueryOpMember;
-				case LEADER: return Messages.PatrolQueryOptions_QueryOpLeader;
-				case PILOT: return Messages.PatrolQueryOptions_QueryOpPilot;
-				case MANDATE: return Messages.PatrolQueryOptions_QueryOpMandate;
-				case MANDATE_KEY: return Messages.PatrolQueryOptions_QueryOpMandate;
-				case PATROL_TYPE: return Messages.PatrolQueryLabelProvider_QueryOpTrackType;
+				case ID: return LabelConstants.ID;
+				case ARMED: return LabelConstants.ARMED;
+				case STATION: return LabelConstants.STATION_NAME;
+				case TEAM: return LabelConstants.TEAM_NAME;
+				case TEAM_KEY: return LabelConstants.TEAM_NAME;
+				case EMPLOYEE: return LabelConstants.MEMBER;
+				case LEADER: return LabelConstants.LEADER;
+				case PILOT: return LabelConstants.PILOT;
+				case MANDATE: return LabelConstants.MANDATE_NAME;
+				case MANDATE_KEY: return LabelConstants.MANDATE_NAME;
+				case PATROL_TYPE: return LabelConstants.TRACK_TYPE;
 				case CM: return Messages.PatrolQueryLabelProvider_ConfigurableModel;
-				case PATROL_TRANSPORT_TYPE: return Messages.PatrolQueryOptions_QueryOpTransportType;
-				case PATROL_TRANSPORT_TYPE_KEY: return Messages.PatrolQueryOptions_QueryOpTransportType;
-				case PATROL_TRANSPORT_GROUP_KEY: return "Transport Group";
-				case PATROL_TRANSPORT_PATROL_GROUP_KEY: return "Transport Group - Patrol";
+				case PATROL_TRANSPORT_TYPE: return LabelConstants.TRANSPORT_MODE;
+				case PATROL_TRANSPORT_TYPE_KEY: return LabelConstants.TRANSPORT_MODE;
+				case PATROL_TRANSPORT_GROUP_KEY: return LabelConstants.ENVIRONMENT_NAME;
+				case PATROL_TRANSPORT_PATROL_GROUP_KEY: return MessageFormat.format(Messages.PatrolQueryLabelProvider_EnvironmentPatrolLevelOptionName, LabelConstants.ENVIRONMENT_NAME);
 				case CONSERVATION_AREA: return Messages.PatrolQueryOptions_CaGroupByOptionName;
 				case AGENCY: return Messages.PatrolQueryLabelProvider_AgencyLabel;
 				case AGENCY_KEY: return Messages.PatrolQueryLabelProvider_AgencyLabel;
@@ -151,22 +153,22 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			return Messages.PatrolStartDateField_PatrolStartDate;
 		}
 		if (item instanceof PatrolStartQuarterDateGroupBy) {
-			return Messages.PatrolQueryLabelProvider_PatrolStartQuarter;
+			return Messages.PatrolQueryLabelProvider_PatrolStartQuarter2;
 		}
 		if (item instanceof PatrolEndQuarterDateGroupBy) {
-			return Messages.PatrolQueryLabelProvider_PatrolEndQuarter;
+			return Messages.PatrolQueryLabelProvider_PatrolEndQuarter2;
 		}
 		if (item instanceof PatrolStartMonthDateGroupBy){
-			return Messages.PatrolQueryLabelProvider_PatrolStartMonthOp;
+			return Messages.PatrolQueryLabelProvider_PatrolStartMonthOp2;
 		}
 		if (item instanceof PatrolEndMonthDateGroupBy){
-			return Messages.PatrolQueryLabelProvider_PatrolEndMonthOp;
+			return Messages.PatrolQueryLabelProvider_PatrolEndMonthOp2;
 		}
 		if (item == PatrolValueItemAreaBuffer.ERROR_MSG_KEY) {
 			return Messages.PatrolQueryLabelProvider_InvalidBufferValue;
 		}
 		if (item == TrackGeometryQueryColumn.KEY) { 
-			return Messages.PatrolQueryLabelProvider_TrackColumnName;
+			return Messages.PatrolQueryLabelProvider_TrackColumnName2;
 		}
 		return null;
 	}

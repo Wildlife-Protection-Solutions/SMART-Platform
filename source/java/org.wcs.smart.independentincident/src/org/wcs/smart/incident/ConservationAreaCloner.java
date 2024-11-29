@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.model.IncidentType;
 
 
@@ -43,7 +44,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 	public void cloneTemplateData(ConservationAreaClonerEngine engine,
 			IProgressMonitor monitor) throws Exception {
 		
-		SubMonitor.convert(monitor, "Cloning incident settings", 1);
+		SubMonitor.convert(monitor, Messages.ConservationAreaCloner_taskanem, 1);
 		cloneIncidentType(engine);
 			
 	}

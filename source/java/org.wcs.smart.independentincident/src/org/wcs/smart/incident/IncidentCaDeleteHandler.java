@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
+import org.wcs.smart.incident.internal.Messages;
 
 /**
  * delete incident configurations
@@ -43,7 +44,7 @@ public class IncidentCaDeleteHandler implements ICaDeleteHandler{
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor)
 			throws Exception {
-		monitor.subTask("Delete Incident Types");
+		monitor.subTask(Messages.IncidentCaDeleteHandler_TaskName);
 		deleteIncidentTypes(ca, session);	
 	}
 

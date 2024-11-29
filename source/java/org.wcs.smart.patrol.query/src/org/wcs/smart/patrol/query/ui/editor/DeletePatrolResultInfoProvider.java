@@ -59,8 +59,8 @@ public class DeletePatrolResultInfoProvider extends IQueryEditCommand {
 	@Override
 	public boolean doWork(IResultItem resultItem, IQueryResult results){
 		IPatrolQueryResultItem item = (IPatrolQueryResultItem)resultItem;
-		if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.DeletePatrolResultInfoProvider_DeleteTitle,
-				MessageFormat.format(Messages.DeletePatrolResultInfoProvider_ConfirmDelete, 
+		if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), DialogConstants.DELETE_DIALOG_TITLE,
+				MessageFormat.format(Messages.DeletePatrolResultInfoProvider_ConfirmDelete2, 
 						item.getPatrolId(), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(item.getPatrolStartDate()), 
 						DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(item.getPatrolEndDate())))){
 			return false;

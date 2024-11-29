@@ -105,7 +105,7 @@
       </command>
       <command
             id="org.wcs.smart.connect.server.recoverca"
-            name="Recover Conservation Area From Connect">
+            name="%recoverca.command.name">
       </command>
    </extension>
    <extension

@@ -401,7 +401,7 @@ RETURNS NULL ON NULL INPUT;
 		
 		//do not add if this attribute already exists
 		for (CategoryAttribute ca : getAllAttributes()) {
-			if (ca.getAttribute().equals(attribute)) throw new IllegalStateException("Attribute already exists in category");
+			if (ca.getAttribute().equals(attribute)) throw new IllegalStateException("Attribute already exists in category"); //$NON-NLS-1$
 		}
 		
 		CategoryAttribute root = new CategoryAttribute(this, attribute);

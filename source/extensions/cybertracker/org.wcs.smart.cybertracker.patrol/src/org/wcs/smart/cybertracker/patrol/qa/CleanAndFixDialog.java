@@ -50,6 +50,7 @@ import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.patrol.CleanPatrolEngine;
 import org.wcs.smart.cybertracker.patrol.CleanPatrolSettings;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -83,7 +84,7 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 	@Override
 	public boolean close(){
 		if (btnSaveSetting.isEnabled()) {
-			int ret = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, getShell(), "Save" , "There are unsaved changes to the settings. Do you want to save these settings?", SWT.NONE, IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL );
+			int ret = MessageDialog.open(MessageDialog.QUESTION_WITH_CANCEL, getShell(), Messages.CleanAndFixDialog_SaveTitle , Messages.CleanAndFixDialog_SaveMessage, SWT.NONE, IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL );
 			if (ret == 2) return false;
 			if (ret == 0) {
 				if (!saveSettings()) return false;
@@ -180,13 +181,13 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		
 		
 		CTabItem runItem = new CTabItem(tabs, SWT.NONE);
-		runItem.setText("Clean Patrols");
+		runItem.setText(Messages.CleanAndFixDialog_CleanTab);
 		
 		Composite runPanel = createRunPanel(tabs);
 		runItem.setControl(runPanel);
 
 		CTabItem settingsItem = new CTabItem(tabs, SWT.NONE);
-		settingsItem.setText("Settings");
+		settingsItem.setText(Messages.CleanAndFixDialog_SettingsTab);
 		
 		Composite settingsPanel = createSettingPanel(tabs);
 		settingsItem.setControl(settingsPanel);
@@ -194,9 +195,9 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		tabs.setSelection(runItem);
 		
 		
-		getShell().setText("Clean & End Patrols");
-		setTitle("Clean && End Patrols");
-		setMessage("Remove empty days and end SMART Mobile patrols that have not sent an 'End Patrol' observation.");
+		getShell().setText(Messages.CleanAndFixDialog_Title);
+		setTitle(Messages.CleanAndFixDialog_Title2);
+		setMessage(Messages.CleanAndFixDialog_Message);
 		
 		initSettings();
 		
@@ -208,22 +209,22 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		try {
 			int x = Integer.parseInt(txtDays.getText());
 			if (x < 3 || x > 100) {
-				throw new Exception("Days must be between 2 and 100");
+				throw new Exception(Messages.CleanAndFixDialog_InvalidDays);
 			}
 			
 			x = Integer.parseInt(txtDistance.getText());
 			if (x < -1 || x > CleanPatrolSettings.MAX_DISTANCE) {
-				throw new Exception(MessageFormat.format("Distance must be between -1 and {0}", CleanPatrolSettings.MAX_DISTANCE));
+				throw new Exception(MessageFormat.format(Messages.CleanAndFixDialog_InvalidDistance, CleanPatrolSettings.MAX_DISTANCE));
 			}
 			
 			x = Integer.parseInt(txtClusterDistance.getText());
 			if (x < -1 || x > CleanPatrolSettings.MAX_DISTANCE) {
-				throw new Exception(MessageFormat.format("Distance must be between -1 and {0}", CleanPatrolSettings.MAX_DISTANCE));
+				throw new Exception(MessageFormat.format(Messages.CleanAndFixDialog_InvalidClusterDistance, CleanPatrolSettings.MAX_DISTANCE));
 			}
 			
 			x = Integer.parseInt(txtClusterMinutes.getText());
 			if (x < 1 || x > 120) {
-				throw new Exception("Timeframe must be between 1 and 120");
+				throw new Exception(Messages.CleanAndFixDialog_InvalidTimeframe);
 			}
 		}catch (Exception ex) {
 			setErrorMessage(ex.getMessage());
@@ -242,7 +243,7 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		
 		Listener lmodifed = e->validateSettings();
 		
-		Composite h = SmartUiUtils.createHeaderLabel(settings, "Data Filter");
+		Composite h = SmartUiUtils.createHeaderLabel(settings, Messages.CleanAndFixDialog_DataFilterHeader);
 		h.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		
 		Composite info = new Composite(settings, SWT.NONE);
@@ -253,11 +254,11 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		l = new Label(info, SWT.NONE);
-		l.setText("These settings determine what data will be cleaned up.");
+		l.setText(Messages.CleanAndFixDialog_DataSettingsInfo);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		l = new Label(settings, SWT.NONE);
-		l.setText("Days since last observation:");
+		l.setText(Messages.CleanAndFixDialog_LastObservation);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		txtDays = new Text(settings, SWT.BORDER);
@@ -266,12 +267,12 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		txtDays.addListener(SWT.Modify, lmodifed);
 				
 		l = new Label(settings, SWT.WRAP);
-		l.setText("Only non-ended SMART Mobile patrols with an observation more than x days ago will be processed.");
+		l.setText(Messages.CleanAndFixDialog_LabeObsMessage);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 250;
 		
 		
-		h = SmartUiUtils.createHeaderLabel(settings, "Last Valid Day");
+		h = SmartUiUtils.createHeaderLabel(settings, Messages.CleanAndFixDialog_ValidDay);
 		h.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		
 		info = new Composite(settings, SWT.NONE);
@@ -282,13 +283,13 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		l = new Label(info, SWT.WRAP);
-		l.setText("This setting is used to determine what day is the last valid day with data. The last valid day is the latest day in the patrol with observations or valid track data.");
+		l.setText(Messages.CleanAndFixDialog_ValidDayMessage);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		((GridData)l.getLayoutData()).widthHint = 250;
 
 		
 		l = new Label(settings, SWT.NONE);
-		l.setText("Track distance (m):");
+		l.setText(Messages.CleanAndFixDialog_TrackDistance);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		txtDistance = new Text(settings, SWT.BORDER);
@@ -297,11 +298,11 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		txtDistance.addListener(SWT.Modify, lmodifed);
 		
 		l = new Label(settings, SWT.WRAP);
-		l.setText("If any track points for the day are further than this distance apart, the track is assumed to be valid (ie not clusted all in one location). Set to -1 to assume all track points are valid.");
+		l.setText(Messages.CleanAndFixDialog_TrackDistanceMessage);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 250;
 		
-		h = SmartUiUtils.createHeaderLabel(settings, "Track Clean Settings");
+		h = SmartUiUtils.createHeaderLabel(settings, Messages.CleanAndFixDialog_CleanSettingsSection);
 		h.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		
 		info = new Composite(settings, SWT.NONE);
@@ -313,11 +314,11 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		l = new Label(info, SWT.NONE);
-		l.setText("These setting are used to remove clusters of track points at the end of the patrol.");
+		l.setText(Messages.CleanAndFixDialog_CleanSettingsInfo);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		l = new Label(settings, SWT.NONE);
-		l.setText("Cluster timeframe (minutes):");
+		l.setText(Messages.CleanAndFixDialog_ClusterTimeframe);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		txtClusterMinutes = new Text(settings, SWT.BORDER);
@@ -327,13 +328,13 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		txtClusterMinutes.addListener(SWT.Modify, lmodifed);
 		
 		l = new Label(settings, SWT.WRAP);
-		l.setText("This value represents the number of minutes at the end of a track during which the data is used to determine if the data collection was actively ended or if the device continued recording by mistake. Set this value to reflect how long a stationary reading at the end of data collection would indicate that the team forgot to manually stop the track.");
+		l.setText(Messages.CleanAndFixDialog_ClusterTimeframeInfo);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 250;
 		
 		
 		l = new Label(settings, SWT.NONE);
-		l.setText("Buffer distance (m):");
+		l.setText(Messages.CleanAndFixDialog_BufferDistance);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		txtClusterDistance = new Text(settings, SWT.BORDER);
@@ -343,7 +344,7 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		
 		
 		l = new Label(settings, SWT.WRAP);
-		l.setText("Based on the points from the timeframe, a center point is calculated that marks the estimated end location of the track (if the recording was left on accidentally). Track points within this specified radius of the center point are removed in reverse order, starting from the end, until a point outside the radius is found. Set this to -1 to disable point removal. The recommended value depends on your GPS device and typical signal accuracy. If tracks left recording are not cleaned up effectively, increase this radius to match the GPS error range observed in your data.");
+		l.setText(Messages.CleanAndFixDialog_BufferDistanceInfo);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 250;
 		
@@ -354,7 +355,7 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		btnPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		
 		Button btnDefaults = new Button(btnPanel, SWT.PUSH);
-		btnDefaults.setText("Restore Defaults");
+		btnDefaults.setText(Messages.CleanAndFixDialog_RestoreDefaults);
 		btnDefaults.addListener(SWT.Selection, e->{
 			txtDays.setText(CleanPatrolSettings.DEFAULT_DAYS);
 			txtDistance.setText(CleanPatrolSettings.DEFAULT_DISTANCE);
@@ -363,7 +364,7 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		});
 
 		btnSaveSetting = new Button(btnPanel, SWT.PUSH);
-		btnSaveSetting.setText("Save Settings");
+		btnSaveSetting.setText(Messages.CleanAndFixDialog_SaveSettings);
 		btnSaveSetting.addListener(SWT.Selection, e->saveSettings());
 		btnSaveSetting.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON));
 		btnSaveSetting.setEnabled(false);
@@ -379,18 +380,18 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		output.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label l = new Label(output, SWT.WRAP);
-		l.setText("Process patrols that start between ");
+		l.setText(Messages.CleanAndFixDialog_ProcessBetween);
 		
 		dtStart = new DateTime(output,  SWT.DROP_DOWN);
 		
 		l = new Label(output, SWT.NONE);
-		l.setText(" and ");
+		l.setText(Messages.CleanAndFixDialog_ProcessAnd);
 		
 		dtEnd = new DateTime(output, SWT.DROP_DOWN);
 		
 		btnGo = new Button(output, SWT.NONE);
 		btnGo.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 4, 1));
-		btnGo.setText("Clean && End Patrols");
+		btnGo.setText(Messages.CleanAndFixDialog_ProcessButton);
 		btnGo.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		btnGo.addListener(SWT.Selection,  e->doWork());
 			
@@ -434,7 +435,7 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		enableControls(false);
 		txtStatus.setText(""); //$NON-NLS-1$
 		
-		Job j = new Job("processing patrol") {
+		Job j = new Job(Messages.CleanAndFixDialog_JobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
@@ -480,14 +481,14 @@ public class CleanAndFixDialog extends SmartStyledTitleDialog{
 		
 		private int size;
 		private int current;
-		private String message = "Processing";
+		private String message = Messages.CleanAndFixDialog_TaskName;
 		
 		
 		@Override
 		public void worked(int work) {
 			current ++;
 			
-			updateMessage(MessageFormat.format("{0} {1} / {2}", message, current, size));
+			updateMessage(MessageFormat.format("{0} {1} / {2}", message, current, size)); //$NON-NLS-1$
 		}
 		
 		@Override

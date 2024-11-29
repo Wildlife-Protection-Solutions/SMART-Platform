@@ -77,6 +77,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.CyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider;
 import org.wcs.smart.cybertracker.export.DataModelWrapper;
@@ -189,7 +190,7 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label nameLabel = new Label(g, SWT.NONE);
-		nameLabel.setText("Package Name(s):");
+		nameLabel.setText(CyberTrackerLabelProvider.PACKAGE_NAMES + ":"); //$NON-NLS-1$
 		nameLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)nameLabel.getLayoutData()).verticalIndent = 2;
 		
@@ -293,11 +294,8 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 			dialog.open();
 		});
 		
-		SmartUiUtils.createHeaderLabel(outer, "Incident Types");
+		SmartUiUtils.createHeaderLabel(outer, Messages.CtIncidentPackageConfigurator_TypesHeader);
 
-//		Label lblTypes = new Label(g, SWT.NONE);
-//		lblTypes.setText("Incident Types:");
-		
 		tblTypes = CheckboxTableViewer.newCheckList(outer,  SWT.BORDER | SWT.MULTI);
 		tblTypes.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(lstEmployees));
 		tblTypes.setContentProvider(ArrayContentProvider.getInstance());
@@ -533,7 +531,7 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 		try {
 			for (Text txt : txtNames) {
 				if (getLanguage(txt).isDefault() && txt.getText().isBlank()) {
-					throw new Exception(MessageFormat.format("A package name is required for the default language ({0})", getLanguage(txt).getDisplayName()));
+					throw new Exception(MessageFormat.format(CyberTrackerLabelProvider.PACKAGE_NAME_REQUIRED, getLanguage(txt).getDisplayName()));
 				}
 			}
 		

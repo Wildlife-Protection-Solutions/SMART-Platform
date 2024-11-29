@@ -51,7 +51,7 @@ public class PatrolFilterTreeItem implements IItemTreeNode{
 	
 	@Override
 	public String getName() {
-		return Messages.PatrolFilterTreeItem_PatrolFiltersTreeItem;
+		return Messages.PatrolFilterTreeItem_PatrolFiltersTreeItem2;
 	}
 
 	@Override

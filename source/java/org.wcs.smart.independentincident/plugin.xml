@@ -617,7 +617,7 @@
       </command>
       <command
             id="org.wcs.smart.incident.types"
-            name="Incident Type Configuration...">
+            name="%incidenttypeconfig.command.name">
       </command>
    </extension>
    <extension

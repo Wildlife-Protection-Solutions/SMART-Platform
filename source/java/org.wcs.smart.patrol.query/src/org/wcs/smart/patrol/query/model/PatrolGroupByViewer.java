@@ -57,7 +57,7 @@ public class PatrolGroupByViewer extends AbstractGroupByViewer<PatrolGroupBy> {
 							UUID uuid = UuidUtils.stringToUuid(items[i]);
 							String name = groupBy.getOption().getName(session, uuid, Locale.getDefault());
 							if (name == null){
-								throw new Exception(MessageFormat.format(Messages.PatrolGroupBy_PatrolOptionParseError, new Object[]{groupBy.getOption().getGuiName(Locale.getDefault())}));
+								throw new Exception(MessageFormat.format(Messages.PatrolGroupBy_PatrolOptionParseError2, new Object[]{groupBy.getOption().getGuiName(Locale.getDefault())}));
 							}
 							initItems[i] = new ListItem(uuid, name);
 						}

@@ -59,7 +59,7 @@ public class GeneralContentProvider implements ITreeContentProvider{
 	public enum GeneralItem{
 		WAYPOINT_SOURCE(Messages.QueryFilterContentProvider_WaypointSourceName,
 				ObservationPlugIn.getDefault().getImageRegistry().get(ObservationPlugIn.WAYPOINT_SOURCE_ICON)),
-		INCIDENT_TYPE("Incident Type",
+		INCIDENT_TYPE(Messages.GeneralContentProvider_IncidentType,
 				ObservationQueryPlugIn.getDefault().getImageRegistry().get(ObservationQueryPlugIn.INCIDENT_TYPE_ICON)),
 		WAYPOINT_CM(Messages.GeneralContentProvider_CmSourceName,
 				DataentryPlugIn.getDefault().getImageRegistry().get(DataentryPlugIn.CONFIG_MODEL_ICON)),

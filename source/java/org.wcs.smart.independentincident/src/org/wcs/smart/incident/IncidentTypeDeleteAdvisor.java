@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.model.IncidentType;
 import org.wcs.smart.observation.model.Waypoint;
 
@@ -42,13 +43,13 @@ public class IncidentTypeDeleteAdvisor implements IDeleteAdvisor {
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof IncidentType type)) return "Invalid object type"; //$NON-NLS-1$
 		
-		if (type.isSystem()) return "Cannot delete system incident type.";
+		if (type.isSystem()) return Messages.IncidentTypeDeleteAdvisor_CannotDeleteSystemTypes;
 		
 		Long cnt = QueryFactory.buildCountQuery(session, Waypoint.class, 
-				new Object[] {"incidentTypeUuid", type.getUuid()});
+				new Object[] {"incidentTypeUuid", type.getUuid()}); //$NON-NLS-1$
 		
 		if (cnt > 0) {
-			return MessageFormat.format("The incident type ''{0}'' is associated with {1} waypoints.", type.getName(), cnt);
+			return MessageFormat.format(Messages.IncidentTypeDeleteAdvisor_IncidentTypeAssociatedWithWp, type.getName(), cnt);
 		}
 		return null;
 	}

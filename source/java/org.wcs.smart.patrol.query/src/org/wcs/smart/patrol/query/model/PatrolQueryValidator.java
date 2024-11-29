@@ -71,7 +71,7 @@ import jakarta.persistence.criteria.Root;
  */
 public class PatrolQueryValidator extends QueryDefinitionValidator {
 
-	private static final String COULDNOTRESOLVE_ERRMSG = Messages.PatrolGroupBy_CouldNotResolveFilter;
+	private static final String COULDNOTRESOLVE_ERRMSG = Messages.PatrolGroupBy_CouldNotResolveFilter2;
 	
 	private String langCode;
 	private HashMap<String, UuidItemType> uuidLookup;
@@ -217,13 +217,13 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 						if (item == null){
 							throw new Exception(
 								MessageFormat.format(
-								Messages.FilterValidator_PatrolFilterError, new Object[]{ filter.asString()}));
+								Messages.FilterValidator_PatrolFilterError2, new Object[]{ filter.asString()}));
 						}
 						if (NamedKeyItem.class.isAssignableFrom(op.getSourceClass())){
 							//try to match the key first
 							if (item.getValue() == null || item.getValue().size() == 0){
 								throw new Exception(MessageFormat.format(
-										Messages.PatrolQueryValidator_CouldNotMatchFilter,
+										Messages.PatrolQueryValidator_CouldNotMatchFilter2,
 										new Object[]{filter.asString()}));
 							}
 							NamedKeyItem it = findKeyValue(item.getValue().get(0), op.getSourceClass(), getCaField(op));
@@ -237,13 +237,13 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 							//try to match names
 							if (item.getValue() == null || item.getValue().size() == 0){
 								throw new Exception(MessageFormat.format(
-										Messages.PatrolQueryValidator_CouldNotMatchFilter,
+										Messages.PatrolQueryValidator_CouldNotMatchFilter2,
 										new Object[]{filter.asString()}));
 							}
 							NamedItem it = findValue(langCode, item.getValue().get(0), op.getSourceClass(), warnings, getCaField(op));							
 							if (it == null){
 								throw new Exception(MessageFormat.format(
-									Messages.FilterValidator_PatrolFilter_ValueMatchingError,
+									Messages.FilterValidator_PatrolFilter_ValueMatchingError2,
 									new Object[]{filter.asString(), op.getSourceClass().getSimpleName(), item.getValue().get(0)}));
 							}else{
 								warnings.add(MessageFormat.format(Messages.FilterValidator_PatrolFilter_UnqiueIdMatchingError,
@@ -258,14 +258,14 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 								((PatrolFilter)filter).setValue(UuidUtils.uuidToString(e.getUuid()));
 							}else{
 								throw new Exception(
-									MessageFormat.format(Messages.FilterValidator_PatrolFilter_EmployeeError,
+									MessageFormat.format(Messages.FilterValidator_PatrolFilter_EmployeeError2,
 										new Object[]{filter.asString(), 
 										item.getValue().get(0) + " "+ item.getValue().get(1) + " [" + item.getId() + "] "}));	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							}	
 						}else{
 							throw new Exception(
 								MessageFormat.format(
-								Messages.FilterValidator_PatrolFilterErrorB, new Object[]{ filter.asString()}));
+								Messages.FilterValidator_PatrolFilterErrorB2, new Object[]{ filter.asString()}));
 						}
 										
 					}
@@ -326,7 +326,7 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 								if (it == null) {
 									throw new Exception(
 										MessageFormat.format(
-												Messages.PatrolGroupBy_Error_NoMatchingValue,
+												Messages.PatrolGroupBy_Error_NoMatchingValue2,
 												new Object[]{groupBy.asString(), op.getSourceClass().getSimpleName(),item.getValue().get(0) }));
 								} else {
 									warnings.add(
@@ -349,7 +349,7 @@ public class PatrolQueryValidator extends QueryDefinitionValidator {
 								} else {
 									throw new Exception(
 										MessageFormat.format(
-										Messages.PatrolGroupBy_Error_NoEmployee,
+										Messages.PatrolGroupBy_Error_NoEmployee2,
 										new Object[]{groupBy.asString(),item.getValue().get(0) + " " + item.getValue().get(1) + " [" + item.getId() + "] "})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								}
 							} else {

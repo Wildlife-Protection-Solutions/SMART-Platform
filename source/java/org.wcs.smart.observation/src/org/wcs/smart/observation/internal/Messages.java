@@ -113,11 +113,14 @@ public class Messages extends NLS {
 	public static String ImportCsvWizardPage_CSVImportMessage;
 	public static String ImportCsvWizardPage_ErrorDialogTitle;
 
-	public static String ImportFromWaypointWizardPage_OpGenerateAllTracks;
+	public static String ImportFromWaypointWizardPage_DialogMessage;
+
+	public static String ImportFromWaypointWizardPage_DialogTitle;
+
+	public static String ImportFromWaypointWizardPage_GenerateTrackpointsAllDays;
+
 	public static String ImportFromWaypointWizardPage_OpGenerateDayTracks1;
-	public static String ImportFromWaypointWizardPage_PageMessage;
 	public static String ImportFromWaypointWizardPage_PageName;
-	public static String ImportFromWaypointWizardPage_PageTitle;
 	
 	public static String ImportGpsDataWizard_GPS_WarningNoneFound;
 

@@ -85,7 +85,6 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	private boolean photoAllowed = false;
 	private boolean photoRequired = true;
 	private boolean collectMultipleObservations = false;
-	private boolean useSingleGpsPoint = false;
 	private DisplayMode displayMode;
 	private Path imageFile;
 	private String extension; //image name extension

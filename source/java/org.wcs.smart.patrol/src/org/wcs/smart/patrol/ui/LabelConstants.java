@@ -40,7 +40,9 @@ public class LabelConstants {
 	
 	public static final String ARMED= Messages.LabelConstants_ArmedField;
 	public static final String COMMENT= Messages.LabelConstants_CommentField;
+	public static final String MEMBER= Messages.LabelConstants_MemberField;
 	public static final String MEMBERS= Messages.LabelConstants_MembersField;
+	public static final String EMPLOYEE = Messages.LabelConstants_EmployeeField;
 	public static final String LEADER= Messages.LabelConstants_LeaderField;
 	public static final String PILOT= Messages.LabelConstants_PilotField;
 	public static final String OBJECTIVE= Messages.LabelConstants_ObjectiveField;

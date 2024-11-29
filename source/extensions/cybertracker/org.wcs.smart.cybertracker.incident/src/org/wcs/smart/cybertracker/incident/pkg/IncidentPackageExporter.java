@@ -279,7 +279,7 @@ public class IncidentPackageExporter {
 		}
 		JSONObject optionType = new JSONObject();
 		
-		optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, "Incident Type");
+		optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, Messages.IncidentPackageExporter_TypesHeader);
 		//TODO: translations for incident Type label
 //		for (Entry<String,String> t : getTranslations(Messages.CtJsonExportUtils_EmployeePageLabel, "CtJsonExportUtils_EmployeePageLabel", ca).entrySet()) { //$NON-NLS-1$
 //			optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());

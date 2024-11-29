@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.patrol;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
 
 import com.ibm.icu.text.MessageFormat;
@@ -48,7 +49,7 @@ public class PatrolTypeDeleteAdvisor implements IDeleteAdvisor {
 		.uniqueResult();
 		
 		if (numpackages > 0) {
-			return MessageFormat.format("There are {0} SMART Mobile packages associated with the ''{1}'' track type. These must be deleted before you can delete the track type.", numpackages, pt.getName());
+			return MessageFormat.format(Messages.PatrolTypeDeleteAdvisor_deletemessage, numpackages, pt.getName());
 		}
 		
 		return null;

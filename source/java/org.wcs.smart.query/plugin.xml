@@ -1045,7 +1045,7 @@
       </command>
       <command
             id="org.wcs.smart.query.columnconfigurations"
-            name="Column Configurations...">
+            name="%queryconfig.command.name">
       </command>
    </extension>
    <extension

@@ -97,7 +97,7 @@ public class PatrolAreaBufferValueDropItem extends AbstractValueDropItem{
 		
 		lbl = new Label(temp, SWT.NONE);
 		lbl.setText(Messages.PatrolAreaBufferValueDropItem_BufferText);			
-		lbl.setToolTipText(Messages.PatrolAreaBufferValueDropItem_buffertooltip);
+		lbl.setToolTipText(Messages.PatrolAreaBufferValueDropItem_buffertooltip2);
 		
 		txtBuffer = new Text(temp, SWT.BORDER);
 		txtBuffer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

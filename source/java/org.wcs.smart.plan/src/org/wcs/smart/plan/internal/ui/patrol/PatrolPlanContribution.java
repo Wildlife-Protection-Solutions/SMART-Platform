@@ -283,7 +283,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 
 		if (currentPlan == null) {
 			toolkit.createLabel(main,
-					"There are no associated plans.");
+					Messages.PatrolPlanContribution_NoPlans);
 		} else {
 			Composite planc = toolkit.createComposite(main);
 			planc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

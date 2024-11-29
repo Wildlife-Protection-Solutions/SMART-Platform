@@ -353,7 +353,7 @@ public class PatrolQueryEditorTableContent {
 		comp.setLayout(layout);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.createLabel(comp,  Messages.PatrolQueryEditorTableContent_NumberOfPatrolsLabel);
+		toolkit.createLabel(comp,  Messages.PatrolQueryEditorTableContent_NumberOfPatrolsLabel2);
 		lblNumPatrols = toolkit.createLabel(comp, Messages.PatrolQueryEditorTableContent_NALabel);
 		
 		toolkit.createLabel(comp,  "  "); //$NON-NLS-1$

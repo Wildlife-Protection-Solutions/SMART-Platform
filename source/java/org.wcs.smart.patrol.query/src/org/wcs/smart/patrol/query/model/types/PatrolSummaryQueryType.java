@@ -277,7 +277,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 							break;
 						}
 					}
-					if (!found) throw new Exception(MessageFormat.format(Messages.PatrolSummaryQueryType_GroupByNotSupported, po.getGuiName(Locale.getDefault()) + " ("+po.getKey() +")")); //$NON-NLS-1$ //$NON-NLS-2$
+					if (!found) throw new Exception(MessageFormat.format(Messages.PatrolSummaryQueryType_GroupByNotSupported2, po.getGuiName(Locale.getDefault()) + " ("+po.getKey() +")")); //$NON-NLS-1$ //$NON-NLS-2$
 					
 				}
 			}

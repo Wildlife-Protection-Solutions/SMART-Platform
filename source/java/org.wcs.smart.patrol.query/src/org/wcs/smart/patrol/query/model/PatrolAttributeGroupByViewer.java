@@ -93,7 +93,7 @@ public class PatrolAttributeGroupByViewer extends AbstractGroupByViewer<PatrolAt
 		if (pa == null || (
 				pa.getType() != Attribute.AttributeType.LIST &&
 				pa.getType() != Attribute.AttributeType.TREE)) 
-			throw new Exception(MessageFormat.format(Messages.PatrolAttributeGroupByViewer_PatrolAttributeNotFound, gb.getAttributeKey()));
+			throw new Exception(MessageFormat.format(Messages.PatrolAttributeGroupByViewer_PatrolAttributeNotFound2, gb.getAttributeKey()));
 		
 		return new PatrolAttributeQueryOption(pa);
 	}

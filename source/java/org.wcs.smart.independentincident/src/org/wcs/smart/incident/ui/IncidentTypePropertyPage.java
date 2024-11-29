@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -91,6 +90,7 @@ import org.wcs.smart.common.celleditor.ComboBoxViewerCellEditor;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.incident.IncidentLabelProvider;
 import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.IncidentPropertyManager;
@@ -142,7 +142,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		public void done(IJobChangeEvent event) {
 			Display.getDefault().asyncExec(()->{
 				if (lblJobStatus.isDisposed()) return;
-				lblJobStatus.setText(MessageFormat.format("Processing finished: {0}", DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format( LocalDateTime.now())));
+				lblJobStatus.setText(MessageFormat.format(Messages.IncidentTypePropertyPage_JobComplete, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format( LocalDateTime.now())));
 				lblJobStatus.getParent().layout();
 			});
 		}
@@ -153,12 +153,12 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	private enum Column {
 		ICON(DialogConstants.ICON_TEXT, 1),
-		NAME("Incident Type", 2),
-		ACTIVE("Active", 1),
-		LINK_TO_PATROL("Link To Patrol", 1, "These incidents will be linked to a patrol based on date/time and location of patrol tracks"),
-		MOVE_TO_PATROL("Move To Patrol", 1, "These incidents will be converted to patrol waypoints based on date/time and location of patrol tracks"),
-		KEY("Key", 1),
-		SYSTEM("System", 1, "System types are required and cannot be removed.");
+		NAME(IncidentLabelProvider.TYPE_NAME, 2),
+		ACTIVE(Messages.IncidentTypePropertyPage_ActiveColumnName, 1),
+		LINK_TO_PATROL(Messages.IncidentTypePropertyPage_LinkToPatrolColumnName, 1, Messages.IncidentTypePropertyPage_LinkTolPatrolTooltip),
+		MOVE_TO_PATROL(Messages.IncidentTypePropertyPage_MoveToPatrolColumnName, 1, Messages.IncidentTypePropertyPage_MoveToPatrolTooltip),
+		KEY(Messages.IncidentTypePropertyPage_KeyColumnName, 1),
+		SYSTEM(Messages.IncidentTypePropertyPage_SystemColumnName, 1, Messages.IncidentTypePropertyPage_SystemTooltip);
 		
 		String name;
 		String tooltip;
@@ -179,7 +179,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @param title
 	 */
 	public IncidentTypePropertyPage(Shell parent) {
-		super(parent, "Configure Independent Incident Types");
+		super(parent, Messages.IncidentTypePropertyPage_Title);
 		this.currentCa = SmartDB.getCurrentConservationArea();
 	}	
 	
@@ -213,12 +213,12 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		tabs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		CTabItem typesItem = new CTabItem(tabs, SWT.NONE);
-		typesItem.setText("Incident Types");
+		typesItem.setText(Messages.IncidentTypePropertyPage_TypesTab);
 		Composite typesPanel = createTypesPanel(tabs);
 		typesItem.setControl(typesPanel);
 
 		CTabItem settingsItem = new CTabItem(tabs, SWT.NONE);
-		settingsItem.setText("Move && Link Settings");
+		settingsItem.setText(Messages.IncidentTypePropertyPage_MoveLinkTab);
 		Composite settings = createMoveAndLinkSettings(tabs);
 		settingsItem.setControl(settings);
 		
@@ -226,8 +226,8 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 
 		loadTypes();
 		
-		setTitle("Independent Incident Types");
-		setMessage("Configure incident types");
+		setTitle(Messages.IncidentTypePropertyPage_DialogTitle);
+		setMessage(Messages.IncidentTypePropertyPage_DialogMessage);
 		
 		return tabs;
 	}
@@ -239,7 +239,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		Label l = new Label(container, SWT.WRAP);
 		l.setText(
-				"These settings control the matching of incidents to patrols. Incidents of types that are flagged as 'link to patrol' or 'move to patrol' can be created in SMART before the patrol data is loaded. Once the patrol data is loaded these incidents are linked or moved to the appropriate patrol by matching track position/time data to the incident position/time."
+				Messages.IncidentTypePropertyPage_LinkingMessage
 				);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 350;
@@ -262,7 +262,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		btnRunNow.addListener(SWT.Selection, e->{
 			IncidentToPatrolProcessorJob.getInstance().schedule();
 		
-			lblJobStatus.setText(MessageFormat.format("Prcessing started: {0}", DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format( LocalDateTime.now())));
+			lblJobStatus.setText(MessageFormat.format(Messages.IncidentTypePropertyPage_StartProcessing, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format( LocalDateTime.now())));
 			
 			IncidentToPatrolProcessorJob.getInstance().removeJobChangeListener(processingJobListener);
 			IncidentToPatrolProcessorJob.getInstance().addJobChangeListener(processingJobListener);			
@@ -292,15 +292,13 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		((GridData)l.getLayoutData()).horizontalIndent = 5;
 		
-		SmartUiUtils.createSubHeaderLabel(container, "Fallback Settings");
+		SmartUiUtils.createSubHeaderLabel(container, Messages.IncidentTypePropertyPage_FallbackSettings);
 		inner = new Composite(container, SWT.NONE);
 		inner.setLayout(new GridLayout(2, false));
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		l = new Label(inner, SWT.WRAP);
-//		l.setText(MessageFormat.format(
-//				Messages.IncidentOptionsPropertyPage_ConvertToIncidentTypeMessage, 				 
-//				IncidentManager.getInstance().getIncidentProvider(IntegrateIncidentSource.KEY).getName()));
-		l.setText("Convert incidents with a type of 'link to patrol' to the fallback type after they are matched to a patrol or if no matching patrol is found after X days. Convert incidents with a type of 'move to patrol' to the fallback type if no matching patrol is found after X days. Set to -1 to never convert unmatched incidents.");
+
+		l.setText(Messages.IncidentTypePropertyPage_FallbackMessage);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		((GridData)l.getLayoutData()).widthHint = 350;
 		
@@ -322,7 +320,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		tblFallbackTypes.getTable().setLinesVisible(true);
 		
 		TableViewerColumn type = new TableViewerColumn(tblFallbackTypes, SWT.NONE);
-		type.getColumn().setText("Link/Move Type");
+		type.getColumn().setText(Messages.IncidentTypePropertyPage_LinkMoveType);
 		type.getColumn().setWidth(250);
 		type.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -333,14 +331,14 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		});
 		
 		TableViewerColumn totype = new TableViewerColumn(tblFallbackTypes, SWT.NONE);
-		totype.getColumn().setText("Fallback Type");
+		totype.getColumn().setText(Messages.IncidentTypePropertyPage_FallbackType);
 		totype.getColumn().setWidth(250);
 		totype.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof IncidentType it) {
 					if (it.getFallbackType() != null) return it.getFallbackType().getName();
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 				return super.getText(element);
 			}
@@ -405,7 +403,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		Label lblNewLabel = new Label(container, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
 				false, 1, 1));
-		lblNewLabel.setText("Language:");
+		lblNewLabel.setText(Messages.IncidentTypePropertyPage_LanguageLabel);
 
 		languageViewer = new LanguageViewer(container, SWT.NONE, currentCa);
 		languageViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -623,17 +621,17 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		for (IncidentType t : types) {
 			if (t.doLinkPatrol() || t.doMovePatrol()) {
 				if (t.getFallbackType() == null) {
-					setErrorMessage(MessageFormat.format("A fallback type is required for incident type ''{0}''. This can be set in the ''Move & Link Settings'' Tab.", t.getName()));
+					setErrorMessage(MessageFormat.format(Messages.IncidentTypePropertyPage_FallbackRequired, t.getName()));
 					ok = false;
 					break;
 				}
 				if (t.getFallbackType() != null && !types.contains(t.getFallbackType())) {
-					setErrorMessage(MessageFormat.format("A fallback type is required for incident type ''{0}''. This can be set in the ''Move & Link Settings'' Tab.", t.getName()));
+					setErrorMessage(MessageFormat.format(Messages.IncidentTypePropertyPage_FallbackRequired, t.getName()));
 					ok = false;
 					break;
 				}
 				if (t.getFallbackType() != null && (t.getFallbackType().doLinkPatrol() || t.getFallbackType().doMovePatrol())) {
-					setErrorMessage(MessageFormat.format("The fallback type for incident type ''{0}'' cannot be set to a type that is set to 'link' or 'move' to a patrol.", t.getName()));
+					setErrorMessage(MessageFormat.format(Messages.IncidentTypePropertyPage_InvalidFallbackType, t.getName()));
 					ok = false;
 					break;
 				}
@@ -652,7 +650,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		IncidentType type = getSelection();
 		if (type == null) return;
 		if (type.isSystem()) {
-			MessageDialog.openWarning(getShell(),DialogConstants.ERROR_STRING, "Cannot change the key of system types.");
+			MessageDialog.openWarning(getShell(),DialogConstants.ERROR_STRING, Messages.IncidentTypePropertyPage_CannotEditSystemTypes);
 			return;
 		}
 		String currentKey = type.getKeyId();
@@ -677,11 +675,11 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		if (type == null) return;
 		
 		if (type.isSystem()) {
-			MessageDialog.openError(getShell(), "Delete", "System types cannot be removed.");
+			MessageDialog.openError(getShell(), Messages.IncidentTypePropertyPage_DeleteTitle, Messages.IncidentTypePropertyPage_CannotDeleteSystem);
 			return;
 		}
-		if (!MessageDialog.openConfirm(getShell(), "Delete", 
-				MessageFormat.format("Are you sure you want to delete the incident type {0}? This action cannot be undone.", type.getName()))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.IncidentTypePropertyPage_DeleteTitle, 
+				MessageFormat.format(Messages.IncidentTypePropertyPage_DeleteConfirm, type.getName()))){
 			return;
 		}
 
@@ -691,7 +689,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 			
 			catch (Exception ex){
-				IncidentPlugIn.displayLog(MessageFormat.format("Cannot delete incident type {0}: {1}", type.getName(), ex.getMessage()), ex);
+				IncidentPlugIn.displayLog(MessageFormat.format(Messages.IncidentTypePropertyPage_DeleteError, type.getName(), ex.getMessage()), ex);
 				return;
 			}
 		}
@@ -723,7 +721,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				IncidentPropertyManager.INSTANCE.updateSetting(s, SmartDB.getCurrentConservationArea(), IncidentPropertyManager.IncidentProperty.INTEGRATE_TO_PATROL_EXPIRE, Integer.valueOf(txtMaxTime.getText()));
 				
 				for (IncidentType t : toDelete){
-					if(t.isSystem()) throw new Exception("Cannot delete system types.");
+					if(t.isSystem()) throw new Exception(Messages.IncidentTypePropertyPage_CannotDeleteSystem);
 					if (t.getUuid() == null) continue;
 					s.remove(t);
 				}
@@ -736,7 +734,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 					if (!type.doLinkPatrol() && !type.doMovePatrol()) {
 						type.setFallbackType(null);
 					}else if ( (type.getFallbackType() == null) || (type.getFallbackType() != null && !types.contains(type.getFallbackType()))) {
-						throw new Exception(MessageFormat.format("fallback type required for type {0}", type.getName()));
+						throw new Exception(MessageFormat.format(Messages.IncidentTypePropertyPage_FallbackRequired, type.getName()));
 					}
 					
 					HibernateManager.saveOrMerge(s,  type.getIcon());
@@ -756,7 +754,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				
 			} catch (Exception ex) {
 				s.getTransaction().rollback();
-				IncidentPlugIn.displayLog(MessageFormat.format("Error saving updates. Close the dialog and try again.\n\n{0}", ex.getMessage()), ex);						
+				IncidentPlugIn.displayLog(MessageFormat.format(Messages.IncidentTypePropertyPage_SaveError, ex.getMessage()), ex);						
 			}
 		}
 		return false;
@@ -766,7 +764,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		IncidentType type = new IncidentType();
 		type.setConservationArea(currentCa);
 		type.setIsActive(true);
-		type.updateName(currentCa.getDefaultLanguage(), "Incident Type");
+		type.updateName(currentCa.getDefaultLanguage(), IncidentLabelProvider.TYPE_NAME);
 		type.setName(type.findName(currentCa.getDefaultLanguage()));	
 		types.add(type);
 		setChangesMade(true);
@@ -780,7 +778,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		if (type == null);
 		
 		if (type.isSystem()) {
-			MessageDialog.openWarning(getShell(),DialogConstants.ERROR_STRING, "Cannot change the link to patrol setting of system types.");
+			MessageDialog.openWarning(getShell(),DialogConstants.ERROR_STRING, Messages.IncidentTypePropertyPage_CannotChangeSystemTypes1);
 			return;
 		}
 		
@@ -798,7 +796,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		IncidentType type = getSelection();
 		if (type == null);
 		if (type.isSystem()) {
-			MessageDialog.openWarning(getShell(),DialogConstants.ERROR_STRING, "Cannot change the move to patrol setting of system types.");
+			MessageDialog.openWarning(getShell(),DialogConstants.ERROR_STRING, Messages.IncidentTypePropertyPage_CannotChangeSystemTypes2);
 			return;
 		}
 		
@@ -983,7 +981,8 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 						if(!SmartUtils.isSimpleString(newValue.trim(), SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, 
 								org.wcs.smart.ca.Label.MAX_LENGTH)){							
 							//invalid value, show error
-							MessageDialog.openError(getShell(), DialogConstants.ERROR_STRING, MessageFormat.format("Name must only contain {0} and be less than {1} characters in length.", new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, org.wcs.smart.ca.Label.MAX_LENGTH}));
+							MessageDialog.openError(getShell(), DialogConstants.ERROR_STRING, 
+									MessageFormat.format(Messages.IncidentTypePropertyPage_InvalidName, new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, org.wcs.smart.ca.Label.MAX_LENGTH}));
 						}
 						toUpdate.updateName(languageViewer.getCurrentSelection(), newValue);
 						if (toUpdate.getUuid() == null) {
@@ -1055,7 +1054,7 @@ public class IncidentTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	}
 	
 	
-	private Job loadTypes = new Job("load types") {
+	private Job loadTypes = new Job("load types") { //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

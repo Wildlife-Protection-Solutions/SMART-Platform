@@ -234,7 +234,7 @@ public class WaypointListOpFilterDropItem extends DropItem implements IFilterDro
 		if (this.type == Type.SOURCE) {
 			l.setText(Messages.WaypointSourceFilterDropItem_IncidentSourceDropItem);
 		}else if (type == Type.INCIDENTTYPE) {
-			l.setText("Incident Type");
+			l.setText(Messages.WaypointListOpFilterDropItem_IncidentTypeDropItem);
 		}else {
 			l.setText(GeneralContentProvider.GeneralItem.WAYPOINT_CM.guiName + " " + Operator.EQUALS.getGuiValue()); //$NON-NLS-1$
 		}

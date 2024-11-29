@@ -52,7 +52,7 @@ public class PatrolGroupByTreeItem implements IItemTreeNode{
 	
 	@Override
 	public String getName() {
-		return Messages.PatrolGroupByTreeItem_PatrolGroupBys;
+		return Messages.PatrolGroupByTreeItem_PatrolGroupBys2;
 	}
 
 	@Override

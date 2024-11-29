@@ -74,7 +74,7 @@ public class CustomHourRangeValueDropItem extends PatrolValueDropItem{
 		Label lbl = new Label(part, SWT.NONE);
 		lbl.setText( formatStringForLabel(item.getGuiName(Locale.getDefault())));
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
-		lbl.setToolTipText(Messages.CustomHourRangeValueDropItem_timerangequeryop_tooltip);
+		lbl.setToolTipText(Messages.CustomHourRangeValueDropItem_timerangequeryop_tooltip2);
 		initDrag(lbl);
 		
 		sTime = new TimePicker(part, SWT.NONE);

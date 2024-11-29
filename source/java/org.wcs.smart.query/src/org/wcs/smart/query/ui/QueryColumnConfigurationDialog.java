@@ -84,6 +84,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.IQueryColumnProvider;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -139,7 +140,7 @@ public class QueryColumnConfigurationDialog extends SmartStyledTitleDialog{
 	
 	public void cancelPressed() {
 		if (this.modified) {
-			if (!MessageDialog.openQuestion(getShell(), "Changes", "There are unsaved changes. Are you sure you want to close?")) {
+			if (!MessageDialog.openQuestion(getShell(), Messages.QueryColumnConfigurationDialog_ConfirmCloseTitle, Messages.QueryColumnConfigurationDialog_ConfirmCloseMessage)) {
 				return;
 			}
 		}
@@ -214,7 +215,7 @@ public class QueryColumnConfigurationDialog extends SmartStyledTitleDialog{
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));		
 		
 		Label lblName = new Label(container, SWT.NONE);
-		lblName.setText("Name:");
+		lblName.setText(Messages.QueryColumnConfigurationDialog_NameField);
 		lblName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		txtName = new Text(container, SWT.BORDER);
@@ -227,7 +228,7 @@ public class QueryColumnConfigurationDialog extends SmartStyledTitleDialog{
 		});
 		
 		Link lnkTranslate = new Link(container, SWT.NONE);
-		lnkTranslate.setText("<a>" + "translate" + "</a>"); 
+		lnkTranslate.setText("<a>" + Messages.QueryColumnConfigurationDialog_Translate + "</a>");  //$NON-NLS-1$ //$NON-NLS-2$
 		lnkTranslate.addListener(SWT.Selection, e->{
 			NamedItem toUpdate = new NamedItem();
 			for(org.wcs.smart.ca.Label l : config.getNames()){
@@ -246,7 +247,7 @@ public class QueryColumnConfigurationDialog extends SmartStyledTitleDialog{
 		});
 		
 		Label lblQueryType = new Label(container, SWT.NONE);
-		lblQueryType.setText("Name:");
+		lblQueryType.setText(Messages.QueryColumnConfigurationDialog_QueryTypeLabel);
 		lblQueryType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		cmbQueryType = new ComboViewer(container, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -284,11 +285,11 @@ public class QueryColumnConfigurationDialog extends SmartStyledTitleDialog{
 		orderComp.setLayout(new GridLayout(4, false));
 		
 		Label l = new Label(orderComp, SWT.NONE);
-		l.setText("All query columns");
+		l.setText(Messages.QueryColumnConfigurationDialog_AllColumnLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		l = new Label(orderComp, SWT.NONE);
-		l.setText("Output query columns");
+		l.setText(Messages.QueryColumnConfigurationDialog_SelectedColumnLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite tableComposite = new Composite(orderComp, SWT.NONE);
@@ -324,24 +325,24 @@ public class QueryColumnConfigurationDialog extends SmartStyledTitleDialog{
 		ToolItem tiMove = new ToolItem(tbAdd, SWT.PUSH);
 		tiMove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_FORWARD));
 		tiMove.addListener(SWT.Selection, e->addSelected());
-		tiMove.setToolTipText("add selected columns to query output");
+		tiMove.setToolTipText(Messages.QueryColumnConfigurationDialog_addselectedTooltip);
 		
 		ToolItem tiRemove = new ToolItem(tbAdd, SWT.PUSH);
 		tiRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_BACKWARD));
 		tiRemove.addListener(SWT.Selection, e->removeSelected());
-		tiRemove.setToolTipText("remove selected columns from query output");
+		tiRemove.setToolTipText(Messages.QueryColumnConfigurationDialog_removeselectedTooltip);
 		
 		ToolItem tiAdd = new ToolItem(tbAdd, SWT.DROP_DOWN);
 		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		tiAdd.setToolTipText("add a subset of columns to the query output");
+		tiAdd.setToolTipText(Messages.QueryColumnConfigurationDialog_addsubsetTooltip);
 		
 		mnuAddColumns = new Menu(tbAdd);
 		MenuItem miAddAll= new MenuItem(mnuAddColumns, SWT.PUSH);
-		miAddAll.setText("Add All");
+		miAddAll.setText(Messages.QueryColumnConfigurationDialog_AddAll);
 		miAddAll.addListener(SWT.Selection, e->addAllColumns());
 		
 		MenuItem miAddNonAttribute= new MenuItem(mnuAddColumns, SWT.PUSH);
-		miAddNonAttribute.setText("Add Non-Attribute Columns");
+		miAddNonAttribute.setText(Messages.QueryColumnConfigurationDialog_AddNonAttribute);
 		miAddNonAttribute.addListener(SWT.Selection, e->addNonAttributeColumns());
 		
 		tiAdd.addListener(SWT.Selection, e->mnuAddColumns.setVisible(true));
@@ -384,32 +385,32 @@ public class QueryColumnConfigurationDialog extends SmartStyledTitleDialog{
 		ToolBar tbSort = new ToolBar(orderButtonComp, SWT.FLAT | SWT.VERTICAL);
 		
 		ToolItem tiSort = new ToolItem(tbSort, SWT.DROP_DOWN);
-		tiSort.setText("Sort By");
+		tiSort.setText(Messages.QueryColumnConfigurationDialog_SortBy);
 		
 		ToolItem tiMoveUp = new ToolItem(tbSort, SWT.PUSH);
-		tiMoveUp.setText("Move Up");
+		tiMoveUp.setText(Messages.QueryColumnConfigurationDialog_MoveUp);
 		
 		tiMoveUp.addListener(SWT.Selection, e->move(-1));
 		
 		ToolItem tiMoveDown = new ToolItem(tbSort, SWT.PUSH );
-		tiMoveDown.setText("Move Down");
+		tiMoveDown.setText(Messages.QueryColumnConfigurationDialog_MoveDown);
 		tiMoveDown.addListener(SWT.Selection, e->move(1));
 		
 		mnuSortColumns = new Menu(tbSort);
 		
 		Menu mnuvisible = new Menu(tblVisibleColumns.getControl());
 		MenuItem miDelete = new MenuItem(mnuvisible, SWT.PUSH);
-		miDelete.setText("Remove");
+		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		miDelete.addListener(SWT.Selection, e->removeSelected());
 		tblVisibleColumns.getControl().setMenu(mnuvisible);
 		
 		MenuItem miSortDefault = new MenuItem(mnuSortColumns, SWT.PUSH);
-		miSortDefault.setText("Default");
+		miSortDefault.setText(Messages.QueryColumnConfigurationDialog_Default);
 		miSortDefault.addListener(SWT.Selection, e->sortRevertOrder());
 		
 		MenuItem miSortDefaultAA = new MenuItem(mnuSortColumns, SWT.PUSH);
-		miSortDefaultAA.setText("Alphabetic");
+		miSortDefaultAA.setText(Messages.QueryColumnConfigurationDialog_Alphabetic);
 		miSortDefaultAA.addListener(SWT.Selection, e->sortAlphabetic());
 		
 		tiSort.addListener(SWT.Selection, e->mnuSortColumns.setVisible(true));
@@ -418,9 +419,9 @@ public class QueryColumnConfigurationDialog extends SmartStyledTitleDialog{
 		
 		loadConfigurableModelsJob.schedule();
 		
-		getShell().setText("Query Column Configuration");
-		setTitle("Query Column Configuration");
-		setMessage("Configure column visibility and order.");
+		getShell().setText(Messages.QueryColumnConfigurationDialog_Title);
+		setTitle(Messages.QueryColumnConfigurationDialog_Title);
+		setMessage(Messages.QueryColumnConfigurationDialog_Message);
 		return container;
 	}
 	
@@ -656,22 +657,22 @@ public class QueryColumnConfigurationDialog extends SmartStyledTitleDialog{
 		this.modified = true;
 		String error = null;
 		if (txtName.getText().isEmpty()) {
-			error = "Name required";
+			error = Messages.QueryColumnConfigurationDialog_NameRequired1;
 		}else {
 			boolean hasdefault = false;
 			for (org.wcs.smart.ca.Label l : config.getNames()) {
 				if (l.getLanguage().isDefault()) {
 					hasdefault = true;
 					if (l.getValue().isBlank()) {
-						error = MessageFormat.format("Name required for {0}.", l.getLanguage().getDisplayName());
+						error = MessageFormat.format(Messages.QueryColumnConfigurationDialog_NameRequired2, l.getLanguage().getDisplayName());
 					}
 				}
 				if (l.getValue().length() > org.wcs.smart.ca.Label.MAX_LENGTH) {
-					error = MessageFormat.format("Name too long (maximum length {0}): {1}.",org.wcs.smart.ca.Label.MAX_LENGTH, l.getValue() );
+					error = MessageFormat.format(Messages.QueryColumnConfigurationDialog_NameTooLong,org.wcs.smart.ca.Label.MAX_LENGTH, l.getValue() );
 				}
 			}
 			if (!hasdefault) {
-				error = MessageFormat.format("Name required for {0}.", config.getConservationArea().getDefaultLanguage().getDisplayName());
+				error = MessageFormat.format(Messages.QueryColumnConfigurationDialog_NameRequired2, config.getConservationArea().getDefaultLanguage().getDisplayName());
 			}
 		}
 		
@@ -701,6 +702,7 @@ public class QueryColumnConfigurationDialog extends SmartStyledTitleDialog{
 						allColumns.clear();
 						selectedColumns.clear();
 						for(QueryColumn c : provider.getQueryColumns(q, Locale.getDefault(), false, session)) {
+							if (c.isDefaultGeometryColumn()) continue;
 							allColumns.add(c);
 							rawColumns.add(c);
 						}
@@ -751,11 +753,11 @@ public class QueryColumnConfigurationDialog extends SmartStyledTitleDialog{
 			Display.getDefault().asyncExec(()->{
 				for (ConfigurableModel cm : cms) {
 					MenuItem mi = new MenuItem(mnuAddColumns, SWT.PUSH);
-					mi.setText(MessageFormat.format("Add All Attributes from ''{0}''", cm.getName()));
+					mi.setText(MessageFormat.format(Messages.QueryColumnConfigurationDialog_AddFrom, cm.getName()));
 					mi.addListener(SWT.Selection, e->addFromConfigurableModel(cm));			
 					
 					MenuItem miSortCm = new MenuItem(mnuSortColumns, SWT.PUSH);
-					miSortCm.setText(MessageFormat.format("Configurable Model: {0}", cm.getName()));
+					miSortCm.setText(MessageFormat.format(Messages.QueryColumnConfigurationDialog_SortByCm, cm.getName()));
 					miSortCm.addListener(SWT.Selection, e->sortDefaultOtherCmAttribute(cm));					
 				}
 			});

@@ -48,7 +48,7 @@ public class PatrolValueTreeItem implements IItemTreeNode{
 	
 	@Override
 	public String getName() {
-		return Messages.PatrolValueTreeItem_PatrolValuesNodeLabel;
+		return Messages.PatrolValueTreeItem_PatrolValuesNodeLabel2;
 	}
 
 	@Override

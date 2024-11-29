@@ -649,7 +649,7 @@ public class DerbyGridEngine extends AbstractPatrolQueryEngine{
 			
 		}else{
 			throw new UnsupportedOperationException(
-					MessageFormat.format(Messages.DerbyGridEngine_Error_PatrolValueNotSupported, new Object[]{option.getGuiName(Locale.getDefault())}));
+					MessageFormat.format(Messages.DerbyGridEngine_Error_PatrolValueNotSupported2, new Object[]{option.getGuiName(Locale.getDefault())}));
 		}
 		return computePatrolTrack(c, engine, dataField);
 	}

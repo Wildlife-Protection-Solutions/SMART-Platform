@@ -5,7 +5,6 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.internal.messages"; //$NON-NLS-1$
 
-	public static String AddERJob_ErrorMsg;
 	public static String AddWaypointDialog_EmptyProjectionError;
 	public static String AddWaypointDialog_EmptyWaypointIDError;
 	public static String AddWaypointDialog_EmptyXError;

@@ -40,6 +40,7 @@ public class Messages extends NLS {
 	public static String FixedQueryColumn_yColumnName;
 	public static String GeneralContentProvider_CmSourceName;
 	public static String GeneralContentProvider_ConservationAreaLabel;
+	public static String GeneralContentProvider_IncidentType;
 	public static String GeneralContentProvider_ObserverLabel;
 	public static String GeneralContentProvider_WaypointIdName;
 	public static String GriddedFilterPanel_CopyError;
@@ -76,15 +77,18 @@ public class Messages extends NLS {
 	public static String WaypointFilterProcessor_filterProgress;
 	public static String WaypointFilterProcessor_progress1;
 	public static String WaypointIdFilterDropItem_IdFieldName;
+	public static String WaypointListOpFilterDropItem_IncidentTypeDropItem;
 	public static String WaypointSourceFilter_InvalidSourceFilter;
 	public static String WaypointSourceFilterDropItem_IncidentSourceDropItem;
 	public static String WaypointSourceGroupByDropItem_AllLabel;
 	public static String WaypointSourceGroupByDropItem_FiltersLabel;
 	public static String WaypointSourceGroupByDropItem_WaypointSourceLabel;
 	public static String DerbyGridEngine_Error_GridValueNotSupported;
+	public static String IncidentTypeGroupByDropItem_TypeLabel;
 	public static String ObservationDropItemFactory_CmError;
 	public static String ObservationDropItemFactory_CmNotFound;
 	public static String ObservationDropItemFactory_QueryItemNotSupported;
+	public static String ObservationDropItemFactory_TypeNotFound;
 	public static String ObservationGridQueryDefaultStyle_LayerName;
 	public static String ObservationGridQueryDefaultStyle_MapName;
 	public static String ObservationGridQueryType_QueryName;

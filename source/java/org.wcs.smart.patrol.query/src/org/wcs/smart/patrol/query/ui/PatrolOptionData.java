@@ -123,7 +123,7 @@ public class PatrolOptionData implements IPatrolOptionData{
 					}
 				} catch (Exception ex) {
 					QueryPlugIn.log(
-							Messages.PatrolQueryOptions_ErrorInvalidPatrolFilterValue
+							Messages.PatrolQueryOptions_ErrorInvalidPatrolFilterValue2
 									+ ex.getLocalizedMessage(), ex);
 					return results;
 				}

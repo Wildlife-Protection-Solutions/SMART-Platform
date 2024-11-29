@@ -245,12 +245,12 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 		progress.split(3);
 		populateTemporaryTableNameObjExtra("pl_mandate_uuid", "p_mandate", c, session);  //$NON-NLS-1$//$NON-NLS-2$
 		
-		progress.subTask(Messages.DerbyObservationEngine_Progress_TransportData);
+		progress.subTask(Messages.DerbyObservationEngine_Progress_TransportData2);
 		progress.split(3);
 		populateTemporaryTableNameObjExtra("pl_transport_uuid", "p_transporttype", c, session);  //$NON-NLS-1$//$NON-NLS-2$
 		populateTransportGroup("pl_transport_uuid", "p_transportgroup", c, session, queryDataTable);  //$NON-NLS-1$//$NON-NLS-2$
 
-		progress.subTask(Messages.DerbyWaypointEngine_TrackData);
+		progress.subTask(Messages.DerbyWaypointEngine_TrackData2);
 		progress.split(3);
 		populateTemporaryTableNameObjExtra("p_type_uuid", "p_type", c, session);  //$NON-NLS-1$//$NON-NLS-2$
 		

@@ -22,29 +22,19 @@
 package org.wcs.smart.connect.cybertracker.ctpackage;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
-import org.wcs.smart.QrCodeManager;
-import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.CtConnectPackageMetadata;
 import org.wcs.smart.connect.cybertracker.model.CtPackageAlert;
-import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.UuidUtils;
 
 import jakarta.ws.rs.NotFoundException;

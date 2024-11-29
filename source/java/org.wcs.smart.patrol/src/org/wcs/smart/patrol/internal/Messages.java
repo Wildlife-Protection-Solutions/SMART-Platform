@@ -160,7 +160,6 @@ public class Messages extends NLS {
 	public static String ImportGpsDataWizard_GPXFileImportError;
 	public static String ImportGpsDataWizard_ImportCompleteMessage;
 	public static String ImportGpsDataWizard_ImportDialog_Title;
-	public static String ImportGpsDataWizard_TrackWarningOverwriteNew2;
 	public static String ImportGpxWizardPage_ImportAllOp;
 	public static String ImportGpxWizardPage_ImportSelectionOp;
 	public static String ImportGpxWizardPage_ImportSingleDayOp;
@@ -187,11 +186,15 @@ public class Messages extends NLS {
 
 	public static String LabelConstants_DatesField;
 
+	public static String LabelConstants_EmployeeField;
+
 	public static String LabelConstants_EnvironmentField;
 
 	public static String LabelConstants_IDField;
 
 	public static String LabelConstants_LeaderField;
+
+	public static String LabelConstants_MemberField;
 
 	public static String LabelConstants_MembersField;
 
@@ -207,10 +210,6 @@ public class Messages extends NLS {
 
 	public static String LabelConstants_TrackType;
 
-	public static String LeaderPilotComposite_Error_LeaderRequired2;
-	public static String LeaderPilotComposite_Error_PilotRequired2;
-	public static String LeaderPilotComposite_LeaderLabel2;
-
 	public static String LeaderPilotComposite_leaderrequired;
 	public static String LeaderPilotComposite_PilotLabel;
 
@@ -220,8 +219,7 @@ public class Messages extends NLS {
 	public static String MandateDeleteAdvisor_DeleteError_Patrol2;
 	public static String MandateDeleteAdvisor_DeleteError_Team;
 	public static String MandateDeleteAdvisor_InvalidObjectType;
-	public static String MergePatrolLegDialog_DialogMessage2;
-	public static String MergePatrolLegDialog_DialogTitle2;
+
 	public static String MergePatrolLegDialog_LeaderLabel;
 	public static String MergePatrolLegDialog_Pilot;
 	public static String MergePatrolsDialog_CustomPatrolId2;
@@ -262,7 +260,6 @@ public class Messages extends NLS {
 	public static String NewPatrolHandler_Progress_DisplayingWizard;
 	public static String ObjectiveComposite_Objective_Label2;
 	public static String ObjectiveComposite_PatrolObjectiveTooLongError2;
-	public static String ObjectiveComposite_Title2;
 	public static String OpenPatrolHandler_CancelBtn;
 	public static String OpenPatrolHandler_DialogTitle2;
 	public static String OpenPatrolHandler_EditButtons;
@@ -291,10 +288,6 @@ public class Messages extends NLS {
 	public static String PatrolAttributeComposite_errorTitle;
 
 	public static String PatrolAttributeComposite_NoCustomMetadata;
-	public static String PatrolAttributeDialog_deletedialogheader;
-	public static String PatrolAttributeDialog_deleteerror;
-	public static String PatrolAttributeDialog_disabletooltiptext;
-	public static String PatrolAttributeDialog_enabletooltiptext;
 	public static String PatrolAttributeTreeComposite_addtooltip;
 	public static String PatrolAttributeTreeComposite_collapseAllBtn;
 	public static String PatrolAttributeTreeComposite_confirmtitle;
@@ -344,12 +337,10 @@ public class Messages extends NLS {
 
 	public static String PatrolDynamicMenuManager_View;
 
-	public static String PatrolEditorInput_EditorNamePrefix2;
 	public static String PatrolEditorInput_Editor_Tooltip2;
 	public static String PatrolEditor_AttachmentError;
 	public static String PatrolEditor_DeleteWaypointsError2;
 	public static String PatrolEditor_EditError_PatrolToOld2;
-	public static String PatrolEditor_EditorName_Prefix2;
 	public static String PatrolEditor_Error_SavingPatrol2;
 	public static String PatrolEditor_Error_SavingWaypoints2;
 	public static String PatrolEditor_HourLabel;
@@ -378,22 +369,17 @@ public class Messages extends NLS {
 	public static String PatrolExporter_Progress_PackagingResults;
 	public static String PatrolExporter_Progress_WritingToFile2;
 	public static String PatrolFeatureSource_ProjectedWaypointLayerName;
-	public static String PatrolFeatureSource_TrackLayerName2;
 	public static String PatrolFeatureSource_WaypointLayerName;
-	public static String PatrolFilterDialog_DialogMessage;
-	public static String PatrolFilterDialog_DialogTitle2;
+
 
 	public static String PatrolFilterDialog_FilterbyId;
 
 	public static String PatrolFilterDialog_IncludeAll;
 
 	public static String PatrolFilterDialog_message;
-	public static String PatrolFilterDialog_OpFilterPatrolIdLabel2;
 	public static String PatrolFilterDialog_OpFilterTypesLabel1;
-	public static String PatrolFilterDialog_OpIncludeAllPatrolsIdsLabel2;
 	public static String PatrolFilterDialog_OpIncludeAllTypesLabel1;
-	public static String PatrolFilterDialog_PatrolDatesGroupLabel2;
-	public static String PatrolFilterDialog_PatrolIdGroupLabel2;
+
 	public static String PatrolFilterDialog_PatrolIdLabel2;
 	public static String PatrolFilterDialog_PatrolTypesGroupLabel1;
 	public static String PatrolFilterDialog_SaveDefault;
@@ -409,15 +395,10 @@ public class Messages extends NLS {
 	public static String PatrolFolderTreeDropListener_UnexpectedTarget2;
 	public static String PatrolHibernateManager_211;
 	public static String PatrolHibernateManager_Error_CouldNoSavePatrol2;
-	public static String PatrolHibernateManager_LoadPatrolTypeError1;
-	public static String PatrolIdComposite_DuplicateIdWarning2;
-	public static String PatrolIdComposite_Error_InvalidId2;
-	public static String PatrolIdComposite_Id_Label2;
 
 	public static String PatrolIdComposite_idexists;
 
 	public static String PatrolIdComposite_invalidid;
-	public static String PatrolIdComposite_Title2;
 	public static String PatrolIdComposite_WarningDialogTitle;
 	public static String PatrolIdGeneratorContribution_DuplicateWarning;
 	public static String PatrolIdGeneratorContribution_InvalidPattern;
@@ -549,15 +530,10 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_ObservationsWaypointsLabel;
 	public static String PatrolLegDayInputComposite_PrjLocationColumnHeader;
 	public static String PatrolLegDayInputComposite_RestMinutesLabel;
-	public static String PatrolLegDayInputComposite_SetTrackDialog_Message2;
 	public static String PatrolLegDayInputComposite_SetTrack;
-
-	public static String PatrolLegDayInputComposite_SetTrackLabel2;
 	public static String PatrolLegDayInputComposite_SourceCmColumnName;
 	public static String PatrolLegDayInputComposite_StartTimeLabel;
 	public static String PatrolLegDayInputComposite_Time_ColumnHeader;
-	public static String PatrolLegDayInputComposite_TotalPatrolHours_Label2;
-	public static String PatrolLegDayInputComposite_TotalActivePatrolHours_Label2;
 
 	public static String PatrolLegDayInputComposite_TotalTime;
 	public static String PatrolLegDayInputComposite_ViewTrackLabel;
@@ -576,9 +552,6 @@ public class Messages extends NLS {
 	public static String PatrolLegSplitDialog_AddEmployees_ToolTip;
 	public static String PatrolLegSplitDialog_DateGroupsJoined_Label;
 	public static String PatrolLegSplitDialog_DateofSplit_Label;
-	public static String PatrolLegSplitDialog_Dialog_Message2;
-	public static String PatrolLegSplitDialog_Dialog_Title;
-	public static String PatrolLegSplitDialog_DialogTitle2;
 	public static String PatrolLegSplitDialog_EndLeg_LegId_Postfix;
 	public static String PatrolLegSplitDialog_Error_DateError_1;
 	public static String PatrolLegSplitDialog_Error_DateError_2;
@@ -588,11 +561,9 @@ public class Messages extends NLS {
 	public static String PatrolLegSplitDialog_Error_GroupANoLeader;
 	public static String PatrolLegSplitDialog_Error_GroupANoMembers;
 	public static String PatrolLegSplitDialog_Error_GroupANoPilot;
-	public static String PatrolLegSplitDialog_Error_GroupANoTransportType2;
 	public static String PatrolLegSplitDialog_Error_GroupBNoLeader;
 	public static String PatrolLegSplitDialog_Error_GroupBNoMembers;
 	public static String PatrolLegSplitDialog_Error_GroupBNoPilot;
-	public static String PatrolLegSplitDialog_Error_GroupBNoTransportType2;
 	public static String PatrolLegSplitDialog_GroupALeader_Label;
 	public static String PatrolLegSplitDialog_GroupAMembers_Label;
 	public static String PatrolLegSplitDialog_GroupAPilot_Label;
@@ -620,17 +591,9 @@ public class Messages extends NLS {
 	public static String PatrolLegSplitDialog_TimeOfSplit_Label;
 
 	public static String PatrolLegSplitDialog_title;
-	public static String PatrolLegSplitDialog_TransportType_Label2;
 	public static String PatrolLegTable_LegEndDate_ColumnName;
 	public static String PatrolLegTable_LegId_ColumnName;
-	public static String PatrolLegTable_LegLeader_ColumnName;
-	public static String PatrolLegTable_LegMembers_ColumnName;
-	public static String PatrolLegTable_LegPilot_ColumnName;
 	public static String PatrolLegTable_LegStartDate_ColumnName;
-	public static String PatrolLegTable_Mandate_ColumnName;
-	public static String PatrolLegsComposite_02;
-	public static String PatrolLegsComposite_12;
-	public static String PatrolLegsComposite_22;
 	public static String PatrolLegsComposite_ChangeLeader_Button;
 	public static String PatrolLegsComposite_ChangeTransport_Button;
 	public static String PatrolLegsComposite_DeleteLeg_ConfirmDialog_Message;
@@ -642,17 +605,9 @@ public class Messages extends NLS {
 	public static String PatrolLegsComposite_Error_MissingLegDay2;
 
 	public static String PatrolLegsComposite_invaliddate1;
-
 	public static String PatrolLegsComposite_invaliddate2;
-
 	public static String PatrolLegsComposite_invaliddate3;
-
 	public static String PatrolLegsComposite_invaliddate4;
-	public static String PatrolLegsComposite_LegError_A2;
-	public static String PatrolLegsComposite_LegError_B2;
-	public static String PatrolLegsComposite_LegError_C2;
-	public static String PatrolLegsComposite_LegError_D2;
-	public static String PatrolLegsComposite_LegError_E;
 	public static String PatrolLegsComposite_MergeLegs;
 	public static String PatrolLegsComposite_modifylegs;
 
@@ -663,16 +618,11 @@ public class Messages extends NLS {
 	public static String PatrolLegsComposite_movemessage;
 
 	public static String PatrolLegsComposite_overlappingmembers;
-
-	public static String PatrolLegsComposite_PatrolEnd_Label2;
-	public static String PatrolLegsComposite_PatrolStart_Label2;
 	public static String PatrolLegsComposite_RemoveLeg_Button;
-	public static String PatrolLegsComposite_SplitPatrol_Button;
 	public static String PatrolLegsComposite_split;
 
 	public static String PatrolLegsComposite_startdate;
 
-	public static String PatrolLegsComposite_Title2;
 	public static String PatrolLegsWizardPage_PageMessage2;
 	public static String PatrolLegsWizardPage_Title2;
 	public static String PatrolListView_CollapseAllOp;
@@ -692,9 +642,6 @@ public class Messages extends NLS {
 	public static String PatrolManager_Progress_DeletingPatrol1;
 	public static String PatrolManager_Progress_RemovingFileStore;
 	public static String PatrolManager_Progress_SubDeletingPatrol2;
-	public static String PatrolMandateComposite_Error_LoadingMandates2;
-	public static String PatrolMandateComposite_Mandate_Label2;
-	public static String PatrolMandateComposite_Title2;
 	public static String PatrolMandatePropertyPage_ClearImage;
 	public static String PatrolMandatePropertyPage_ConfirmDeleteMessage;
 	public static String PatrolMandatePropertyPage_ConfirmDeleteTitle;
@@ -776,17 +723,7 @@ public class Messages extends NLS {
 	public static String PatrolSummaryEditor_ObservationDescription;
 
 	public static String PatrolSummaryEditor_ObservationSection;
-
-	public static String PatrolSummaryEditor_OverallStatistics2;
-	public static String PatrolSummaryEditor_PatrolData_SectionDescription2;
-	public static String PatrolSummaryEditor_PatrolData_SectionName2;
-	public static String PatrolSummaryEditor_PatrolId_Label2;
-	public static String PatrolSummaryEditor_PatrolInfo_SectionDescription;
-	public static String PatrolSummaryEditor_PatrolInfo_SectionHeader2;
-	public static String PatrolSummaryEditor_PatrolType_Label1;
 	public static String PatrolSummaryEditor_SaveError;
-
-	public static String PatrolSummaryEditor_SectionName2;
 	public static String PatrolSummaryEditor_StartDate_Label;
 	public static String PatrolSummaryEditor_Station_Label;
 
@@ -796,7 +733,6 @@ public class Messages extends NLS {
 
 	public static String PatrolSummaryEditor_TotalTime;
 	public static String PatrolSummaryEditor_TrackType;
-	public static String PatrolSummaryEditor_TransportType_Label2;
 	public static String PatrolSummaryEditor_YesDataLabel;
 	public static String PatrolTemplateCloner_copycustomattributes2;
 	public static String PatrolTemplateCloner_ProgressCopyMandates2;
@@ -811,7 +747,6 @@ public class Messages extends NLS {
 	public static String PatrolTrackPointDialog_Button_Apply;
 	public static String PatrolTransportChangeDialog_CustomLabel;
 	public static String PatrolTransportChangeDialog_DateLabel;
-	public static String PatrolTransportChangeDialog_DialogMessage2;
 	public static String PatrolTransportChangeDialog_DialogTitle2;
 	public static String PatrolTransportChangeDialog_Error_StartDateAfter;
 	public static String PatrolTransportChangeDialog_Error_StartDateBefore;
@@ -827,13 +762,9 @@ public class Messages extends NLS {
 
 	public static String PatrolTransportChangeDialog_title;
 	public static String PatrolTransportChangeDialog_TransportChangeLegIdentifier;
-	public static String PatrolTransportComposite_Error_NoTransportType2;
-
 	public static String PatrolTransportComposite_modrequired;
 	public static String PatrolTransportComposite_PilotLabel;
 	public static String PatrolTransportComposite_PilotRequired2;
-	public static String PatrolTransportComposite_Title2;
-	public static String PatrolTransportComposite_TransportType_Lable2;
 	public static String PatrolTransportCsvExportConfig_DialogMessage12;
 	public static String PatrolTransportCsvExportConfig_FailedMessage;
 	public static String PatrolTransportCsvExportConfig_Message1;
@@ -850,7 +781,6 @@ public class Messages extends NLS {
 	public static String PatrolTransportCsvImportConfig_Title1;
 	public static String PatrolTransportCsvImporter_ErrorfileNotFound;
 	public static String PatrolTransportCsvImporter_InvalidLine;
-	public static String PatrolTransportCsvImporter_InvalidPatrolType1;
 	public static String PatrolTransportCsvImporter_LanguageMessage;
 	public static String PatrolTransportCsvImporter_LanguageSelection;
 	public static String PatrolTransportType_Key;
@@ -868,37 +798,18 @@ public class Messages extends NLS {
 	public static String PatrolTreeContentProvider_TypeOption1;
 	public static String PatrolTreeContentProvider_YearOption;
 	public static String PatrolTypePropertyPage_ActiveLabel;
-	public static String PatrolTypePropertyPage_DefaultName;
 	public static String PatrolTypePropertyPage_DefaultTransportionTypeName2;
-	public static String PatrolTypePropertyPage_DeleteConfirmation;
 	public static String PatrolTypePropertyPage_DeleteDialogTitle;
-	public static String PatrolTypePropertyPage_DeleteError;
-	public static String PatrolTypePropertyPage_DeleteWarningMessage;
-	public static String PatrolTypePropertyPage_DialogMessage;
 	public static String PatrolTypePropertyPage_DisabledLabel;
 	public static String PatrolTypePropertyPage_Error_DeletingTransport;
 	public static String PatrolTypePropertyPage_Error_DuplicateTransportOption;
 	public static String PatrolTypePropertyPage_Error_InvalidTransportType;
-	public static String PatrolTypePropertyPage_Error_SavingChanges12;
-	public static String PatrolTypePropertyPage_InvalidMaxSpeed_DialogMessage;
-	public static String PatrolTypePropertyPage_InvalidMaxSpeed_DialogTitle;
 	public static String PatrolTypePropertyPage_InvalidType_DialogTitle;
-	public static String PatrolTypePropertyPage_LanguageLabel;
-	public static String PatrolTypePropertyPage_MaxSpeed_ColumnHeader;
-	public static String PatrolTypePropertyPage_MaxSpeed_ColumnTooltip;
-	public static String PatrolTypePropertyPage_RequiresPilotLbl;
-	public static String PatrolTypePropertyPage_Title;
-	public static String PatrolTypePropertyPage_TrackTypeHeader;
-	public static String PatrolTypePropertyPage_TrackTypes;
-	public static String PatrolTypePropertyPage_TransportOptionsLabel;
-	public static String PatrolTypePropertyPage_UniqueTrackType;
 	public static String PatrolType_AirName;
 	public static String PatrolType_GroundName;
 	public static String PatrolType_MixedName;
 	public static String PatrolType_WaterName;
 	public static String PatrolTypeDeleteAdvisor_patrolswithtypeexist2;
-	public static String PatrolTypeDeleteAdvisor_systemtracktypenotdelete;
-	public static String PatrolTypeDeleteAdvisor_tranportswithtypeexist2;
 	public static String Patrol_SystemGenerateId_Name;
 	public static String PatrolGpsImportEngine_NotracksFound;
 	public static String PatrolGpxImportEngine_NotAllTracksImported2;
@@ -919,8 +830,6 @@ public class Messages extends NLS {
 	public static String PatrolPresentationPart_attachmentslabel;
 	public static String PatrolPresentationPart_categorycolumn;
 	public static String PatrolPresentationPart_changeTrackPointStyle;
-
-	public static String PatrolPresentationPart_changetrackstyletooltip;
 	public static String PatrolPresentationPart_changewpstyletooltip;
 	public static String PatrolPresentationPart_daylabel;
 	public static String PatrolPresentationPart_dayslabel;
@@ -940,8 +849,6 @@ public class Messages extends NLS {
 	public static String PatrolPresentationPart_singleattachmentslabel;
 	public static String PatrolPresentationPart_StartDate;
 	public static String PatrolPresentationPart_Station;
-	public static String PatrolPresentationPart_SummaryAreaLabel2;
-
 	public static String PatrolPresentationPart_SummarySection;
 	public static String PatrolPresentationPart_tabname;
 	public static String PatrolPresentationPart_timecolumn;
@@ -960,7 +867,6 @@ public class Messages extends NLS {
 	public static String PatrolViewFilter_AscOp;
 	public static String PatrolViewFilter_DescOp;
 	public static String PatrolViewFilter_EndDateSort;
-	public static String PatrolViewFilter_PatrolIdSort2;
 	public static String PatrolViewFilter_StartDateSort;
 	public static String PatrolWaypointSource_PatrolWaypointSourceName2;
 	public static String PatrolWaypointSourceUiProvider_WaypointNotFound2;
@@ -998,16 +904,12 @@ public class Messages extends NLS {
 	public static String SmartServiceInfo_PatrolService_Keyword52;
 	public static String SmartServiceInfo_PatrolService_Keyword6;
 	public static String StationComposite_NoStation_Label;
-	public static String StationComposite_Station_Label;
-	public static String StationComposite_Title2;
 	public static String StationDeleteAdvisor_DeleteError2;
 	public static String StationDeleteAdvisor_InvalidObjectType;
 	public static String StationTeamWizardPage_PageMessage2;
 	public static String StationTeamWizardPage_Title;
 	public static String TeamComposite_Error_CouldNotLoadTeams;
 	public static String TeamComposite_NoTeam_Label;
-	public static String TeamComposite_TeamLabel;
-	public static String TeamComposite_Title2;
 	public static String TeamDeleteAdvisor_DeleteError2;
 	public static String TeamDeleteAdvisor_Error_InvalidObjectType;
 	public static String TeamPropertyPage_ConfirmDeleteMessage;
@@ -1100,7 +1002,6 @@ public class Messages extends NLS {
 
 	public static String TrackTypeWizardPage_Title;
 
-	public static String TransportTypeDeleteAdvisor_DeleteError2;
 	public static String TransportTypeDeleteAdvisor_InvalidObjectType;
 
 	public static String TransportTypeDeleteAdvisor_message;
@@ -1126,7 +1027,6 @@ public class Messages extends NLS {
 	public static String XmlToPatrolConverter_ReadError2;
 	public static String XmlToPatrolConverter_SignatureTypeKeyNotFound;
 	public static String XmlToPatrolConverter_SourceParseError;
-	public static String XmlToPatrolConverter_TrackTypeNotFound2;
 	public static String XmlToPatrolConverter_TreeAttributesNotSupported2;
 	public static String XmlToPatrolConverter_TreeNodeNotFound2;
 	public static String XmlToPatrolConverter2_ReadError2;

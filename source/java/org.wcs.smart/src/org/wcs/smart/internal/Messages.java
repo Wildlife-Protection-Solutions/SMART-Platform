@@ -500,9 +500,6 @@ public class Messages extends NLS {
 	public static String CsvFileComposite_InvalidDelimiter1;
 	public static String CsvFileComposite_semicolon;
 	public static String CsvFileComposite_tab;
-	public static String DataModel_AttributeAlreadyExists;
-	public static String DataModel_AttributeAlreadyExistsChild;
-	public static String DataModel_AttributeAlreadyExistsParent;
 	public static String DataModel_categoriestask;
 	public static String DataModel_CategoryConfigError;
 	public static String DataModel_CategoryConfigError2;
@@ -737,6 +734,7 @@ public class Messages extends NLS {
 	public static String DialogConstants_ClearImageText;
 	public static String DialogConstants_csvfiles;
 	public static String DialogConstants_DeleteButton_Label;
+	public static String DialogConstants_DeleteDialogTitle;
 	public static String DialogConstants_DeSelectAll;
 	public static String DialogConstants_DisableAllButton_Label;
 	public static String DialogConstants_DisableButton_Label;
@@ -993,9 +991,9 @@ public class Messages extends NLS {
 	public static String GPSDataImport_Progress_ReadingGpxFileName;
 	public static String GPSDataImport_TrackError_CouldNotReadFile;
 	public static String GPSDataImport_TrackImportDescrption;
-	public static String GPSDataImport_TrackName;
 	public static String GPSDataImport_TrackPointError_CouldNotParse;
 	public static String GPSDataImport_TrackPointError_CouldNotRead;
+	public static String GPSDataImport_TrackPointName;
 	public static String GPSDataImport_TrackProgress_ReadingGPXData;
 	public static String GPSDataImport_WaypointError_CouldNotParse;
 	public static String GPSDataImport_WaypointError_CouldNotReadFile;
@@ -1045,7 +1043,6 @@ public class Messages extends NLS {
 	public static String IconPreferencePage_editiconsettooltip;
 	public static String IconPreferencePage_editicontooltip;
 	public static String IconPreferencePage_IconSetsTab;
-	public static String IconPreferencePage_IconsTab;
 	public static String IconPreferencePage_LoadJobName;
 	public static String IconPreferencePage_MakeDefault;
 	public static String IconPreferencePage_newiconsettooltip;
@@ -1275,7 +1272,6 @@ public class Messages extends NLS {
 	public static String MapView_MapName;
 	public static String MultipleSelectComposite_Button_Add;
 	public static String MultipleSelectComposite_Button_Remove;
-	public static String NameKeyComposite_ChangeKey_Button_Label;
 	public static String NameKeyComposite_ChangeKey_Button_Tooltip;
 	public static String NameKeyComposite_ChangeKey_ConfirmDialog_Message;
 	public static String NameKeyComposite_ChangeKey_ConfirmDialog_Title;
@@ -1639,7 +1635,6 @@ public class Messages extends NLS {
 	public static String TranslateSimpleListItemDialog_NameLabel;
 	public static String UpgradeEngine_ChangeLogTaskName;
 	public static String UpgradeEngine_CompressingTaskName;
-	public static String UpgradeEngine_Confirm_Title;
 	public static String UpgradeEngine_Error_Message1;
 	public static String UpgradeEngine_LoadingTaskName;
 	public static String UpgradeEngine_subprogress2;

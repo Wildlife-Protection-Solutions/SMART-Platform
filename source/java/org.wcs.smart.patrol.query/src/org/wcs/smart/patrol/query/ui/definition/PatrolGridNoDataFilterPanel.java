@@ -89,8 +89,8 @@ public class PatrolGridNoDataFilterPanel extends BasicFilterDefintionPanel {
 		((GridLayout)opComp.getLayout()).marginHeight = 0;
 		
 		btnOpDefault = new Button(opComp, SWT.RADIO);
-		btnOpDefault.setText(Messages.PatrolGridNoDataFilterPanel_DefaultOp);
-		btnOpDefault.setToolTipText(Messages.PatrolGridNoDataFilterPanel_DefaultTooltip);
+		btnOpDefault.setText(Messages.PatrolGridNoDataFilterPanel_DefaultOp2);
+		btnOpDefault.setToolTipText(Messages.PatrolGridNoDataFilterPanel_DefaultTooltip2);
 		btnOpDefault.setSelection(true);
 		
 		btnOpNone = new Button(opComp, SWT.RADIO);
@@ -98,8 +98,8 @@ public class PatrolGridNoDataFilterPanel extends BasicFilterDefintionPanel {
 		btnOpNone.setToolTipText(Messages.PatrolGridNoDataFilterPanel_NoneTooltip);
 		
 		btnOpCustom = new Button(opComp, SWT.RADIO);
-		btnOpCustom.setText(Messages.PatrolGridNoDataFilterPanel_CustomOp);
-		btnOpCustom.setToolTipText(Messages.PatrolGridNoDataFilterPanel_CustomTooltip);
+		btnOpCustom.setText(Messages.PatrolGridNoDataFilterPanel_CustomOp2);
+		btnOpCustom.setToolTipText(Messages.PatrolGridNoDataFilterPanel_CustomTooltip2);
 
 		Listener l = (e) -> {
 			updateEnabled();

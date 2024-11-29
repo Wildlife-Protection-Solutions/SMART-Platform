@@ -11,12 +11,12 @@
             locationURI="menu:org.eclipse.ui.main.menu?before=org.wcs.smart.fielddata">
          <menu
                id="org.wcs.smart.menu.patrol"
-               label="Patrol/Track"
+               label="%patroltrack1.menu.label"
                mnemonic="%patrol.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.patrol.newPatrol"
                   id="org.wcs.smart.patrol.create"
-                  label="New Patrol/Track"
+                  label="%new.patroltrack.command.label"
                   mnemonic="%patrol.newpatrol.command.mnemonic"
                   style="push"
                   tooltip="%patrol.newpatrol.command.tooltip">
@@ -28,7 +28,7 @@
             <menu
                   icon="images/icons/obj16/patrol.png"
                   id="org.wcs.smart.patrol.data"
-                  label="Patrol/Track Data">
+                  label="%patroltrack.data.menu.label">
                <command
                      commandId="org.wcs.smart.patrol.exportPatrol"
                      label="%patrolexport.command.label"
@@ -47,7 +47,7 @@
             <menu
                   icon="images/icons/obj16/patrol.png"
                   id="org.wcs.smart.patrol.configuration"
-                  label="Patrol/Track Configuration">
+                  label="%patroltrack.config.menu.label">
                <command
                      commandId="org.wcs.smart.patrol.patrolTypes"
                      icon="images/icons/obj16/patrol_transport_type.png"
@@ -105,7 +105,7 @@
                   commandId="org.wcs.smart.observation.perspective.show"
                   icon="images/icons/obj16/patrol.png"
                   id="org.wcs.smart.patrol.view"
-                  label="View Patrol/Tracks"
+                  label="%patroltrack.view.command.label"
                   mnemonic="%showpatrolperspectivecommand.mnemonic"
                   style="push"
                   tooltip="%showpatrolperspectivecommand.tooltip">
@@ -342,7 +342,7 @@
                commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/obj16/patrol@2x.png"
                id="org.wcs.smart.perspective.fielddata.patrol"
-               label="Patrol/Track"
+               label="%patroltrack.perspective.command.label"
                mnemonic="%showpatrolperspectivecommand.mnemonic"
                mode="FORCE_TEXT"
                style="radio"
@@ -1044,7 +1044,7 @@
             class="org.wcs.smart.patrol.internal.ui.views.PatrolListView$PatrolListViewWrapper"
             icon="images/icons/obj16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolListView"
-            name="Patrols/Tracks"
+            name="%patroltrack.view.name"
             restorable="true">
       </view>
    </extension>

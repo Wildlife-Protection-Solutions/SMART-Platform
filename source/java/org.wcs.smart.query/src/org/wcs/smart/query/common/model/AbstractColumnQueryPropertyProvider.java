@@ -114,7 +114,7 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 		((GridLayout)panel.getLayout()).marginHeight = 0;
 		
 		Label lblTableColumns = new Label(panel, SWT.NONE);
-		lblTableColumns.setText("Column Configuration:");
+		lblTableColumns.setText(Messages.AbstractColumnQueryPropertyProvider_ConfigurationSelection);
 		lblTableColumns.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		cmbConfiguration = new ComboViewer(panel, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -124,7 +124,7 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 		cmbConfiguration.setLabelProvider(new LabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element == CUSTOM) return " -- Custom -- ";
+				if (element == CUSTOM) return Messages.AbstractColumnQueryPropertyProvider_CustomOp;
 				if (element instanceof QueryColumnConfiguration cc) return cc.getName();
 				return super.getText(element);
 			}
@@ -134,7 +134,7 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 		
 		Label lblInfo = new Label(panel, SWT.NONE);
 		lblInfo.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.INFO_ICON));
-		lblInfo.setToolTipText("Configurations can be modified or added using the Query -> Column Configurations... menu" );
+		lblInfo.setToolTipText(Messages.AbstractColumnQueryPropertyProvider_TooltipInfo );
 		
 		new Label(panel, SWT.NONE);
 		
@@ -209,7 +209,7 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 		
 		
 		
-		Job j = new Job("load configs") {
+		Job j = new Job(DialogConstants.LOADING_TEXT) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

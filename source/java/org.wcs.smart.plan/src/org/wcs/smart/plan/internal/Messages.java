@@ -100,8 +100,8 @@ public class Messages extends NLS {
 	public static String PatrolPlanContribution_Description_Label;
 	public static String PatrolPlanContribution_Name;
 	public static String PatrolPlanContribution_Name_Label;
-	public static String PatrolPlanContribution_NoAssociatedPlan_Label2;
 	public static String PatrolPlanContribution_None_Label;
+	public static String PatrolPlanContribution_NoPlans;
 	public static String PatrolPlanContribution_Open_Error;
 	public static String PatrolPlanContribution_Parents_Label;
 	public static String PatrolPlanContribution_PlanId_Label;

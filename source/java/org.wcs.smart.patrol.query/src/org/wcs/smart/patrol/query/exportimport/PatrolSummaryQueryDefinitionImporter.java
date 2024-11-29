@@ -112,7 +112,7 @@ public class PatrolSummaryQueryDefinitionImporter extends SummaryQueryDefinition
 							break;
 						}
 					}
-					if (!found) warnings.add(MessageFormat.format(Messages.PatrolSummaryQueryDefinitionImporter_GroupByNotSupported, po.getGuiName(Locale.getDefault())));
+					if (!found) warnings.add(MessageFormat.format(Messages.PatrolSummaryQueryDefinitionImporter_GroupByNotSupported2, po.getGuiName(Locale.getDefault())));
 					
 				}
 			}

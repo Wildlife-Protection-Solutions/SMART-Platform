@@ -73,6 +73,7 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.CyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider;
 import org.wcs.smart.cybertracker.export.DataModelWrapper;
@@ -99,6 +100,7 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.PatrolAttributePatrolType;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.NamedIconItemLabelProvider;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -189,7 +191,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		
 		
 		Label trackLabel = new Label(g, SWT.NONE);
-		trackLabel.setText("Track Type:");
+		trackLabel.setText(LabelConstants.TRACK_TYPE + ":"); //$NON-NLS-1$
 		
 		cmbTrackType = new ComboViewer(g, SWT.READ_ONLY);
 		cmbTrackType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -203,7 +205,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		});
 		
 		Label nameLabel = new Label(g, SWT.NONE);
-		nameLabel.setText("Package Name(s):");
+		nameLabel.setText(CyberTrackerLabelProvider.PACKAGE_NAMES + ":"); //$NON-NLS-1$
 		nameLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP,false, false));
 		((GridData)nameLabel.getLayoutData()).verticalIndent = 2;
 
@@ -543,12 +545,12 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		
 		try {
 			if (cmbTrackType.getStructuredSelection().isEmpty()) {
-				throw new Exception("Track type required.");
+				throw new Exception(MessageFormat.format(Messages.CtPatrolPackageConfigurator_fieldrequired, LabelConstants.TRACK_TYPE));
 			}
 			
 			for (Text txt : txtNames) {
 				if (getLanguage(txt).isDefault() && txt.getText().isBlank()) {
-					throw new Exception(MessageFormat.format("A package name is required for the default language ({0})", getLanguage(txt).getDisplayName()));
+					throw new Exception(MessageFormat.format(CyberTrackerLabelProvider.PACKAGE_NAME_REQUIRED, getLanguage(txt).getDisplayName()));
 				}
 			}
 		
@@ -776,7 +778,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 			((GridLayout)inner.getLayout()).marginHeight = 0;
 
 			Label l= new Label(inner, SWT.NONE);
-			l.setText("Track Type");
+			l.setText(LabelConstants.TRACK_TYPE);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			

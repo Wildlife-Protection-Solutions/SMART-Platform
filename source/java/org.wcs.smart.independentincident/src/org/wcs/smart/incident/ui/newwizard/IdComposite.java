@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IIncidentProvider;
+import org.wcs.smart.incident.IncidentLabelProvider;
 import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.internal.Messages;
@@ -113,7 +114,7 @@ public class IdComposite extends AbstractIncidentComposite {
 		}
 		
 		Label l = new Label(item, SWT.NONE);
-		l.setText("Incident Type:");
+		l.setText(IncidentLabelProvider.TYPE_NAME + ":"); //$NON-NLS-1$
 		
 		cmbType = new ComboViewer(item, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbType.setContentProvider(ArrayContentProvider.getInstance());

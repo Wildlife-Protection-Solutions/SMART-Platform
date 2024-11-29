@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,6 +62,7 @@ import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolObservationResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
@@ -358,30 +360,32 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 			return;
 		}
 		
-		progress.subTask(Messages.DerbyObservationEngine_Progress_StationData);
+		String taskName = "Populating {0} Data";
+		
+		progress.subTask(MessageFormat.format(taskName, LabelConstants.STATION_NAME));
 		progress.split(3);
 		populateTemporaryTableNameObjExtra("p_station_uuid", "p_station", c, session);  //$NON-NLS-1$//$NON-NLS-2$
 		
 		
-		progress.subTask(Messages.DerbyObservationEngine_Progress_TeamData);
+		progress.subTask(MessageFormat.format(taskName, LabelConstants.TEAM_NAME));
 		progress.split(3);
 		populateTemporaryTableNameObjExtra("p_team_uuid", "p_team", c, session);  //$NON-NLS-1$//$NON-NLS-2$
 		
-		progress.subTask(Messages.DerbyObservationEngine_Progress_MandateData);
+		progress.subTask(MessageFormat.format(taskName, LabelConstants.MANDATE_NAME));
 		progress.split(3);
 		populateTemporaryTableNameObjExtra("pl_mandate_uuid", "p_mandate", c, session);  //$NON-NLS-1$//$NON-NLS-2$
 		
-		progress.subTask(Messages.DerbyObservationEngine_Progress_TransportData);
+		progress.subTask(MessageFormat.format(taskName, LabelConstants.TRANSPORT_MODE));
 		progress.split(3);
 		populateTemporaryTableNameObjExtra("pl_transport_uuid", "p_transporttype", c, session);  //$NON-NLS-1$//$NON-NLS-2$
 		populateTransportGroup("pl_transport_uuid", "p_transportgroup", c, session, queryDataTable);  //$NON-NLS-1$//$NON-NLS-2$
 		
-		progress.subTask(Messages.DerbyObservationEngine_Progress_TransportData);
+		progress.subTask(MessageFormat.format(taskName, LabelConstants.TRACK_TYPE));
 		progress.split(3);
 		populateTemporaryTableNameObjExtra("p_type_uuid", "p_type", c, session);  //$NON-NLS-1$//$NON-NLS-2$
 		
 		
-		progress.subTask(Messages.DerbyObservationEngine_Progress_LeaderPilotData);
+		progress.subTask(MessageFormat.format(taskName, LabelConstants.LEADER));
 		progress.split(4);
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT plm_leader FROM "); //$NON-NLS-1$

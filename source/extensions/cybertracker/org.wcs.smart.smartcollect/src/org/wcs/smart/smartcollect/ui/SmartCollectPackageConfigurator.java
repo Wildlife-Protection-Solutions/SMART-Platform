@@ -75,6 +75,7 @@ import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.cybertracker.ConnectCtPlugIn;
 import org.wcs.smart.connect.cybertracker.ctpackage.ConnectDataContribution;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.CyberTrackerLabelProvider;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider;
 import org.wcs.smart.cybertracker.export.DataModelWrapper;
@@ -197,7 +198,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		warnLabel.setText(Messages.SmartCollectPackageConfigurator_WarningLabel);
 		
 		Label nameLabel = new Label(g, SWT.NONE);
-		nameLabel.setText("Package Name(s):");
+		nameLabel.setText(CyberTrackerLabelProvider.PACKAGE_NAMES);
 		nameLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP,false, false));
 		((GridData)nameLabel.getLayoutData()).verticalIndent = 2;
 		
@@ -459,7 +460,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		try {
 			for (Text txt : txtNames) {
 				if (getLanguage(txt).isDefault() && txt.getText().isBlank()) {
-					throw new Exception(MessageFormat.format("A package name is required for the default language ({0})", getLanguage(txt).getDisplayName()));
+					throw new Exception(MessageFormat.format(CyberTrackerLabelProvider.PACKAGE_NAME_REQUIRED, getLanguage(txt).getDisplayName()));
 				}
 			}
 		

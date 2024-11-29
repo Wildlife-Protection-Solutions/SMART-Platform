@@ -56,7 +56,7 @@ public class PatrolEditorContribution implements IPatrolEditorContribution {
 	
 	@Override
 	public Composite createControl(FormToolkit toolkit, Composite parent, boolean canEdit) {
-		composite = new ObjectDeviceLinkComposite(parent, toolkit, "patrol/track", "Leg");
+		composite = new ObjectDeviceLinkComposite(parent, toolkit, Messages.PatrolEditorContribution_patrolortrack, Messages.PatrolEditorContribution_leg);
 		return composite;
 	}
 	

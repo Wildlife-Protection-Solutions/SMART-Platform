@@ -95,11 +95,14 @@ public class Messages extends NLS {
 	public static String CyberTrackerCaDeleteHandler_DeleteRegistryKey;
 	public static String CyberTrackerFileImportDialog_OpenArchiveFolderOp;
 	public static String CyberTrackerLabelProvider_AttachmentTagNotFound;
+	public static String CyberTrackerLabelProvider_IncidentTypeNotFound;
 	public static String CyberTrackerLabelProvider_JsonParseError1;
 	public static String CyberTrackerLabelProvider_JsonParseError2;
 	public static String CyberTrackerLabelProvider_JsonParseError3;
 	public static String CyberTrackerLabelProvider_JsonParseError4;
 	public static String CyberTrackerLabelProvider_JsonParseError5;
+	public static String CyberTrackerLabelProvider_NameRequiredMessage;
+	public static String CyberTrackerLabelProvider_NamesLabel;
 	public static String CyberTrackerLabelProvider_ObservationParseError1;
 	public static String CyberTrackerLabelProvider_ObservationParseError10;
 	public static String CyberTrackerLabelProvider_ObservationParseError11;
@@ -483,7 +486,6 @@ public class Messages extends NLS {
 	public static String SmartMobileDeviceList_SaveError;
 	public static String SmartMobileDeviceList_Title;
 	public static String SmartMobileDeviceManager_DefaultLabelName;
-	public static String SmartMobileDeviceManager_LoadError;
 
 	static {
 		// initialize resource bundle

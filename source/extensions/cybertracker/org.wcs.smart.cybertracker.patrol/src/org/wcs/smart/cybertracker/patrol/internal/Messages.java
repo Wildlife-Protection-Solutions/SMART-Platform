@@ -41,7 +41,6 @@ public class Messages extends NLS {
 	public static String PatrolDialog_NoTransportType2;
 	public static String PatrolDialog_PageErrors;
 	public static String PatrolDialog_PatrolRequiredError2;
-	public static String PatrolDialog_PatrolRequiredError22;
 	public static String PatrolDialog_SaveErrors;
 	public static String PatrolDialog_ShellTitle;
 	public static String PatrolDialog_StartDateLabel;
@@ -50,10 +49,73 @@ public class Messages extends NLS {
 	public static String PatrolJsonProcessor_ErrorDialog;
 	public static String PatrolJsonProcessor_ErrorMesg2;
 	public static String PatrolJsonProcessor_ErrorTitle;
-	public static String PatrolJsonProcessor_UserCancelled22;
 	public static String PatrolJsonProcessor_UserCancelled2;
 	public static String PatrolJsonProcessor_WarningsLabel;
 	public static String PatrolJsonProcessor_WarningsMsg2;
+	public static String CleanAndFixDialog_BufferDistance;
+
+	public static String CleanAndFixDialog_BufferDistanceInfo;
+
+	public static String CleanAndFixDialog_CleanSettingsInfo;
+
+	public static String CleanAndFixDialog_CleanSettingsSection;
+
+	public static String CleanAndFixDialog_CleanTab;
+
+	public static String CleanAndFixDialog_ClusterTimeframe;
+
+	public static String CleanAndFixDialog_ClusterTimeframeInfo;
+
+	public static String CleanAndFixDialog_DataFilterHeader;
+
+	public static String CleanAndFixDialog_DataSettingsInfo;
+
+	public static String CleanAndFixDialog_InvalidClusterDistance;
+
+	public static String CleanAndFixDialog_InvalidDays;
+
+	public static String CleanAndFixDialog_InvalidDistance;
+
+	public static String CleanAndFixDialog_InvalidTimeframe;
+
+	public static String CleanAndFixDialog_JobName;
+
+	public static String CleanAndFixDialog_LabeObsMessage;
+
+	public static String CleanAndFixDialog_LastObservation;
+
+	public static String CleanAndFixDialog_Message;
+
+	public static String CleanAndFixDialog_ProcessAnd;
+
+	public static String CleanAndFixDialog_ProcessBetween;
+
+	public static String CleanAndFixDialog_ProcessButton;
+
+	public static String CleanAndFixDialog_RestoreDefaults;
+
+	public static String CleanAndFixDialog_SaveMessage;
+
+	public static String CleanAndFixDialog_SaveSettings;
+
+	public static String CleanAndFixDialog_SaveTitle;
+
+	public static String CleanAndFixDialog_SettingsTab;
+
+	public static String CleanAndFixDialog_TaskName;
+
+	public static String CleanAndFixDialog_Title;
+
+	public static String CleanAndFixDialog_Title2;
+
+	public static String CleanAndFixDialog_TrackDistance;
+
+	public static String CleanAndFixDialog_TrackDistanceMessage;
+
+	public static String CleanAndFixDialog_ValidDay;
+
+	public static String CleanAndFixDialog_ValidDayMessage;
+
 	public static String CtPatrolPackageConfigurator_CmLabel;
 
 	public static String CtPatrolPackageConfigurator_CmRequired;
@@ -69,6 +131,8 @@ public class Messages extends NLS {
 	public static String CtPatrolPackageConfigurator_DefaultName;
 
 	public static String CtPatrolPackageConfigurator_DetailsLabel;
+
+	public static String CtPatrolPackageConfigurator_fieldrequired;
 
 	public static String CtPatrolPackageConfigurator_FrequencyTooltip;
 
@@ -133,11 +197,15 @@ public class Messages extends NLS {
 
 	public static String PatrolCyberTrackerLabelProvider_ModifiedMessage2;
 
+	public static String PatrolEditorContribution_leg;
+
 	public static String PatrolEditorContribution_loadingmobiledetails;
 
 	public static String PatrolEditorContribution_objectType2;
 
 	public static String PatrolEditorContribution_PatrolLegField2;
+
+	public static String PatrolEditorContribution_patrolortrack;
 
 	public static String PatrolMetadataPackageContribution_ArmedLabel;
 
@@ -231,6 +299,20 @@ public class Messages extends NLS {
 	public static String PatrolTrackWizardPage_Title2;
 
 	public static String PatrolTrackWizardPage_TracksLabel2;
+
+	public static String PatrolTypeDeleteAdvisor_deletemessage;
+
+	public static String UnendedPatrolProcessor_CleanedPatrols;
+
+	public static String UnendedPatrolProcessor_CleanError;
+
+	public static String UnendedPatrolProcessor_ErrorPatrols;
+
+	public static String UnendedPatrolProcessor_NoDataFound;
+
+	public static String UnendedPatrolProcessor_ProcessingTaskName;
+
+	public static String UnendedPatrolProcessor_RefreshingTaskName;
 
 	static {
 		// initialize resource bundle

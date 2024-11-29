@@ -62,6 +62,8 @@ public abstract class SimpleQuery extends StyledQuery {
 
 	private static final long serialVersionUID = 1L;
 	
+	private static final String QUERY_CONFIG_IDENTIFIER = "config:"; //$NON-NLS-1$
+	
 	public static final String COLUMN_SPLITTER = ","; //$NON-NLS-1$
 	
 	/* db fields */
@@ -146,7 +148,7 @@ public abstract class SimpleQuery extends StyledQuery {
 	public boolean hasColumnConfig() {
 		String v = getVisibleColumns();
 		if (v == null) return false;
-		if (v.startsWith("config:")) return true;
+		if (v.startsWith(QUERY_CONFIG_IDENTIFIER)) return true;
 		return false;
 	}
 	
@@ -155,7 +157,7 @@ public abstract class SimpleQuery extends StyledQuery {
 		if (config == null) {
 			setVisibleColumns(null);
 		}else {
-			setVisibleColumns("config:" + UuidUtils.uuidToString(config.getUuid()) );
+			setVisibleColumns(QUERY_CONFIG_IDENTIFIER + UuidUtils.uuidToString(config.getUuid()) );
 		}		
 	}
 	

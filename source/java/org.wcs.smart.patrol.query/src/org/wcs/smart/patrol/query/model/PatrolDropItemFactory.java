@@ -82,6 +82,7 @@ import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolTreeGroupByDropI
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolValueDropItem;
 import org.wcs.smart.patrol.query.ui.itempanel.GriddedFilterPanel;
 import org.wcs.smart.patrol.query.ui.itempanel.SummaryFilterPanel;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
@@ -117,6 +118,8 @@ import org.wcs.smart.util.UuidUtils;
 public class PatrolDropItemFactory extends BasicDropItemFactory implements IQueryDropItemFactory {
 
 	public static PatrolDropItemFactory INSTANCE = new PatrolDropItemFactory();
+	
+	public static final String NOT_FOUND_MSG = Messages.PatrolDropItemFactory_NotFoundMessage;
 	
 	protected PatrolDropItemFactory(){
 		
@@ -640,9 +643,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			ListItem m = PatrolQueryHibernateManager.getInstance()
 					.getPatrolMandate(session, value1);
 			if (m == null) {
-				it = new ErrorDropItem(MessageFormat.format(
-						Messages.PatrolFilter_MandateNotFound,
-						new Object[] { value1 }));
+				it = new ErrorDropItem(MessageFormat.format(NOT_FOUND_MSG, LabelConstants.MANDATE_NAME, value1));
 			} else {
 				it.initializeData(new Object[]{new PatrolOptionData(option), m});
 			}
@@ -650,9 +651,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			ListItem m = PatrolQueryHibernateManager.getInstance().getStation(
 					session, value1);
 			if (m == null) {
-				it = new ErrorDropItem(MessageFormat.format(
-						Messages.PatrolFilter_StationNotFound,
-						new Object[] { value1 }));
+				it = new ErrorDropItem(MessageFormat.format(NOT_FOUND_MSG, LabelConstants.STATION_NAME, value1));
 			} else {
 				it.initializeData(new Object[]{new PatrolOptionData(option), m});
 			}
@@ -660,9 +659,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			ListItem m = PatrolQueryHibernateManager.getInstance().getTeam(
 					session, value1);
 			if (m == null) {
-				it = new ErrorDropItem(MessageFormat.format(
-						Messages.PatrolFilter_TeamNotFound,
-						new Object[] { value1 }));
+				it = new ErrorDropItem(MessageFormat.format(NOT_FOUND_MSG, LabelConstants.TEAM_NAME, value1));
 			} else {
 				it.initializeData(new Object[]{new PatrolOptionData(option), m});
 			}
@@ -671,20 +668,27 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 				|| option == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY
 				|| option == PatrolQueryOption.MANDATE_KEY
 				|| option == PatrolQueryOption.AGENCY_KEY) {
+			
 			List<ListItem> items = null;
+			String op = null;
 			if (option == PatrolQueryOption.TEAM_KEY) {
 				items = PatrolQueryHibernateManager.getInstance()
 						.getActiveTeams(session);
+				op = LabelConstants.TEAM_NAME;
 			} else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY) {
 				items = PatrolQueryHibernateManager.getInstance()
 						.getActiveTransportTypes(session);
+				op = LabelConstants.TRANSPORT_MODE;
 			} else if (option == PatrolQueryOption.MANDATE_KEY) {
 				items = PatrolQueryHibernateManager.getInstance()
 						.getActiveMandates(session);
+				op = LabelConstants.MANDATE_NAME;
 			} else if (option == PatrolQueryOption.AGENCY_KEY) {
-				items = PatrolQueryHibernateManager.getInstance().getAgencies(session);				
+				items = PatrolQueryHibernateManager.getInstance().getAgencies(session);
+				op = Messages.PatrolDropItemFactory_AgencyField;
 			} else if (option == PatrolQueryOption.PATROL_TRANSPORT_GROUP_KEY) {
 				items = PatrolQueryHibernateManager.getInstance().getActiveTransportGroups(session);
+				op = LabelConstants.ENVIRONMENT_NAME;
 			}
 			
 			boolean found = false;
@@ -698,17 +702,14 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 				}
 			}
 			if (!found) {
-				it = new ErrorDropItem(MessageFormat.format(
-						Messages.PatrolFilter_TeamNotFound,
-						new Object[] { value1 }));
+				it = new ErrorDropItem(MessageFormat.format(NOT_FOUND_MSG, op, value1));				
 			}
+			
 		} else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE) {
 			ListItem m = PatrolQueryHibernateManager.getInstance()
 					.getTransportType(session, value1);
 			if (m == null) {
-				it = new ErrorDropItem(MessageFormat.format(
-						Messages.PatrolFilter_TransportTypeNotFound,
-						new Object[] { value1 }));
+				it = new ErrorDropItem(MessageFormat.format(NOT_FOUND_MSG, LabelConstants.TRANSPORT_MODE, value1));				
 			} else {
 				it.initializeData(new Object[]{new PatrolOptionData(option), m});
 			}
@@ -726,16 +727,15 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 					it.initializeData(new Object[]{new PatrolOptionData(option), m});	
 				}
 			}catch (Exception ex) {
-				it = new ErrorDropItem(MessageFormat.format(
-						Messages.PatrolDropItemFactory_ParseError,
-						new Object[] { value1 }));
+				it = new ErrorDropItem(MessageFormat.format(Messages.PatrolDropItemFactory_ParseError,value1));
+						
 			}
 			
 			
 		} else if (option == PatrolQueryOption.PATROL_TYPE) {
 			ListItem m = PatrolQueryHibernateManager.getInstance().getPatrolType(session, value1);
 			if (m == null) {
-				it = new ErrorDropItem(MessageFormat.format(Messages.PatrolDropItemFactory_TrackTypeNotFound, new Object[] { value1 }));
+				it = new ErrorDropItem(MessageFormat.format(NOT_FOUND_MSG, LabelConstants.TRACK_TYPE, value1));
 			} else {
 				it.initializeData(new Object[]{new PatrolOptionData(option), m});
 			}
@@ -746,18 +746,14 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 			ListItem m = PatrolQueryHibernateManager.getInstance().getEmployee(
 					session, value1);
 			if (m == null) {
-				it = new ErrorDropItem(MessageFormat.format(
-						Messages.PatrolFilter_EmployeeNotFound,
-						new Object[] { value1 }));
+				it = new ErrorDropItem(MessageFormat.format(NOT_FOUND_MSG, LabelConstants.EMPLOYEE, value1));				
 			} else {
 				it.initializeData(new Object[]{new PatrolOptionData(option), m});
 			}
 		} else if (option == PatrolQueryOption.AGENCY){
 			Agency ag = (Agency) session.get(Agency.class, UuidUtils.stringToUuid(value1));
 			if (ag == null){
-				it = new ErrorDropItem(MessageFormat.format(
-						Messages.PatrolDropItemFactory_AgencyNotFound,
-						new Object[] { value1 }));
+				it = new ErrorDropItem(MessageFormat.format(NOT_FOUND_MSG, Messages.PatrolDropItemFactory_AgencyField, value1));				
 			}else{
 				ListItem init = new ListItem(ag.getUuid(), ag.getName());
 				it.initializeData(new Object[]{new PatrolOptionData(option), init});
@@ -766,9 +762,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 		}else if (option == PatrolQueryOption.RANK){
 			Rank ag = (Rank) session.get(Rank.class, UuidUtils.stringToUuid(value1));
 			if (ag == null){
-				it = new ErrorDropItem(MessageFormat.format(
-						Messages.PatrolDropItemFactory_RankNotFound,
-						new Object[] { value1 }));
+				it = new ErrorDropItem(MessageFormat.format(NOT_FOUND_MSG, Messages.PatrolDropItemFactory_RankField, value1));				
 			}else{
 				ListItem init = new ListItem(ag.getUuid(), ag.getName());
 				it.initializeData(new Object[]{new PatrolOptionData(option), init});
@@ -781,7 +775,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IQuer
 		
 		PatrolAttribute pa = PatrolQueryHibernateManager.getInstance().getPatrolAttribute(session, f.getAttributeKey());
 		if (!pa.getType().equals(f.getAttributeType())){
-			return new DropItem[] {new ErrorDropItem(Messages.PatrolDropItemFactory_InvalidTypes)};
+			return new DropItem[] {new ErrorDropItem(Messages.PatrolDropItemFactory_InvalidTypes2)};
 		}
 		
 		PatrolAttributeQueryOption op = new PatrolAttributeQueryOption(pa);

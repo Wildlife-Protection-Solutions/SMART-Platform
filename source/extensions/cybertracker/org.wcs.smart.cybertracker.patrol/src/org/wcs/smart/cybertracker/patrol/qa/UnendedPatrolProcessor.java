@@ -32,11 +32,13 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.patrol.CleanPatrolEngine;
 import org.wcs.smart.cybertracker.patrol.CleanPatrolSettings;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Desktop processor for processing non-ended smart patrols. This
@@ -56,20 +58,20 @@ public class UnendedPatrolProcessor extends CleanPatrolEngine{
 	}
 		
 	public String getStatusMessage() {
-		if (modified.isEmpty() && error.isEmpty()) return "No data found that required processing";
+		if (modified.isEmpty() && error.isEmpty()) return Messages.UnendedPatrolProcessor_NoDataFound;
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("The following patrols have been cleaned and ended:\n");
+		sb.append(Messages.UnendedPatrolProcessor_CleanedPatrols + "\n"); //$NON-NLS-1$
 		for (Patrol p : modified) {
 			sb.append(p.getId());
-			sb.append("\n");
+			sb.append("\n"); //$NON-NLS-1$
 		}
 		
 		if (!error.isEmpty()) {
-			sb.append("\nThe following patrols generated errors when processing:\n");
+			sb.append("\n" + Messages.UnendedPatrolProcessor_ErrorPatrols + "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			for (Patrol p : error) {
 				sb.append(p.getId());
-				sb.append("\n");
+				sb.append("\n"); //$NON-NLS-1$
 			}
 		}
 		
@@ -90,7 +92,7 @@ public class UnendedPatrolProcessor extends CleanPatrolEngine{
 		
 		List<Patrol> tocleanup = new ArrayList<>();
 		
-		monitor.beginTask("Loading Data", 1);
+		monitor.beginTask(DialogConstants.LOADING_TEXT, 1);
 		
 		try(Session session = HibernateManager.openSession()){
 			
@@ -129,7 +131,7 @@ public class UnendedPatrolProcessor extends CleanPatrolEngine{
 			}	
 		}
 		
-		monitor.beginTask("Processing data", tocleanup.size()+1);
+		monitor.beginTask(Messages.UnendedPatrolProcessor_ProcessingTaskName, tocleanup.size()+1);
 		for(Patrol p : tocleanup) {
 			try(Session session = HibernateManager.openSession()){
 				session.beginTransaction();
@@ -140,7 +142,7 @@ public class UnendedPatrolProcessor extends CleanPatrolEngine{
 					}
 					session.getTransaction().commit();
 				}catch (Exception ex) {
-					SmartPlugIn.displayLog(MessageFormat.format("Unable to clean up patrol {0}: {1}", p.getId(), ex.getMessage()), ex);
+					SmartPlugIn.displayLog(MessageFormat.format(Messages.UnendedPatrolProcessor_CleanError, p.getId(), ex.getMessage()), ex);
 					session.getTransaction().rollback();
 					error.add(p);
 				}
@@ -149,7 +151,7 @@ public class UnendedPatrolProcessor extends CleanPatrolEngine{
 		}		
 
 		//fire patrol modified event
-		monitor.beginTask("Refreshing data", modified.size());
+		monitor.beginTask(Messages.UnendedPatrolProcessor_RefreshingTaskName, modified.size());
 		for (Patrol p : modified) {
 			PatrolEventManager.getInstance().patrolSaved(p, true);
 			monitor.worked(1);	

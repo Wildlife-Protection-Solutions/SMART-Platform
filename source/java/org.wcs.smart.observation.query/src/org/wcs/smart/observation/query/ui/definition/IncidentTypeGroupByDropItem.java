@@ -75,7 +75,7 @@ public class IncidentTypeGroupByDropItem extends DropItem implements IGroupByDro
 	@Override
 	public String getText() {
 		StringBuilder sb = new StringBuilder();
-		sb.append ("Incident Type");
+		sb.append (Messages.IncidentTypeGroupByDropItem_TypeLabel);
 		sb.append("\n"); //$NON-NLS-1$
 		int cnt = 0;
 		for (ListItem it : selectedItems){

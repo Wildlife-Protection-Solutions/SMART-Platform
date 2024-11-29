@@ -9,7 +9,7 @@ public class Messages extends NLS {
 	public static String PatrolEditorContribution_AddError;
 	public static String PatrolEditorContribution_ConfirmRemove;
 	public static String PatrolEditorContribution_DeleteError;
-	public static String PatrolEditorContribution_PatrolMotiviated;
+	public static String PatrolEditorContribution_MotiviatedByName;
 	public static String PatrolProfileRecordPatrolData_AnyOption;
 	public static String PatrolQueryFilterViewer_MotivatedByName;
 	public static String PatrolQueryFilterViewer_ParseError;

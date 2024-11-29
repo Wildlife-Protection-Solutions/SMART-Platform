@@ -665,8 +665,8 @@
          </menu>
          <menu
                id="org.wcs.smart.menu.quicklinks"
-               label="Quick Links"
-               mnemonic="L">
+               label="%quicklinks.menu.label"
+               mnemonic="%quicklinks.menu.mnemonic">
             <dynamic
                   class="org.wcs.smart.ui.QuickLinksContributionItem"
                   id="org.wcs.smart.menu.quicklinks.dynamic">
@@ -974,7 +974,7 @@
             name="%perspective.command.name">
          <commandParameter
                id="org.wcs.smart.perspectiveid"
-               name="Perspective Id"
+               name="%commandParameter.name"
                optional="true">
          </commandParameter>
       </command>
@@ -987,7 +987,7 @@
             name="%activemaptool.command.name">
          <commandParameter
                id="org.wcs.smart.map.toolid"
-               name="MapTool Id"
+               name="%commandParameter.name.0"
                optional="true">
          </commandParameter>
       </command>
@@ -1594,16 +1594,6 @@
             toolCursorId="org.wcs.smart.cross"
             tooltip="%DrawAreaTooltip">
       </modalTool>
-      <modalTool
-            categoryId="org.wcs.smart.ui.map.tool"
-            class="org.wcs.smart.ui.map.tool.DrawEditPolygonTool"
-            icon="images/icons/obj16/polygon_add.png"
-            id="org.wcs.smart.polygon.drawedit"
-            name="Edit Polygon"
-            onToolbar="false"
-            toolCursorId="org.wcs.smart.cross"
-            tooltip="Draw/Edit polygon">
-      </modalTool>
    </extension>
    <extension
          point="org.wcs.smart.caExport">
@@ -1704,17 +1694,17 @@
       <page
             class="org.wcs.smart.ui.internal.preference.QuickLinkPreferencePage"
             id="org.wcs.smart.preference.quicklink"
-            name="Quick Link Configuration">
+            name="%quicklink.prefpage.name">
       </page>
       <page
             class="org.wcs.smart.ui.internal.preference.SmartDefaultStylesPreferencePage"
             id="org.wcs.smart.preference.map.styles"
-            name="Default Map Layer Styles">
+            name="%mapstyles.prefpage.name">
       </page>
       <page
             class="org.wcs.smart.ui.internal.preference.EarthRangerPreferencePage"
             id="org.wcs.smart.preference.earthranger"
-            name="Earth Ranger">
+            name="%er.prefpage.name">
       </page>
    </extension>
    <extension

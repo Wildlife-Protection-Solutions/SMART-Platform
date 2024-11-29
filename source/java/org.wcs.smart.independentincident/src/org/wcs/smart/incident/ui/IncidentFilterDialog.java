@@ -32,6 +32,7 @@ import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.incident.IncidentLabelProvider;
 import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.internal.Messages;
 
@@ -148,7 +149,7 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 					sourceFilterCmp = new SourceFilterComposite(incidentsourceComp, SWT.NONE);
 				}
 				
-				Composite incidenttypecomp = createGroupComposite("Incident Type", composite);
+				Composite incidenttypecomp = createGroupComposite(IncidentLabelProvider.TYPE_NAME, composite);
 				incidenttypecomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 				typeFilterComp = new IncidentTypeFilterComposite(incidenttypecomp, SWT.NONE);
 				

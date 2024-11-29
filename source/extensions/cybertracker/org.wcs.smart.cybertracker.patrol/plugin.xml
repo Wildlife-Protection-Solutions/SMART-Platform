@@ -201,7 +201,7 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.cybertracker.patrol.cleanandfix"
-            name="Clean &amp;&amp; End Patrols">
+            name="%cleanendpatrol.command.name">
       </command>
    </extension>
    <extension

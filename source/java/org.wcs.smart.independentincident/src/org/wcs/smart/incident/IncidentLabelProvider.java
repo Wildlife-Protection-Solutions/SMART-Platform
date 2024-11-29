@@ -34,6 +34,8 @@ import org.wcs.smart.incident.model.IncidentType;
  */
 public class IncidentLabelProvider implements IIncidentLabelProvider {
 	
+	public static final String TYPE_NAME = Messages.IncidentLabelProvider_IncidentTypeLabel;
+	
 	@Override
 	public String getLabel(Object item, Locale l) {
 		if (item instanceof IndepedentIncidentSource ){

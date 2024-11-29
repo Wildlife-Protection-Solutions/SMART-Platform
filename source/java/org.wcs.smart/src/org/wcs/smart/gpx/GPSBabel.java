@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
@@ -91,7 +92,7 @@ public class GPSBabel {
 		final HashMap<String, String> options = new HashMap<String, String>();
 
 		CommandLine cmdLine = CommandLine.parse("\"" + getGpsBabelLocation() + "\"" + FORMAT_ARGS); //$NON-NLS-1$ //$NON-NLS-2$
-		DefaultExecutor exec = new DefaultExecutor();
+		DefaultExecutor exec = DefaultExecutor.builder().get();
 
 		exec.setStreamHandler(new ExecuteStreamHandler() {
 			private BufferedReader inputReader;
@@ -137,7 +138,7 @@ public class GPSBabel {
 		});
 
 		// ensure the process does not run for more than 30 seconds 
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(30000);
+		ExecuteWatchdog watchdog = ExecuteWatchdog.builder().setTimeout(Duration.ofMillis(30000)).get();
 		exec.setWatchdog(watchdog);
 		
 		exec.execute(cmdLine);
@@ -178,9 +179,9 @@ public class GPSBabel {
 		cmdLine.addArgument(file.toAbsolutePath().normalize().toString());
 		SmartPlugIn.logInfo("Running: " + cmdLine.toString()); //$NON-NLS-1$
 		
-		DefaultExecutor exec = new DefaultExecutor();
+		DefaultExecutor exec = DefaultExecutor.builder().get();
 		// 2 minute timeout
-		ExecuteWatchdog watchdog = new ExecuteWatchdog(IMPORT_TIMEOUT_MSEC);
+		ExecuteWatchdog watchdog = ExecuteWatchdog.builder().setTimeout(Duration.ofMillis(IMPORT_TIMEOUT_MSEC)).get();
 		exec.setWatchdog(watchdog);
 		int exitValue = -1;
 		try{
@@ -211,9 +212,9 @@ public class GPSBabel {
 			cmdLine.addArgument("-F"); //$NON-NLS-1$
 			cmdLine.addArgument(file.toAbsolutePath().normalize().toString());
 			
-			exec = new DefaultExecutor();
+			exec = DefaultExecutor.builder().get();
 			
-			watchdog = new ExecuteWatchdog(IMPORT_TIMEOUT_MSEC);
+			watchdog = ExecuteWatchdog.builder().setTimeout(Duration.ofMillis(IMPORT_TIMEOUT_MSEC)).get();
 			exec.setWatchdog(watchdog);
 			try{
 				exitValue = exec.execute(cmdLine);

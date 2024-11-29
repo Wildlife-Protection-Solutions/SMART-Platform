@@ -73,7 +73,7 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 	/*
 	 * job to load all patrol ids
 	 */
-	private Job loadPIdJob = new Job(Messages.PatrolIdDropItem_LoadIdsJobName){
+	private Job loadPIdJob = new Job(Messages.PatrolIdDropItem_LoadIdsJobName2){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			if (value.isDisposed()){

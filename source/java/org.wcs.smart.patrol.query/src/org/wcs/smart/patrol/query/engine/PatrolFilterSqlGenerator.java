@@ -239,7 +239,7 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		String prefix = engine.tablePrefix(option.getPatrolAttributeClass());
 		if (prefix == null){
 			throw new SQLException(MessageFormat.format(
-					Messages.PatrolFilter_InvalidPrefix, new Object[]{ option.getKey()}));
+					Messages.PatrolFilter_InvalidPrefix2, new Object[]{ option.getKey()}));
 		}
 		
 		if (option.getType() == PatrolQueryOptionType.STRING){
