@@ -52,7 +52,7 @@ public class IncidentLabelProvider implements IIncidentLabelProvider {
 		if (item == IncidentJsonFeatureProcessor.Messages.OBSERVATION_NOT_FOUND) return Messages.getString("IncidentLabelProvider.ObservationNotFound", l); //$NON-NLS-1$
 		
 		if (item instanceof IndepedentIncidentSource ){
-			 return Messages.getString("IncidentLabelProvider.IncidentLabel", l);
+			 return Messages.getString("IncidentLabelProvider.IncidentLabel", l); //$NON-NLS-1$
 		}
 		return null;
 	}

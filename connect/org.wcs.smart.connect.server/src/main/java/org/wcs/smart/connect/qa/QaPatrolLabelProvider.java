@@ -40,11 +40,11 @@ public class QaPatrolLabelProvider extends ILabelProvider {
 		case LoadingString:
 			return Messages.getString("QaPatrolLabelProvider.LoadingString", l); //$NON-NLS-1$
 		case PatrolSpeedRoutineType_Desc:
-			return Messages.getString("QaPatrolLabelProvider.SpeedDescription", l); //$NON-NLS-1$
+			return Messages.getString("QaPatrolLabelProvider.SpeedDescription2", l); //$NON-NLS-1$
 		case PatrolSpeedRoutineType_InvalidMaxSpeed:
 			return Messages.getString("QaPatrolLabelProvider.SpeedInvalid", l); //$NON-NLS-1$
 		case PatrolSpeedRoutineType_Name:
-			return Messages.getString("QaPatrolLabelProvider.SpeedName", l); //$NON-NLS-1$
+			return Messages.getString("QaPatrolLabelProvider.SpeedName2", l); //$NON-NLS-1$
 		case PatrolSpeedRoutineType_Param_MaxSpeedName:
 			return Messages.getString("QaPatrolLabelProvider.SpeedMaxSpeedLbl", l); //$NON-NLS-1$
 		case PatrolSpeedRoutineType_Param_SpeedUnits:
@@ -52,31 +52,31 @@ public class QaPatrolLabelProvider extends ILabelProvider {
 		case PatrolSpeedRoutineType_Param_TypeName:
 			return Messages.getString("QaPatrolLabelProvider.SpeedPTypes", l); //$NON-NLS-1$
 		case PatrolSpeedRoutineType_TrackSpeedExceeded:
-			return Messages.getString("QaPatrolLabelProvider.SpeedTrackExceeded", l); //$NON-NLS-1$
+			return Messages.getString("QaPatrolLabelProvider.SpeedTrackExceeded2", l); //$NON-NLS-1$
 		case PatrolSpeedRoutineType_WpSpeedExceeded:
 			return Messages.getString("QaPatrolLabelProvider.SpeedWpExceeded", l); //$NON-NLS-1$
 		case PatrolTrackDataProvider_Name:
-			return Messages.getString("QaPatrolLabelProvider.TrackProviderName", l); //$NON-NLS-1$
+			return Messages.getString("QaPatrolLabelProvider.TrackProviderName2", l); //$NON-NLS-1$
 		case PatrolTrackDataProvider_TrackNotFound:
-			return Messages.getString("QaPatrolLabelProvider.TrackNotfound", l); //$NON-NLS-1$
+			return Messages.getString("QaPatrolLabelProvider.TrackNotfound2", l); //$NON-NLS-1$
 		case PatrolTrackDataProvider_LegLabel:
 			return Messages.getString("QaPatrolLabelProvider.LegLabel", l); //$NON-NLS-1$
 		case PatrolWaypointDataProvider_WpNotFound:
-			return Messages.getString("QaPatrolLabelProvider.WaypointNotFound", l); //$NON-NLS-1$
+			return Messages.getString("QaPatrolLabelProvider.WaypointNotFound2", l); //$NON-NLS-1$
 		case PatrolWaypointDataProvider_Name:
-			return Messages.getString("QaPatrolLabelProvider.WaypointProviderName", l); //$NON-NLS-1$
+			return Messages.getString("QaPatrolLabelProvider.WaypointProviderName2", l); //$NON-NLS-1$
 		case PatrolWaypointDataProvider_WpIdLabel:
 			return Messages.getString("QaPatrolLabelProvider.WpIdLabel", l); //$NON-NLS-1$
 		case PatrolSpeedRoutineType_TrackError:
-			return Messages.getString("QaPatrolLabelProvider.TrackValidationError", l); //$NON-NLS-1$
+			return Messages.getString("QaPatrolLabelProvider.TrackValidationError2", l); //$NON-NLS-1$
 		case EmptyEndPatrolDaysType_Name: 
 			return Messages.getString("QaPatrolLabelProvider.EmptyEndPatrolDaysRoutineName", l); //$NON-NLS-1$
 		case EmptyEndPatrolDaysType_Desc: 
 			return Messages.getString("QaPatrolLabelProvider.EmptyEndPatrolDaysRoutineDesc", l); //$NON-NLS-1$
 		case PatrolDataProvider_Name:
-			return Messages.getString("QaPatrolLabelProvider.PatrolDataProvider", l); //$NON-NLS-1$
+			return Messages.getString("QaPatrolLabelProvider.PatrolDataProvider2", l); //$NON-NLS-1$
 		case PatrolDataProvider_PatrolNotFound:
-			return Messages.getString("QaPatrolLabelProvider.PatrolNotFound", l); //$NON-NLS-1$
+			return Messages.getString("QaPatrolLabelProvider.PatrolNotFound2", l); //$NON-NLS-1$
 		case EmptyEndPatrolDaysType_EmptyDays:
 			return Messages.getString("QaPatrolLabelProvider.MissingDaysMessage", l); //$NON-NLS-1$
 		}

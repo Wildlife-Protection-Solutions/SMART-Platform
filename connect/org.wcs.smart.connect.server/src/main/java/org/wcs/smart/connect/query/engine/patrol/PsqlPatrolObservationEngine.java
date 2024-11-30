@@ -168,6 +168,7 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine implements 
 				{"p_team","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
 				{"pl_mandate","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_transporttype","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"p_transportgroup","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_type","varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_leader","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_pilot","varchar(164)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -190,7 +191,8 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine implements 
 		updateLabel(c, queryDataTable, "p_type_uuid", "p_type");  //$NON-NLS-1$//$NON-NLS-2$
 		updateLabel(c, queryDataTable, "pl_mandate_uuid", "pl_mandate");  //$NON-NLS-1$//$NON-NLS-2$
 		updateLabel(c, queryDataTable, "pl_transport_uuid", "p_transporttype");  //$NON-NLS-1$//$NON-NLS-2$
-		
+		populateTransportGroup("pl_transport_uuid", "p_transportgroup", c, session, queryDataTable);  //$NON-NLS-1$//$NON-NLS-2$
+
 		//leader & pilot
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT plm_leader FROM "); //$NON-NLS-1$

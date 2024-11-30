@@ -63,7 +63,7 @@ public class CyberTrackerLabelProvider implements ICyberTrackerLabelProvider{
 		if (item ==  JsonImportWarning.Type.INVALID_LINESTRING_GEOMETRY) return Messages.getString("CyberTrackerLabelProvider_ParseWarn19", l);  //$NON-NLS-1$
 		if (item ==  JsonImportWarning.Type.INVALID_POLYGON_GEOMETRY) return Messages.getString("CyberTrackerLabelProvider_ParseWarn20", l);  //$NON-NLS-1$
 		if (item == JsonImportWarning.Type.TAG_NOT_FOUND) return Messages.getString("CyberTrackerLabelProvider.TagNotFound", l); //$NON-NLS-1$
-		if (item == JsonImportWarning.Type.INC_TYPE_NOT_FOUND) return "Incident type ''{0}'' not found. The system ''incident'' type will be used instead";
+		if (item == JsonImportWarning.Type.INC_TYPE_NOT_FOUND) return Messages.getString("CyberTrackerLabelProvider.IncidenTypeNotFound", l); //$NON-NLS-1$
 
 		if (item == SmartMobileDeviceManager.DEFAULT_NAME) return Messages.getString("CyberTrackerLabelProvider.DefaultDeviceIdName", l); //$NON-NLS-1$
 

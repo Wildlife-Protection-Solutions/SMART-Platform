@@ -35,7 +35,6 @@ import org.wcs.smart.cybertracker.json.UserCancelledException;
 import org.wcs.smart.cybertracker.patrol.json.PatrolJsonProcessor;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolWpLink;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -45,7 +44,6 @@ import org.wcs.smart.patrol.PatrolIdGenerator;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 

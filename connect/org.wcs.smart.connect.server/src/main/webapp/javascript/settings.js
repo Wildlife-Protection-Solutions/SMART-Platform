@@ -1094,7 +1094,7 @@ function dqUpdateSetting(key, value){
 			displayError(this.responseText);
 			return;
 		}
-		displayInfo("Data queue setting updated");
+		displayInfo(i18n("settings.settingsupdate"));
 	};
 	oReq.open("PUT", DATAQUEUE_SETTINGS_URL + "/" + key, true);
 	oReq.send(value);

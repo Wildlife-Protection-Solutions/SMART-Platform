@@ -90,6 +90,8 @@ public class PatrolWaypointQueryResult extends WaypointQueryResult<PatrolWaypoin
 		it.setPatrolType(rs.getString("p_type")); //$NON-NLS-1$
 		it.setArmed(rs.getBoolean("p_armed")); //$NON-NLS-1$
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
+		it.setTransportGroup(rs.getString("p_transportgroup")); //$NON-NLS-1$
+		it.setPatrolTransportTypeUuid((UUID)rs.getObject("pl_transport_uuid")); //$NON-NLS-1$
 		it.setPatrolLegId(rs.getString("p_legid")); //$NON-NLS-1$
 
 		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$

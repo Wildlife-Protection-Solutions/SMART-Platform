@@ -43,8 +43,8 @@ public class PlanLabelProvider implements IPlanLabelProvider {
 	@Override
 	public String getLabel(Object item, Locale l) {
 		if (item == NumericPlanTarget.TargetType.DISTANCE) return Messages.getString("PlanLabelProvider.DistanceTraveledTargetOp", l); //$NON-NLS-1$
-		if (item == NumericPlanTarget.TargetType.PATROL_HOURS) return Messages.getString("PlanLabelProvider.PatrolHoursTargetOp", l); //$NON-NLS-1$
-		if (item == NumericPlanTarget.TargetType.PATROL_DAYS) return Messages.getString("PlanLabelProvider.PatrolDaysTargetOp", l); //$NON-NLS-1$
+		if (item == NumericPlanTarget.TargetType.PATROL_HOURS) return Messages.getString("PlanLabelProvider.PatrolHoursTargetOp2", l); //$NON-NLS-1$
+		if (item == NumericPlanTarget.TargetType.PATROL_DAYS) return Messages.getString("PlanLabelProvider.PatrolDaysTargetOp2", l); //$NON-NLS-1$
 		if (item == NumericPlanTarget.TargetType.PATROL_MANHOURS) return Messages.getString("PlanLabelProvider.ManHoursTargetOp", l); //$NON-NLS-1$
 		
 		if (item == NumericPlanTarget.Unit.KM) return Messages.getString("PlanLabelProvider.KMUnits", l); //$NON-NLS-1$
@@ -54,7 +54,7 @@ public class PlanLabelProvider implements IPlanLabelProvider {
 		if (item == Plan.PlanType.CA) return Messages.getString("PlanLabelProvider.CaPlanType", l); //$NON-NLS-1$
 		if (item == Plan.PlanType.STATION) return Messages.getString("PlanLabelProvider.StationPlanType", l); //$NON-NLS-1$
 		if (item == Plan.PlanType.TEAM) return Messages.getString("PlanLabelProvider.TeamPlanType", l); //$NON-NLS-1$
-		if (item == Plan.PlanType.PATROL) return Messages.getString("PlanLabelProvider.PatorlPlanType", l); //$NON-NLS-1$
+		if (item == Plan.PlanType.PATROL) return Messages.getString("PlanLabelProvider.PatorlPlanType2", l); //$NON-NLS-1$
 				
 		if (item == PlanTargetStatus.Status.COMPLETE) return Messages.getString("PlanLabelProvider.CompleteStatus", l); //$NON-NLS-1$
 		if (item == PlanTargetStatus.Status.INCOMPLETE) return  Messages.getString("PlanLabelProvider.IncompleteStatus", l); //$NON-NLS-1$

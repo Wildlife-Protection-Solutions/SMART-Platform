@@ -30,7 +30,6 @@ import org.wcs.smart.patrol.json.PatrolAttributeMetadata.PatrolWaypointMetadata;
 import org.wcs.smart.patrol.json.PatrolJsonFeatureProcessor;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolTransportGroup;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 
 /**
@@ -44,22 +43,22 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 	@Override
 	public String getLabel(Object item, Locale l) {
 		if (item instanceof PatrolWaypointSource){
-			return Messages.getString("PatrolLabelProvider.WpSource", l); //$NON-NLS-1$
+			return Messages.getString("PatrolLabelProvider.WpSource2", l); //$NON-NLS-1$
 		}
-		if (item.equals(PATROLTEAM_TABLENAME_KEY)) return Messages.getString("PatrolLabelProvider.TeamTableName", l); //$NON-NLS-1$
-		if (item.equals(PATROLTT_TABLENAME_KEY)) return Messages.getString("PatrolLabelProvider.TransportTypeTableName", l); //$NON-NLS-1$
-		if (item.equals(PATROLMANDATE_TABLENAME_KEY)) return Messages.getString("PatrolLabelProvider.MandateTableName", l); //$NON-NLS-1$
+		if (item.equals(PATROLTEAM_TABLENAME_KEY)) return Messages.getString("PatrolLabelProvider.TeamTableName2", l); //$NON-NLS-1$
+		if (item.equals(PATROLTT_TABLENAME_KEY)) return Messages.getString("PatrolLabelProvider.TransportTypeTableName2", l); //$NON-NLS-1$
+		if (item.equals(PATROLMANDATE_TABLENAME_KEY)) return Messages.getString("PatrolLabelProvider.MandateTableName2", l); //$NON-NLS-1$
 		if (item.equals(TEAMNAME_KEY)) return Messages.getString("PatrolLabelProvider.TeamNameColumn", l); //$NON-NLS-1$
 		if (item.equals(TEAMDESCRIPTION_KEY)) return Messages.getString("PatrolLabelProvider.TeamDescriptionColumn", l); //$NON-NLS-1$
 		if (item.equals(TEAMMANDATE_KEY)) return Messages.getString("PatrolLabelProvider.TeamMandateColumn", l); //$NON-NLS-1$
 		if (item.equals(TEAMACTIVE_KEY)) return Messages.getString("PatrolLabelProvider.TeamActiveColumn", l); //$NON-NLS-1$
-		if (item.equals(TRANSPORTNAME_KEY)) return Messages.getString("PatrolLabelProvider.TransportTypeColumn", l); //$NON-NLS-1$
+		if (item.equals(TRANSPORTNAME_KEY)) return Messages.getString("PatrolLabelProvider.TransportTypeColumn2", l); //$NON-NLS-1$
 		if (item.equals(TRANSPORTACTIVE_KEY)) return Messages.getString("PatrolLabelProvider.TransportActiveColumn", l); //$NON-NLS-1$
 		if (item.equals(TRANSPORTTYPE_KEY)) return Messages.getString("PatrolLabelProvider.TransportPatrolColumn1", l); //$NON-NLS-1$
-		if (item.equals(MANDATENAME_KEY)) return Messages.getString("PatrolLabelProvider.MandateColumn", l); //$NON-NLS-1$
+		if (item.equals(MANDATENAME_KEY)) return Messages.getString("PatrolLabelProvider.MandateColumn2", l); //$NON-NLS-1$
 		if (item.equals(MANDATEACTIVE_KEY)) return Messages.getString("PatrolLabelProvider.MandateActiveColumn", l); //$NON-NLS-1$
-		if (item.equals(MIXED_KEY)) return "[Mixed]";
-		if (item.equals(NOGROUP_KEY)) return "[None]";
+		if (item.equals(MIXED_KEY)) return Messages.getString("PatrolLabelProvider.MixedOp", l); //$NON-NLS-1$
+		if (item.equals(NOGROUP_KEY)) return Messages.getString("PatrolLabelProvider.NoneOp", l); //$NON-NLS-1$
 		
 		if (item instanceof PatrolJsonFeatureProcessor.Messages) {
 			return getMessage((PatrolJsonFeatureProcessor.Messages)item, l);
@@ -71,8 +70,6 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			return Messages.getString("PatrolLabelProvider.GroundPatrol", l); //$NON-NLS-1$
 		}else if (item == PatrolTransportGroup.DefaultType.MARINE) {
 			return Messages.getString("PatrolLabelProvider.WaterPatrol", l); //$NON-NLS-1$
-		}else if (item == PatrolType.DefaultType.PATROL) {
-			return "Patrol";
 		}
 		return null;
 	}
@@ -90,7 +87,7 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			key = "PatrolLabelProvider.CommentMetadata"; //$NON-NLS-1$
 			break;
 		case EMPLOYEES:
-			key = "PatrolLabelProvider.MembersMetadata"; //$NON-NLS-1$
+			key = "PatrolLabelProvider.MembersMetadata2"; //$NON-NLS-1$
 			break;
 		case LEADER:
 			key = "PatrolLabelProvider.LeaderMetadata"; //$NON-NLS-1$
@@ -102,7 +99,7 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			key = "PatrolLabelProvider.ObjectiveMetadata"; //$NON-NLS-1$
 			break;
 		case PATROLID:
-			key = "PatrolLabelProvider.PatrolIdMetadata"; //$NON-NLS-1$
+			key = "PatrolLabelProvider.PatrolIdMetadata2"; //$NON-NLS-1$
 			break;
 		case PILOT:
 			key = "PatrolLabelProvider.PilotMetadata"; //$NON-NLS-1$
@@ -114,10 +111,9 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			key = "PatrolLabelProvider.TeamMetadata"; //$NON-NLS-1$
 			break;
 		case TRANSPORT_TYPE:
-			key = "PatrolLabelProvider.TransporttypeMetadata"; //$NON-NLS-1$
+			key = "PatrolLabelProvider.TransporttypeMetadata2"; //$NON-NLS-1$
 			break;
-		default:
-			break;
+		
 		}
 		addTranslations(translations, key);
 		return translations;
@@ -142,29 +138,29 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 	@Override
 	public String getMessage(PatrolJsonFeatureProcessor.Messages message, Locale l) {
 		switch(message) {
-			case COMPLETE_MSG: return Messages.getString("PatrolLabelProvider.JSONPATROL_1", l); //$NON-NLS-1$
+			case COMPLETE_MSG: return Messages.getString("PatrolLabelProvider.JSONPATROL_1a", l); //$NON-NLS-1$
 			case INVALID_DATA_TYPE: return Messages.getString("PatrolLabelProvider.JSONPATROL_2", l); //$NON-NLS-1$
 			case INVALID_FEATURE_TYPE: return Messages.getString("PatrolLabelProvider.JSONPATROL_3", l); //$NON-NLS-1$
 			case MISSING_PROPERTY: return Messages.getString("PatrolLabelProvider.JSONPATROL_4", l); //$NON-NLS-1$
-			case PATROLLEG_LINK_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_5", l); //$NON-NLS-1$
-			case PATROL_LINK_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_6", l); //$NON-NLS-1$
-			case PATROL_LINK_EXISTS: return Messages.getString("PatrolLabelProvider.JSONPATROL_7", l); //$NON-NLS-1$
-			case PATROLLEG_LINK_EXISTS: return Messages.getString("PatrolLabelProvider.JSONPATROL_8", l); //$NON-NLS-1$
-			case PATROLLEG_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_9", l); //$NON-NLS-1$
-			case TRANSPORTTYPE_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_10", l); //$NON-NLS-1$
-			case MANDATE_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_11", l); //$NON-NLS-1$
-			case MANDATE_EXISTING: return Messages.getString("PatrolLabelProvider.JSONPATROL_12", l); //$NON-NLS-1$
-			case EMPLOYEE_NOT_FOUND: return Messages.getString("PatrolLabelProvider.JSONPATROL_13", l); //$NON-NLS-1$
-			case NO_EMPLOYEES: return Messages.getString("PatrolLabelProvider.JSONPATROL_14", l); //$NON-NLS-1$
-			case NO_LEADER: return Messages.getString("PatrolLabelProvider.JSONPATROL_15", l); //$NON-NLS-1$
-			case NO_PILOT: return Messages.getString("PatrolLabelProvider.JSONPATROL_16", l); //$NON-NLS-1$
-			case INVALID_PATROL_UUID: return Messages.getString("PatrolLabelProvider.JSONPATROL_17", l); //$NON-NLS-1$
-			case INVALID_PATROLLEG_UUID: return Messages.getString("PatrolLabelProvider.JSONPATROL_18", l); //$NON-NLS-1$
-			case PATROL_EXISTS: return Messages.getString("PatrolLabelProvider.JSONPATROL_19", l); //$NON-NLS-1$
-			case PATROLLEG_EXISTS: return Messages.getString("PatrolLabelProvider.JSONPATROL_20", l); //$NON-NLS-1$
+			case PATROLLEG_LINK_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_5a", l); //$NON-NLS-1$
+			case PATROL_LINK_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_6a", l); //$NON-NLS-1$
+			case PATROL_LINK_EXISTS: return Messages.getString("PatrolLabelProvider.JSONPATROL_7a", l); //$NON-NLS-1$
+			case PATROLLEG_LINK_EXISTS: return Messages.getString("PatrolLabelProvider.JSONPATROL_8a", l); //$NON-NLS-1$
+			case PATROLLEG_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_9a", l); //$NON-NLS-1$
+			case TRANSPORTTYPE_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_10a", l); //$NON-NLS-1$
+			case MANDATE_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_11a", l); //$NON-NLS-1$
+			case MANDATE_EXISTING: return Messages.getString("PatrolLabelProvider.JSONPATROL_12a", l); //$NON-NLS-1$
+			case EMPLOYEE_NOT_FOUND: return Messages.getString("PatrolLabelProvider.JSONPATROL_13a", l); //$NON-NLS-1$
+			case NO_EMPLOYEES: return Messages.getString("PatrolLabelProvider.JSONPATROL_14a", l); //$NON-NLS-1$
+			case NO_LEADER: return Messages.getString("PatrolLabelProvider.JSONPATROL_15a", l); //$NON-NLS-1$
+			case NO_PILOT: return Messages.getString("PatrolLabelProvider.JSONPATROL_16a", l); //$NON-NLS-1$
+			case INVALID_PATROL_UUID: return Messages.getString("PatrolLabelProvider.JSONPATROL_17a", l); //$NON-NLS-1$
+			case INVALID_PATROLLEG_UUID: return Messages.getString("PatrolLabelProvider.JSONPATROL_18a", l); //$NON-NLS-1$
+			case PATROL_EXISTS: return Messages.getString("PatrolLabelProvider.JSONPATROL_19a", l); //$NON-NLS-1$
+			case PATROLLEG_EXISTS: return Messages.getString("PatrolLabelProvider.JSONPATROL_20a", l); //$NON-NLS-1$
 			case TEAM_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_21", l); //$NON-NLS-1$
 			case STATION_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_22", l); //$NON-NLS-1$
-			case CUSTOM_ATTRIBUTE_ERROR: return Messages.getString("PatrolLabelProvider.JSONPATROL_23", l); //$NON-NLS-1$
+			case CUSTOM_ATTRIBUTE_ERROR: return Messages.getString("PatrolLabelProvider.JSONPATROL_23a", l); //$NON-NLS-1$
 			case OBSERVATION_EXISTS: return Messages.getString("PatrolLabelProvider.ObservationExists", l); //$NON-NLS-1$
 			case OBSERVATION_NOT_FOUND: return Messages.getString("PatrolLabelProvider.ObservationNotFound", l); //$NON-NLS-1$
 			case WAYPOINT_NOT_FOUND: return Messages.getString("PatrolLabelProvider.WaypointNotFound", l); //$NON-NLS-1$

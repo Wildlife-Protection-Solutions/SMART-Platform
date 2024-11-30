@@ -575,7 +575,7 @@ function processDate(date, now){
 	date = new Date(date.toString());
 
 	if (date.getDate() == now.getDate() && date.getMonth() == now.getMonth() && date.getFullYear() == now.getFullYear()){
-		return "Today (" + formatDate(date) + ")";
+		return i18n("ca.today") + " (" + formatDate(date) + ")";
 	}else{
 		date2 = new Date(date);
 		date2.setHours(0);
@@ -583,16 +583,15 @@ function processDate(date, now){
 		date2.setSeconds(0);
 		date2.setMilliseconds(0);
 
-		
 		var days = Math.ceil((now.getTime() - date2.getTime()) / (1000 * 24 * 60 * 60));
-		if (days == 1) return "Yesterday (" + formatDate(date) + ")"; 
-		return days + " days ago (" + formatDate(date) + ")";
+		if (days == 1) return i18n("ca.yesterday") + " (" + formatDate(date) + ")"; 
+		return days + " " + i18n("ca.daysago") + " (" + formatDate(date) + ")";
 	}
 }
 
 function editalias(){
 	let ip = this.dataset.ip;
-	let alias = prompt("Enter the alias for ip: " + ip, "");
+	let alias = prompt(i18n("ca.ipaliasprompt") + ip, "");
 	if (alias == null) return;
 	
 	//TODO: if this update fails

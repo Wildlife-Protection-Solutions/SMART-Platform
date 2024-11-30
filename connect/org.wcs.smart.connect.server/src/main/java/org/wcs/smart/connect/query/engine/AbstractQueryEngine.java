@@ -794,6 +794,34 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		c.createStatement().execute(sb.toString());	
 	}
 	
+	
+	protected void populateTransportGroup(String transportTypeUuidColumn, String nameColumn, Connection c, Session session, String queryDataTable) throws SQLException {
+		String sql = "SELECT DISTINCT " + transportTypeUuidColumn + " FROM "+ queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
+		
+		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
+			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+transportTypeUuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			int count = 0;
+			while (rs.next()) {
+				UUID uuid = (UUID) rs.getObject(1);
+				if (uuid == null) continue;
+					
+				
+				PatrolTransportType pt = session.get(PatrolTransportType.class, uuid);
+				if (pt.getTransportGroup() == null) continue;
+				statement.setString(1, pt.getTransportGroup().getName());
+				statement.setObject(2, uuid);
+				statement.addBatch();
+				count ++;
+				if (count > 100){
+					statement.executeBatch();
+					count = 0;
+				}				
+			}
+			statement.executeBatch();
+			
+		}
+	}
+	
 	/**
 	 * The number of category levels in the data model.
 	 * @return

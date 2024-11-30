@@ -38,6 +38,7 @@ import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
+import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -160,7 +161,15 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet<PatrolQueryRes
 		it.setPatrolTypeUuid((UUID) rs.getObject("p_type_uuid")); //$NON-NLS-1$
 		it.setPatrolType(rs.getString("p_type")); //$NON-NLS-1$
 		it.setArmed(rs.getBoolean("p_is_armed")); //$NON-NLS-1$
+		
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
+		UUID transportUuid = (UUID) rs.getObject("pl_transport_uuid"); //$NON-NLS-1$
+		
+		PatrolTransportType tt = session.get(PatrolTransportType.class, transportUuid);
+		if (tt.getTransportGroup() != null) {
+			it.setTransportGroup(tt.getTransportGroup().getName());
+		}
+		
 		it.setPatrolLegId(rs.getString("pl_id")); //$NON-NLS-1$
 		it.setPatrolLegStartDate(rs.getDate("pl_start_date").toLocalDate()); //$NON-NLS-1$
 		it.setPatrolLegEndDate(rs.getDate("pl_end_date").toLocalDate()); //$NON-NLS-1$

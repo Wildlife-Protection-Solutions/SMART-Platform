@@ -39,19 +39,19 @@ public class PatrolCyberTrackerLabelProvider implements IPatrolCyberTrackerLabel
 	public String getLabel(Object item, Locale l) {
 		
 		if (item == PatrolJsonImportWarning.WarningType.STATION_NOT_FOUND) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning1", l);  //$NON-NLS-1$
-		if (item == PatrolJsonImportWarning.WarningType.TEAM_NOT_FOUND) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning2", l);  //$NON-NLS-1$
-		if (item == PatrolJsonImportWarning.WarningType.MANDATE_NOT_FOUND) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning3", l);  //$NON-NLS-1$
-		if (item == PatrolJsonImportWarning.WarningType.MEMBER_NOT_FOUND) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning4", l);  //$NON-NLS-1$
-		if (item == PatrolJsonImportWarning.WarningType.TT_NOT_FOUND_ERROR) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning5", l);  //$NON-NLS-1$
-		if (item == PatrolJsonImportWarning.WarningType.TRACK_POINT_MULTI_MATCHES) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning6", l);  //$NON-NLS-1$
-		if (item == PatrolJsonImportWarning.WarningType.PATROL_NOT_FOUND) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning7", l);  //$NON-NLS-1$
-		if (item == PatrolJsonImportWarning.WarningType.DUPLICATE) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning8", l);  //$NON-NLS-1$
+		if (item == PatrolJsonImportWarning.WarningType.TEAM_NOT_FOUND) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning22", l);  //$NON-NLS-1$
+		if (item == PatrolJsonImportWarning.WarningType.MANDATE_NOT_FOUND) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning32", l);  //$NON-NLS-1$
+		if (item == PatrolJsonImportWarning.WarningType.MEMBER_NOT_FOUND) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning42", l);  //$NON-NLS-1$
+		if (item == PatrolJsonImportWarning.WarningType.TT_NOT_FOUND_ERROR) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning52", l);  //$NON-NLS-1$
+		if (item == PatrolJsonImportWarning.WarningType.TRACK_POINT_MULTI_MATCHES) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning62", l);  //$NON-NLS-1$
+		if (item == PatrolJsonImportWarning.WarningType.PATROL_NOT_FOUND) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning72", l);  //$NON-NLS-1$
+		if (item == PatrolJsonImportWarning.WarningType.DUPLICATE) return Messages.getString("PatrolCyberTrackerLabelProvider_Warning82", l);  //$NON-NLS-1$
 		
 		
-		if (item == PatrolJsonProcessor.StatusMessage.ADDED) return Messages.getString("PatrolCyberTrackerLabelProvider_CreatedMessage", l);  //$NON-NLS-1$
-		if (item == PatrolJsonProcessor.StatusMessage.MODIFIED) return Messages.getString("PatrolCyberTrackerLabelProvider_ModifiedMessage", l);  //$NON-NLS-1$
+		if (item == PatrolJsonProcessor.StatusMessage.ADDED) return Messages.getString("PatrolCyberTrackerLabelProvider_CreatedMessage2", l);  //$NON-NLS-1$
+		if (item == PatrolJsonProcessor.StatusMessage.MODIFIED) return Messages.getString("PatrolCyberTrackerLabelProvider_ModifiedMessage2", l);  //$NON-NLS-1$
 		
-		if (item == PatrolJsonProcessor.CA_ERROR) return Messages.getString("PatrolCyberTrackerLabelProvider_CaNotFound", l);  //$NON-NLS-1$
+		if (item == PatrolJsonProcessor.CA_ERROR) return Messages.getString("PatrolCyberTrackerLabelProvider_CaNotFound2", l);  //$NON-NLS-1$
 
 		if (item == MobileDeviceIdPatrolQueryOption.KEY) return Messages.getString("PatrolCyberTrackerLabelProvider.DeviceIdOption", l); //$NON-NLS-1$
 

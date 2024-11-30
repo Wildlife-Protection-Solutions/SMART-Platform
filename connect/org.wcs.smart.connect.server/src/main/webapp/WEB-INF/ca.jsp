@@ -22,7 +22,7 @@
 		<div class="tabheader pageheader">
   			<a id="calist" class="tab "><fmt:message key="ca.pageheader"/></a>
   			<a id="dmmanager" class="tab "><fmt:message key="ca.dmpageheader"/></a>
-  			<a id="synchistory" class="tab ">Sync History</a>
+  			<a id="synchistory" class="tab "><fmt:message key="ca.synchistory"/></a>
   		</div>
  	
 		<div><div id="message" class="msgsection"></div></div>
@@ -92,15 +92,15 @@
 		
 			 <div id="synctable" class="table-cell smart-table">
 		  	  	<div class="table-row smart-table-header">
-				  <div class="table-cell smart-table-cell">Conservation Area</div>				  
-				  <div class="table-cell smart-table-cell">IP</div>
-				  <div class="table-cell smart-table-cell">IP Alias</div>
+				  <div class="table-cell smart-table-cell"><fmt:message key="ca.synchistory.ca"/></div>				  
+				  <div class="table-cell smart-table-cell"><fmt:message key="ca.synchistory.ip"/></div>
+				  <div class="table-cell smart-table-cell"><fmt:message key="ca.synchistory.ipalias"/></div>
 				  <div class="table-cell smart-table-cell"></div>
-				  <div class="table-cell smart-table-cell">Last Username</div>
-				  <div class="table-cell smart-table-cell">Last Sync Download</div>
-				  <div class="table-cell smart-table-cell">Last Sync Upload</div>
-				  <div class="table-cell smart-table-cell">Last CA Download</div>
-				  <div class="table-cell smart-table-cell">Last CA Upload</div>
+				  <div class="table-cell smart-table-cell"><fmt:message key="ca.synchistory.lastusername"/></div>
+				  <div class="table-cell smart-table-cell"><fmt:message key="ca.synchistory.lastsyncdown"/></div>
+				  <div class="table-cell smart-table-cell"><fmt:message key="ca.synchistory.lastsyncup"/></div>
+				  <div class="table-cell smart-table-cell"><fmt:message key="ca.synchistory.lastcadown"/></div>
+				  <div class="table-cell smart-table-cell"><fmt:message key="ca.synchistory.lastcaup"/></div>
 				</div>
 			</div>
 		    <a id="refreshhistory" style="padding-left:3px" href="#"><fmt:message key="dataqueue.refresh"/></a>

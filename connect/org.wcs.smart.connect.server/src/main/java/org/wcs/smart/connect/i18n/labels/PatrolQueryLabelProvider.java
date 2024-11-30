@@ -51,23 +51,23 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			switch((FixedQueryColumn.FixedColumns)item){
 			case CA_ID: return Messages.getString("PatrolQueryLabelProvider.CaId", l); //$NON-NLS-1$
 			case CA_NAME: return Messages.getString("PatrolQueryLabelProvider.CaName", l); //$NON-NLS-1$
-			case PATROL_ID: return Messages.getString("PatrolQueryLabelProvider.PId", l); //$NON-NLS-1$
+			case PATROL_ID: return Messages.getString("PatrolQueryLabelProvider.PId2", l); //$NON-NLS-1$
 			case PATROL_TYPE: return Messages.getString("PatrolQueryLabelProvider.PatrolType", l); //$NON-NLS-1$
-			case PATROL_START_DATE: return Messages.getString("PatrolQueryLabelProvider.PStartDate", l); //$NON-NLS-1$
-			case PATROL_END_DATE: return Messages.getString("PatrolQueryLabelProvider.PEndDate", l); //$NON-NLS-1$
+			case PATROL_START_DATE: return Messages.getString("PatrolQueryLabelProvider.PStartDate2", l); //$NON-NLS-1$
+			case PATROL_END_DATE: return Messages.getString("PatrolQueryLabelProvider.PEndDate2", l); //$NON-NLS-1$
 			case PATROL_STATION: return Messages.getString("PatrolQueryLabelProvider.StationName", l); //$NON-NLS-1$
 			case PATROL_TEAM: return Messages.getString("PatrolQueryLabelProvider.TeamName", l); //$NON-NLS-1$
 			case PATROL_OBJETIVE: return Messages.getString("PatrolQueryLabelProvider.Objective", l); //$NON-NLS-1$
 			case PATROL_MANDATE: return Messages.getString("PatrolQueryLabelProvider.Mandate", l); //$NON-NLS-1$
 			case PATROL_ARMED: return Messages.getString("PatrolQueryLabelProvider.Armed", l); //$NON-NLS-1$
-			case PATROL_LEG_ID: return Messages.getString("PatrolQueryLabelProvider.LegId", l); //$NON-NLS-1$
+			case PATROL_LEG_ID: return Messages.getString("PatrolQueryLabelProvider.LegId2", l); //$NON-NLS-1$
 			case PATROL_LEG_LEADER: return Messages.getString("PatrolQueryLabelProvider.Leader", l); //$NON-NLS-1$
 			case PATROL_LEG_PILOT: return Messages.getString("PatrolQueryLabelProvider.Pilot", l); //$NON-NLS-1$
 			case PATROL_LEG_MEMBERS: return Messages.getString("PatrolQueryLabelProvider.Members", l); //$NON-NLS-1$
-			case PATROL_LEG_START_DATE: return Messages.getString("PatrolQueryLabelProvider.LegStartdate", l); //$NON-NLS-1$
-			case PATROL_LEG_END_DATE: return Messages.getString("PatrolQueryLabelProvider.LegEnddate", l); //$NON-NLS-1$
-			case TRANSPORT_TYPE: return Messages.getString("PatrolQueryLabelProvider.Transporttype", l); //$NON-NLS-1$
-			case TRANSPORT_GROUP: return "Transport Group";
+			case PATROL_LEG_START_DATE: return Messages.getString("PatrolQueryLabelProvider.LegStartdate2", l); //$NON-NLS-1$
+			case PATROL_LEG_END_DATE: return Messages.getString("PatrolQueryLabelProvider.LegEnddate2", l); //$NON-NLS-1$
+			case TRANSPORT_TYPE: return Messages.getString("PatrolQueryLabelProvider.Transporttype2", l); //$NON-NLS-1$
+			case TRANSPORT_GROUP: return Messages.getString("PatrolQueryLabelProvider.TransportGroup", l); //$NON-NLS-1$
 			case WAYPOINT_ID: return Messages.getString("PatrolQueryLabelProvider.Wid", l); //$NON-NLS-1$
 			case WAYPOINT_DATE: return Messages.getString("PatrolQueryLabelProvider.WPDate", l); //$NON-NLS-1$
 			case WAYPOINT_TIME: return Messages.getString("PatrolQueryLabelProvider.WPTime", l); //$NON-NLS-1$
@@ -83,44 +83,44 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case WAYPOINT_LASTMODIFIEDBY: return Messages.getString("PatrolQueryLabelProvider.LastModifiedByColumn", l); //$NON-NLS-1$
 			case OBS_GROUP_ID: return Messages.getString("PatrolQueryLabelProvider.ObsGroupColumnName", l); //$NON-NLS-1$
 			case OBSERVATION_UUID: return Messages.getString("PatrolQueryLabelProvider.ObservationUuidColumnName", l); //$NON-NLS-1$
-			case PATROL_UUID: return Messages.getString("PatrolQueryLabelProvider.PatrolUuidColumnName", l); //$NON-NLS-1$
+			case PATROL_UUID: return Messages.getString("PatrolQueryLabelProvider.PatrolUuidColumnName2", l); //$NON-NLS-1$
 			case WAYPOINT_UUID: return Messages.getString("PatrolQueryLabelProvider.WaypointUuidColumnName", l); //$NON-NLS-1$
-			case PATROL_END_TIME: return Messages.getString("PatrolQueryLabelProvider.PatrolEndTimeColumnName", l); //$NON-NLS-1$
-			case PATROL_START_TIME: return Messages.getString("PatrolQueryLabelProvider.PatrolStartTimeColumnName", l); //$NON-NLS-1$
+			case PATROL_END_TIME: return Messages.getString("PatrolQueryLabelProvider.PatrolEndTimeColumnName2", l); //$NON-NLS-1$
+			case PATROL_START_TIME: return Messages.getString("PatrolQueryLabelProvider.PatrolStartTimeColumnName2", l); //$NON-NLS-1$
 			default:
 				break;
 			}
 		}
 		if (item instanceof PatrolValueOption){
 			switch((PatrolValueOption)item){
-				case NUM_PATROLS: return Messages.getString("PatrolQueryLabelProvider.NumPatrolsOp", l);  //$NON-NLS-1$
+				case NUM_PATROLS: return Messages.getString("PatrolQueryLabelProvider.NumPatrolsOp2", l);  //$NON-NLS-1$
 				case NUM_DAYS: return Messages.getString("PatrolQueryLabelProvider.NumDaysOp", l);     //$NON-NLS-1$
 				case NUM_NIGHTS: return Messages.getString("PatrolQueryLabelProvider.NumNightsOp", l); //$NON-NLS-1$
 				case DISTANCE: return Messages.getString("PatrolQueryLabelProvider.DistanceOp", l);       //$NON-NLS-1$
 				case AREA_BUFFER: return Messages.getString("PatrolQueryLabelProvider.TrackAreaValueItem", l); //$NON-NLS-1$
 
-				case NUM_FIELDHOURS: return Messages.getString("PatrolQueryLabelProvider.NumberActiveHoursOp", l); //$NON-NLS-1$
-				case NUM_PATROLHOURS: return Messages.getString("PatrolQueryLabelProvider.NumberHoursOp", l);   //$NON-NLS-1$
+				case NUM_FIELDHOURS: return Messages.getString("PatrolQueryLabelProvider.NumberActiveHoursOp2", l); //$NON-NLS-1$
+				case NUM_PATROLHOURS: return Messages.getString("PatrolQueryLabelProvider.NumberHoursOp2", l);   //$NON-NLS-1$
 				case NUM_MEMBERS: return Messages.getString("PatrolQueryLabelProvider.NumEmployeesOp", l); //$NON-NLS-1$
 				case MAN_HOURS: return Messages.getString("PatrolQueryLabelProvider.PersonFieldHoursOp", l);     //$NON-NLS-1$
 				case MAN_DAYS: return Messages.getString("PatrolQueryLabelProvider.PersonDaysOp", l); //$NON-NLS-1$
 				
-				case NUM_PATROLS_TOTAL: return Messages.getString("PatrolQueryLabelProvider.TotalPatrolsOp", l); //$NON-NLS-1$
+				case NUM_PATROLS_TOTAL: return Messages.getString("PatrolQueryLabelProvider.TotalPatrolsOp2", l); //$NON-NLS-1$
 				case NUM_DAYS_TOTAL: return Messages.getString("PatrolQueryLabelProvider.TotalDaysOp", l);    //$NON-NLS-1$
 				case DISTANCE_TOTAL: return Messages.getString("PatrolQueryLabelProvider.TotalDistanceOp", l);   //$NON-NLS-1$
-				case NUM_FIELDHOURS_TOTAL: return Messages.getString("PatrolQueryLabelProvider.TotalActiveHoursOp", l); //$NON-NLS-1$
-				case NUM_PATROLHOURS_TOTAL: return Messages.getString("PatrolQueryLabelProvider.TotalPatroHrsOp", l); //$NON-NLS-1$
+				case NUM_FIELDHOURS_TOTAL: return Messages.getString("PatrolQueryLabelProvider.TotalActiveHoursOp2", l); //$NON-NLS-1$
+				case NUM_PATROLHOURS_TOTAL: return Messages.getString("PatrolQueryLabelProvider.TotalPatroHrsOp2", l); //$NON-NLS-1$
 				case MAN_HOURS_TOTAL: return Messages.getString("PatrolQueryLabelProvider.TotalPersonFieldHrs", l); //$NON-NLS-1$
 				case MAN_DAYS_TOTAL: return Messages.getString("PatrolQueryLabelProvider.TotalPersonDaysOp", l); //$NON-NLS-1$
 				
-				case PATROLHOURS_TRACK: return Messages.getString("PatrolQueryLabelProvider.NumTrackHours", l); //$NON-NLS-1$
+				case PATROLHOURS_TRACK: return Messages.getString("PatrolQueryLabelProvider.NumTrackHours2", l); //$NON-NLS-1$
 				case NUM_CUSTOM: return Messages.getString("PatrolQueryLabelProvider.NumTimeRanges", l); //$NON-NLS-1$
 
 			}
 		}
 		if (item instanceof PatrolQueryOption){
 			switch((PatrolQueryOption)item){
-				case ID: return Messages.getString("PatrolQueryLabelProvider.PatrolIdOp", l); //$NON-NLS-1$
+				case ID: return Messages.getString("PatrolQueryLabelProvider.PatrolIdOp2", l); //$NON-NLS-1$
 				case ARMED: return Messages.getString("PatrolQueryLabelProvider.ArmedOp", l); //$NON-NLS-1$
 				case STATION: return Messages.getString("PatrolQueryLabelProvider.StationOp", l); //$NON-NLS-1$
 				case TEAM: return Messages.getString("PatrolQueryLabelProvider.TeamOp", l); //$NON-NLS-1$
@@ -131,10 +131,10 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case MANDATE: return Messages.getString("PatrolQueryLabelProvider.MandateOp", l); //$NON-NLS-1$
 				case MANDATE_KEY: return Messages.getString("PatrolQueryLabelProvider.MandateOp", l); //$NON-NLS-1$
 				case PATROL_TYPE: return Messages.getString("PatrolQueryLabelProvider.PatrolTypeOp1", l); //$NON-NLS-1$
-				case PATROL_TRANSPORT_TYPE: return Messages.getString("PatrolQueryLabelProvider.TransportTypeOp", l); //$NON-NLS-1$
-				case PATROL_TRANSPORT_TYPE_KEY: return Messages.getString("PatrolQueryLabelProvider.TransportTypeOp", l); //$NON-NLS-1$
-				case PATROL_TRANSPORT_GROUP_KEY: return "Transport Group";
-				case PATROL_TRANSPORT_PATROL_GROUP_KEY: return "Transport Group - Patrol";
+				case PATROL_TRANSPORT_TYPE: return Messages.getString("PatrolQueryLabelProvider.TransportTypeOp2", l); //$NON-NLS-1$
+				case PATROL_TRANSPORT_TYPE_KEY: return Messages.getString("PatrolQueryLabelProvider.TransportTypeOp2", l); //$NON-NLS-1$
+				case PATROL_TRANSPORT_GROUP_KEY: return Messages.getString("PatrolQueryLabelProvider.TransportGroupOp", l); //$NON-NLS-1$
+				case PATROL_TRANSPORT_PATROL_GROUP_KEY: return Messages.getString("PatrolQueryLabelProvider.TransportGroupPatrolTrackOp", l); //$NON-NLS-1$
 				case CONSERVATION_AREA: return Messages.getString("PatrolQueryLabelProvider.CaOp", l); //$NON-NLS-1$
 				case AGENCY: return Messages.getString("PatrolQueryLabelProvider.AgencyOp", l); //$NON-NLS-1$
 				case AGENCY_KEY: return Messages.getString("PatrolQueryLabelProvider.AgencyOp", l); //$NON-NLS-1$
@@ -144,29 +144,29 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			}
 		}
 		if (item instanceof PatrolEndDateField){
-			return Messages.getString("PatrolQueryLabelProvider.PatrolEndDateQueryFilterfield", l); //$NON-NLS-1$
+			return Messages.getString("PatrolQueryLabelProvider.PatrolEndDateQueryFilterfield2", l); //$NON-NLS-1$
 		}
 		if (item instanceof PatrolStartDateField){
-			return Messages.getString("PatrolQueryLabelProvider.PatrolStartDateQueryFilterfield", l); //$NON-NLS-1$
+			return Messages.getString("PatrolQueryLabelProvider.PatrolStartDateQueryFilterfield2", l); //$NON-NLS-1$
 		}
 		if (item == PatrolValueItemAreaBuffer.ERROR_MSG_KEY) {
 			return Messages.getString("PatrolQueryLabelProvider.InvalidBufferValue",l); //$NON-NLS-1$
 		}
 		if (item == TrackGeometryQueryColumn.KEY) { 
-			return Messages.getString("PatrolQueryLabelProvider.TrackColumName", l);  //$NON-NLS-1$
+			return Messages.getString("PatrolQueryLabelProvider.TrackColumName2", l);  //$NON-NLS-1$
 		}
 		if (item instanceof PatrolStartMonthDateGroupBy){
-			return Messages.getString("PatrolQueryLabelProvider.PatrolStartMonthGroupByOp", l); //$NON-NLS-1$
+			return Messages.getString("PatrolQueryLabelProvider.PatrolStartMonthGroupByOp2", l); //$NON-NLS-1$
 		}
 		if (item instanceof PatrolEndMonthDateGroupBy){
-			return Messages.getString("PatrolQueryLabelProvider.PatrolEndMonthGroupByOp", l); //$NON-NLS-1$
+			return Messages.getString("PatrolQueryLabelProvider.PatrolEndMonthGroupByOp2", l); //$NON-NLS-1$
 		}
 		
 		if (item instanceof PatrolEndQuarterDateGroupBy){
-			return Messages.getString("PatrolQueryLabelProvider.PatrolEndQuaterGroupByOp", l);  //$NON-NLS-1$
+			return Messages.getString("PatrolQueryLabelProvider.PatrolEndQuaterGroupByOp2", l);  //$NON-NLS-1$
 		}
 		if (item instanceof PatrolStartQuarterDateGroupBy){
-			return Messages.getString("PatrolQueryLabelProvider.PatrolStartQuaterGroupByOp", l);  //$NON-NLS-1$
+			return Messages.getString("PatrolQueryLabelProvider.PatrolStartQuaterGroupByOp2", l);  //$NON-NLS-1$
 		}
 		return null;
 	}

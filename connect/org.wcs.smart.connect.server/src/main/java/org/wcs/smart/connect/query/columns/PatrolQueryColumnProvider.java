@@ -106,6 +106,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_MEMBERS,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_END_DATE,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.TRANSPORT_GROUP,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.TRANSPORT_TYPE,l));
 		keys.addAll(getPatrolAttributeQueryColumns(q, session));		
 		keys.add(new TrackGeometryQueryColumn(l));
@@ -137,6 +138,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_LEADER,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_PILOT,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_MEMBERS,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.TRANSPORT_GROUP,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.TRANSPORT_TYPE,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_ID,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DATE,l));
@@ -191,6 +193,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_LEADER,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_PILOT,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_MEMBERS,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.TRANSPORT_GROUP,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.TRANSPORT_TYPE,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_ID,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DATE,l));
