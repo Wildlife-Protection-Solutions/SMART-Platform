@@ -180,11 +180,11 @@ public class Messages extends NLS {
 	public static String PatrolQueryResultsEditor_TableTabName;
 	public static String PatrolQueryType_PatrolQueryTypeName;
 	public static String PatrolQueryValidator_CouldNotMatchFilter2;
-	public static String PatrolEndDateField_PatrolEndDatefilter;
+	public static String PatrolEndDateField_PatrolEndDatefilter2;
 	public static String PatrolObservationQueryDefaultStyle_LayerName;
 	public static String PatrolObservationQueryDefaultStyle_MapName;
 	public static String PatrolObservationQueryType_PatrolObservationQueryTypeName;
-	public static String PatrolStartDateField_PatrolStartDate;
+	public static String PatrolStartDateField_PatrolStartDate2;
 	public static String PatrolSummaryGroupByValuePanel_GroupByPanelTitle;
 	public static String PatrolSummaryGroupByValuePanel_ValueError;
 	public static String PatrolSummaryQueryDefinitionImporter_GroupByNotSupported2;

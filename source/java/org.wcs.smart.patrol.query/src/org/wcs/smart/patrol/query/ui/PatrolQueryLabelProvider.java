@@ -147,10 +147,10 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			}
 		}
 		if (item instanceof PatrolEndDateField){
-			return Messages.PatrolEndDateField_PatrolEndDatefilter;
+			return Messages.PatrolEndDateField_PatrolEndDatefilter2;
 		}
 		if (item instanceof PatrolStartDateField){
-			return Messages.PatrolStartDateField_PatrolStartDate;
+			return Messages.PatrolStartDateField_PatrolStartDate2;
 		}
 		if (item instanceof PatrolStartQuarterDateGroupBy) {
 			return Messages.PatrolQueryLabelProvider_PatrolStartQuarter2;
