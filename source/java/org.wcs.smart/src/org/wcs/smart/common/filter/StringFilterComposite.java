@@ -47,7 +47,6 @@ import org.wcs.smart.internal.Messages;
 public class StringFilterComposite extends Composite {
 
 	private Button btnIncludeAll;
-	private Button btnFilter;
 	private Label lblValue;
 	private ComboViewer comparatorViewer;
 	private Text txtFilter;
@@ -102,19 +101,14 @@ public class StringFilterComposite extends Composite {
 		this.setLayout(new GridLayout(1, false));
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Composite idComp = new Composite(this, SWT.NONE);
-		idComp.setLayout(new GridLayout(1, false));
-		idComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-		btnIncludeAll = new Button(idComp, SWT.RADIO);
+		btnIncludeAll = new Button(this, SWT.CHECK);
 		btnIncludeAll.setText(Messages.StringFilterComposite_IncludeAll_Label);
-		
-		btnFilter = new Button(idComp, SWT.RADIO);
-		btnFilter.setText(Messages.StringFilterComposite_Filter_Label);
 		
 		Composite comp = new Composite(this, SWT.NONE);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		comp.setLayout(new GridLayout(3, false));
+		((GridLayout)comp.getLayout()).marginWidth = 0;
+		((GridLayout)comp.getLayout()).marginHeight = 0;
 		
 		if (searchFields.length <= 1){
 			lblValue = new Label(comp, SWT.NONE);
@@ -147,16 +141,11 @@ public class StringFilterComposite extends Composite {
 		txtFilter = new Text(comp, SWT.BORDER);
 		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		btnFilter.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				setFilteringEnabled(true);
-			}
-		});
+
 		btnIncludeAll.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				setFilteringEnabled(false);
+				setFilteringEnabled(!btnIncludeAll.getSelection());
 			}
 		});
 	}
@@ -169,13 +158,7 @@ public class StringFilterComposite extends Composite {
 		btnIncludeAll.setText(text);
 	}
 
-	/**
-	 * Sets the filter link radio label
-	 * @param text
-	 */
-	public void setFilterRadioLabel(String text) {
-		btnFilter.setText(text);
-	}
+
 
 	/**
 	 * Updates the controls to the given values 
@@ -198,7 +181,6 @@ public class StringFilterComposite extends Composite {
 	}
 	
 	private void setFilteringEnabled(boolean enabled) {
-		btnFilter.setSelection(enabled);
 		btnIncludeAll.setSelection(!enabled);
 		txtFilter.setEnabled(enabled);
 		comparatorViewer.getControl().setEnabled(enabled);
@@ -215,7 +197,7 @@ public class StringFilterComposite extends Composite {
 	 * @return the string comparison operator
 	 */
 	public StringComparison getComparisonForModel() {
-		if (btnFilter.getSelection()) {
+		if (!btnIncludeAll.getSelection()) {
 			return (StringComparison)((IStructuredSelection)comparatorViewer.getSelection()).getFirstElement();
 		}
 		return null;
@@ -226,7 +208,7 @@ public class StringFilterComposite extends Composite {
 	 * @return the filter value
 	 */
 	public String getFilterValueForModel() {
-		if (btnFilter.getSelection()) {
+		if (!btnIncludeAll.getSelection()) {
 			return txtFilter.getText();
 		}
 		return null;

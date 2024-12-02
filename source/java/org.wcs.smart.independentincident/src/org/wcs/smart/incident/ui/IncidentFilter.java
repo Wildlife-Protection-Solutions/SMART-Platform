@@ -164,6 +164,10 @@ public class IncidentFilter {
 		this.incidentIdFilter = text;
 	}
 	
+	private boolean hasDateFilter() {
+		return this.dateFilter != null && this.dateFilter != DateFilter.ALL;
+	}
+	
 	/**
 	 * Builds a query that returns the following incident fields:
 	 * incident uuid, incident id, incident datetime, source, typeuuid
@@ -199,7 +203,7 @@ public class IncidentFilter {
 			}
 			
 		}
-		if (dateFilter != null){
+		if (hasDateFilter()){
 			if (and){
 				str.append(" AND ("); //$NON-NLS-1$
 				and = false;
@@ -232,7 +236,7 @@ public class IncidentFilter {
 				throw new IllegalStateException(MessageFormat.format("String operator {0} not supported.", stringComparator.getGuiName())); //$NON-NLS-1$
 			}
 		}
-		if (dateFilter != null) {
+		if (hasDateFilter()) {
 			
 			LocalDateTime start = dateFilter.getStartDate() == null ? startDate.atStartOfDay() : dateFilter.getStartDate().atStartOfDay();
 			LocalDateTime end = dateFilter.getEndDate() == null ? endDate.atTime(LocalTime.MAX) : dateFilter.getEndDate().atTime(LocalTime.MAX);

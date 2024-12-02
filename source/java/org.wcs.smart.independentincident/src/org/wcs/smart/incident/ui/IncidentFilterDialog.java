@@ -141,7 +141,6 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 						new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.IncidentFilterDialog_IdOptionLabel, "id")}, //$NON-NLS-1$
 						new StringFilterComposite.StringComparison[]{StringFilterComposite.StringComparison.CONTAINS, StringFilterComposite.StringComparison.EQUALS}); 
 				incidentIdFilterCmp.setIncludeAllRadioLabel(Messages.IncidentFilterDialog_IncludeAllOption);
-				incidentIdFilterCmp.setFilterRadioLabel(Messages.IncidentFilterDialog_FilterOptions);
 				
 				if (IncidentManager.getInstance().getIncidentProviders().size() > 1) {
 					Composite incidentsourceComp = createGroupComposite(Messages.IncidentFilterDialog_SourceFilterSection, composite);

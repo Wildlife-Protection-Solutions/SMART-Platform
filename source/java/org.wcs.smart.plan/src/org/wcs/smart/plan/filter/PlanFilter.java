@@ -162,6 +162,10 @@ public class PlanFilter {
 		this.searchField = field;
 	}
 	
+	private boolean hasDateFilter() {
+		return this.dateFilter != null && this.dateFilter != DateFilter.ALL;
+	}
+	
 	/**
 	 * 
 	 * @param s
@@ -205,7 +209,7 @@ public class PlanFilter {
 			}
 			
 		}
-		if (dateFilter != null){
+		if (hasDateFilter()){
 			if (and){
 				str.append(" AND ("); //$NON-NLS-1$
 				and = false;
@@ -235,7 +239,7 @@ public class PlanFilter {
 				query.setParameter("language", SmartDB.getCurrentLanguage()); //$NON-NLS-1$
 			}
 		}
-		if (dateFilter != null) {
+		if (hasDateFilter()) {
 			LocalDate start = dateFilter.getStartDate();
 			if (start == null){
 				start = startDate;

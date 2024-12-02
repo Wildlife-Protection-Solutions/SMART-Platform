@@ -31,7 +31,7 @@ import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.ui.LabelConstants;
 
 import jakarta.persistence.Tuple;
@@ -199,9 +199,9 @@ public class PatrolViewFilter {
 	 * Sets the patrol types to filter by.  If
 	 * null all patrol types will be selected.
 	 * 
-	 * @param types list of patrol types
+	 * @param types list of patrol transport types
 	 */
-	public void setPatrolTypes(PatrolType[] types){
+	public void setPatrolTransportTypes(PatrolTransportType[] types){
 		if (types == null) {
 			this.typeKeys = new String[0];
 			return;
@@ -234,6 +234,12 @@ public class PatrolViewFilter {
 		this.patrolIdFilter = text;
 	}
 	
+	private boolean hasDateFilter(DateFilter filter) {
+		return (filter != null && filter!=DateFilter.ALL);
+	}
+	private boolean hasTypeFilter() {
+		return typeKeys != null && typeKeys.length > 0;
+	}
 	/**
 	 * Builds a query that returns the following patrol fields:
 	 * patrol uuid, patrol id, patrol type, start date, end date
@@ -245,19 +251,19 @@ public class PatrolViewFilter {
 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT p.uuid, p.id, p.patrolType, p.startDate, p.endDate "); //$NON-NLS-1$
-		str.append("FROM Patrol p  "); //$NON-NLS-1$
+		str.append("SELECT distinct p.uuid, p.id, p.patrolType, p.startDate, p.endDate "); //$NON-NLS-1$
+		str.append("FROM PatrolLeg pl join pl.patrol p  "); //$NON-NLS-1$
 		str.append("WHERE p.conservationArea = :ca " ); //$NON-NLS-1$
 	
 		boolean and = true;
 		boolean or = false;
-		if (typeKeys != null && typeKeys.length > 0){
+		if (hasTypeFilter()) {
 			if (and ){
 				str.append(" AND ("); //$NON-NLS-1$
 				and = false;
 			}
 			or = true;
-			str.append(" p.patrolType.keyId IN (:pt) "); //$NON-NLS-1$
+			str.append(" pl.type.keyId IN (:pt) "); //$NON-NLS-1$
 		}
 		if (stringComparator != null && patrolIdFilter != null){
 			if (and){
@@ -271,7 +277,7 @@ public class PatrolViewFilter {
 			str.append(" lower(p.id) like lower(:pid) "); //$NON-NLS-1$
 			
 		}
-		if (dateFilter != null){
+		if (hasDateFilter(dateFilter)){
 			if (and){
 				str.append(" AND ("); //$NON-NLS-1$
 				and = false;
@@ -290,7 +296,7 @@ public class PatrolViewFilter {
 		str.append("ORDER BY " + sortBy.field + " " + sortByDir.sql ); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		Query<Tuple> query = s.createQuery(str.toString(), Tuple.class).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		if (typeKeys != null && typeKeys.length > 0){
+		if (hasTypeFilter()) {
 			query.setParameterList("pt", this.typeKeys); //$NON-NLS-1$
 		}
 		if (stringComparator != null && patrolIdFilter != null){
@@ -300,7 +306,7 @@ public class PatrolViewFilter {
 				query.setParameter("pid", this.patrolIdFilter); //$NON-NLS-1$
 			}
 		}
-		if (dateFilter != null) {
+		if (hasDateFilter(dateFilter)) {
 			LocalDate start = dateFilter.getStartDate();
 			if (start == null){
 				start = startDate;

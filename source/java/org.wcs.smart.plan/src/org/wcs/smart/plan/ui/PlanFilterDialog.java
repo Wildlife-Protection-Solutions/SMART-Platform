@@ -141,6 +141,7 @@ public class PlanFilterDialog extends SmartFilterDialog {
 					@Override
 					protected DateFilter[] getDefaultDateViewerInput() {
 						return new DateFilter[] {
+								DateFilter.ALL,
 								DateFilter.RANGE_30_DAYS,
 								DateFilter.RANGE_60_DAYS,
 								DateFilter.CURRENT_YEAR,
@@ -162,9 +163,7 @@ public class PlanFilterDialog extends SmartFilterDialog {
 				Composite planIdComp = createGroupComposite(Messages.PlanFilterDialog_PlanIdName_Label, composite);
 				
 				planIdFilter = new StringFilterComposite(planIdComp, SWT.NONE, PlanFilter.SEARCH_FIELDS);
-				planIdFilter.setIncludeAllRadioLabel(Messages.PlanFilterDialog_IncludeAll_Label);
-				planIdFilter.setFilterRadioLabel(Messages.PlanFilterDialog_FilterIdName_Label);
-				
+				planIdFilter.setIncludeAllRadioLabel(Messages.PlanFilterDialog_IncludeAll_Label);	
 	
 				updateControlsValues();
 			} finally {

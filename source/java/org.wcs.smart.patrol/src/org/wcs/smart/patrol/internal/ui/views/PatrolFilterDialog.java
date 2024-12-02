@@ -22,12 +22,14 @@
 package org.wcs.smart.patrol.internal.ui.views;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -39,6 +41,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite;
@@ -49,9 +53,12 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolDynamicMenuManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.NamedItemLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
+
 
 /**
  * Filter dialog for filtering the patrols displayed in the patrol list view.
@@ -68,15 +75,15 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 	private StringFilterComposite patrolIdFilterCmp;
 	
 	//type filter
-	private Button btnFilterTypes;
-	private Button btnIncludeAllTypes;
-	private CheckboxTableViewer patrolTypeTableViewer;
+	private CheckboxTreeViewer patrolTypeTableViewer;
+	
 	
 	//sort by option
 	private ComboViewer sortBy;
 	private ComboViewer sortByDir;
 	
 	private Session session;
+	private int treecount = 0;
 	/**
 	 * Create the dialog.
 	 * @param parent parent shell
@@ -110,20 +117,23 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 	 * Updates the filter with the values from the user
 	 */
 	private void updateFilterModel(PatrolViewFilter toUpdate){
+		//date
 		toUpdate.setDateFilter(dateFilterCmp.getDateFilterForModel(),
 				dateFilterCmp.getStartDateForModel(), dateFilterCmp.getEndDateForModel());
-		
-		if (btnFilterTypes != null && btnFilterTypes.getSelection()){
-			Object[] values = patrolTypeTableViewer.getCheckedElements();
-			PatrolType[] types = new PatrolType[values.length];
-			for (int i = 0; i < values.length; i ++){
-				types[i] = ((PatrolType) values[i]);
+			
+		//types
+		Object[] checked = patrolTypeTableViewer.getCheckedElements();
+		if (checked.length == treecount) {
+			toUpdate.setPatrolTransportTypes(null);
+		}else {
+			List<PatrolTransportType> types = new ArrayList<>();
+			for (Object x : checked) {
+				if (x instanceof PatrolTransportType tt) types.add(tt);
 			}
-			toUpdate.setPatrolTypes(types);
-		}else{
-			toUpdate.setPatrolTypes(null);
+			toUpdate.setPatrolTransportTypes(types.toArray(new PatrolTransportType[types.size()]));
 		}
-		
+
+		//id
 		toUpdate.setPatrolIdFilter(patrolIdFilterCmp.getComparisonForModel(), 
 				patrolIdFilterCmp.getFilterValueForModel());
 		
@@ -132,23 +142,23 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 		toUpdate.setSortBy(sb, dir);
 	}
 
+	private void checkAll(boolean check) {
+		for (Object kid : (List<?>)patrolTypeTableViewer.getInput()) {
+			patrolTypeTableViewer.setSubtreeChecked(kid, check);	
+		}
+	}
 	/**
 	 * Updates the widgets with the values from the current filter
 	 */
 	@Override
 	protected void updateControlsValues(){
 		//patrol type
-		boolean enabled = currentFilter.getPatrolTypeFilters() != null;
-		if(btnFilterTypes != null) btnFilterTypes.setSelection(enabled);
-		if (btnIncludeAllTypes != null) btnIncludeAllTypes.setSelection(!enabled);
-		if (patrolTypeTableViewer != null) {
-			patrolTypeTableViewer.getTable().setEnabled(enabled);
-			if (enabled){
-				patrolTypeTableViewer.setCheckedElements(currentFilter.getPatrolTypeFilters());
-			}else{
-				patrolTypeTableViewer.setAllChecked(true);
-			}
+		if (currentFilter.getPatrolTypeFilters() == null || currentFilter.getPatrolTypeFilters().length == 0) {
+			checkAll(true);			
+		}else {
+			patrolTypeTableViewer.setCheckedElements(currentFilter.getPatrolTypeFilters());			
 		}
+		
 		//date 
 		dateFilterCmp.applyState(currentFilter.getDateFilter(), currentFilter.getStartDate(), currentFilter.getEndDate());
 		
@@ -190,15 +200,16 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 		dateFilterCmp = new DateFilterComposite(dateFilterExpComp, SWT.NONE, this);
 
 		List<PatrolType> activeTypes = PatrolHibernateManager.getPatrolTypes(SmartDB.getCurrentConservationArea(), fsession);
-		if (activeTypes.size() > 1) {
-			Composite patrolType = createGroupComposite(Messages.PatrolFilterDialog_PatrolTypesGroupLabel1, composite);
-			createPatrolType(fsession, patrolType, activeTypes);
-		}
+		List<PatrolTransportType> transports = new ArrayList<>();
+		activeTypes.forEach(e->transports.addAll(e.getTransportTypes()));
+		treecount = transports.size() + activeTypes.size();
 
+		Composite patrolType = createGroupComposite(MessageFormat.format("{0} && {1}", LabelConstants.TRACK_TYPE, LabelConstants.TRANSPORT_MODE), composite); //$NON-NLS-1$
+		createPatrolType(fsession, patrolType, activeTypes);
+				
 		Composite patrolIdComp = createGroupComposite(LabelConstants.ID, composite);
 		patrolIdFilterCmp = new StringFilterComposite(patrolIdComp, SWT.NONE, new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.PatrolFilterDialog_PatrolIdLabel2, "id")}); //$NON-NLS-1$
 		patrolIdFilterCmp.setIncludeAllRadioLabel(Messages.PatrolFilterDialog_IncludeAll);
-		patrolIdFilterCmp.setFilterRadioLabel(Messages.PatrolFilterDialog_FilterbyId);
 		
 		
 		Composite sortDirection = createGroupComposite(Messages.PatrolFilterDialog_SortByOption, composite);
@@ -263,34 +274,106 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 	private Composite createPatrolType(Session session, Composite parent, List<PatrolType> activeTypes) {
 
 		Composite patrolTypeComp = new Composite(parent, SWT.NONE);
-		patrolTypeComp.setLayout(new GridLayout(1, false));
+		patrolTypeComp.setLayout(new GridLayout(2, false));
 		patrolTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		btnIncludeAllTypes = new Button(patrolTypeComp, SWT.RADIO);
-		btnIncludeAllTypes.setText(Messages.PatrolFilterDialog_OpIncludeAllTypesLabel1);
-		
-		btnFilterTypes = new Button(patrolTypeComp, SWT.RADIO);
-		btnFilterTypes.setText(Messages.PatrolFilterDialog_OpFilterTypesLabel1);
-		
-		patrolTypeTableViewer = CheckboxTableViewer.newCheckList(patrolTypeComp, SWT.BORDER | SWT.FULL_SELECTION);
-		patrolTypeTableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));		
-		patrolTypeTableViewer.setContentProvider(ArrayContentProvider.getInstance());
+
+		patrolTypeTableViewer = new CheckboxTreeViewer(patrolTypeComp);
+		patrolTypeTableViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));		
 		patrolTypeTableViewer.setLabelProvider(new NamedItemLabelProvider());
+		patrolTypeTableViewer.setContentProvider(new ITreeContentProvider() {
+			
+			@Override
+			public boolean hasChildren(Object element) {
+				return element instanceof PatrolType;
+			}
+			
+			@Override
+			public Object getParent(Object element) {
+				if (element instanceof PatrolTransportType tt) return tt.getPatrolType();
+				return null;
+			}
+			
+			@Override
+			public Object[] getElements(Object element) {
+				return activeTypes.toArray();
+			}
+			
+			@Override
+			public Object[] getChildren(Object parent) {
+				if (parent instanceof PatrolType t) return t.getTransportTypes().toArray();
+				return null;
+			}
+		});
 		patrolTypeTableViewer.setInput(activeTypes);
+		patrolTypeTableViewer.expandAll();
 		
-		btnFilterTypes.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				patrolTypeTableViewer.getTable().setEnabled(true);
+		patrolTypeTableViewer.addCheckStateListener(e->{
+			if (e.getElement() instanceof PatrolType t && e.getChecked()) {
+				patrolTypeTableViewer.setGrayed(t, false);
 			}
-		});
-		btnIncludeAllTypes.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				patrolTypeTableViewer.getTable().setEnabled(false);
+			patrolTypeTableViewer.setSubtreeChecked(e.getElement(), e.getChecked());
+			
+			if (e.getElement() instanceof PatrolTransportType tt) {
+				//if all children at checked then don't grey
+				//otherwise grey
+				
+				int cnt = 0;
+				for (Object x : tt.getPatrolType().getTransportTypes()) {
+					if (patrolTypeTableViewer.getChecked(x)) {
+						cnt++;
+					}
+				}
+				if (cnt == 0) {
+					patrolTypeTableViewer.setGrayChecked(tt.getPatrolType(), false);
+				}else if (cnt != tt.getPatrolType().getTransportTypes().size()) {
+					if (e.getChecked()) {
+						patrolTypeTableViewer.setGrayChecked(tt.getPatrolType(), e.getChecked());
+					}else {
+						patrolTypeTableViewer.setGrayed(tt.getPatrolType(), true);	
+					}
+				}else {
+					patrolTypeTableViewer.setGrayed(tt.getPatrolType(), false);
+					patrolTypeTableViewer.setChecked(tt.getPatrolType(), true);
+				}
+				
 			}
+			
 		});
+		
+		createCheckAllMenu(patrolTypeTableViewer);
+
+		Composite btnComp = new Composite(patrolTypeComp, SWT.NONE);
+		btnComp.setLayout(new GridLayout());
+		((GridLayout)btnComp.getLayout()).marginWidth = 0;
+		((GridLayout)btnComp.getLayout()).marginHeight = 0;
+		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Button btnAll = new Button(btnComp, SWT.PUSH);
+		btnAll.setText(DialogConstants.SELECT_ALL);
+		btnAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnAll.addListener(SWT.Selection,  e-> checkAll(true));
+		
+		Button btnNone = new Button(btnComp, SWT.PUSH);
+		btnNone.setText(DialogConstants.DESELECT_ALL);
+		btnNone.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnNone.addListener(SWT.Selection,  e-> checkAll(false));
+		
 		return patrolTypeComp;
+	}
+	
+	private void createCheckAllMenu(CheckboxTreeViewer tblViewer) {
+		Menu mnu = new Menu(tblViewer.getControl());
+		
+		MenuItem miSelectAll = new MenuItem(mnu, SWT.PUSH);
+		miSelectAll.setText(DialogConstants.SELECT_ALL);
+		miSelectAll.addListener(SWT.Selection, e->checkAll(true));
+		
+		MenuItem miSelectNone = new MenuItem(mnu, SWT.PUSH);
+		miSelectNone.setText(DialogConstants.DESELECT_ALL);
+		miSelectNone.addListener(SWT.Selection, e->checkAll(false));
+		
+		tblViewer.getControl().setMenu(mnu);
 	}
 	
 }
