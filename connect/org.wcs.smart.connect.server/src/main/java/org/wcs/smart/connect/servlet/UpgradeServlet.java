@@ -2283,6 +2283,24 @@ public class UpgradeServlet extends HttpServlet {
 							"create trigger trg_work_item after update of status on connect.work_item for each row execute function connect.update_workitem_summary()", //$NON-NLS-1$
 							"create table connect.ip_alias(ip varchar, alias varchar, primary key(ip))", //$NON-NLS-1$
 							
+							
+							//ticket #3810
+							"""
+							CREATE OR REPLACE FUNCTION connect.utmarea(geom geometry) RETURNS double precision AS $$
+								DECLARE
+									srid integer;
+									centroid geometry;
+								BEGIN
+									centroid := st_centroid(geom);
+									srid := connect.toutm(st_y(centroid), st_x(centroid));
+									IF (srid is null) THEN
+										return st_area(geography(geom));
+									END IF;
+									RETURN st_area(st_transform( st_setsrid(geom, 4326), srid));
+								END;
+								$$LANGUAGE plpgsql; 
+							""", //$NON-NLS-1$
+							
 							//versions
 							"update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$
 							"update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$
