@@ -177,7 +177,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 		if(keepIDs){
 			mission.setId(xml.getId());
 		}else{
-			mission.setId(MissionIdGenerator.INSTANCE.generateMissionId(mission, session));
+			mission.setId(MissionIdGenerator.INSTANCE.generateMissionId(ca, session));
 		}
 		
 		mission.setMissionDays(new ArrayList<MissionDay>());

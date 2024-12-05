@@ -827,7 +827,7 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 		mission.setStartDate(dStartDate);
 		mission.setComment(ct.getComment());
 		
-		String missionId = MissionIdGenerator.INSTANCE.generateMissionId(mission, session);
+		String missionId = MissionIdGenerator.INSTANCE.generateMissionId(ca, session);
 		mission.setId(missionId);
 		
 		for (Employee member: ct.getMembers()){

@@ -239,7 +239,7 @@ public class ErDataGenerator implements IDataEngine{
 			Mission mission = createMission(session, monitor);
 			survey.getMissions().add(mission);
 			mission.setSurvey(survey);
-			mission.setId(MissionIdGenerator.INSTANCE.generateMissionId(mission, session));
+			mission.setId(MissionIdGenerator.INSTANCE.generateMissionId(design.getConservationArea(), session));
 			session.persist(mission);
 			session.flush();
 			mission.getMissionDays().forEach(m->{

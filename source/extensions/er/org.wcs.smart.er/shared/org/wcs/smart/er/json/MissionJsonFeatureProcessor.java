@@ -590,7 +590,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		//generate id
 		if (newMission.getId() == null || newMission.getId().trim().isEmpty()) {
-			newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(newMission, session));
+			newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(ca, session));
 		}
 		session.persist(newMission);
 		session.flush();
@@ -1309,7 +1309,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 
 		if (newMission.getId() == null || newMission.getId().trim().isEmpty()) {
-			newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(newMission, session));
+			newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(ca, session));
 		}
 		session.persist(toUpdate);
 		session.flush();

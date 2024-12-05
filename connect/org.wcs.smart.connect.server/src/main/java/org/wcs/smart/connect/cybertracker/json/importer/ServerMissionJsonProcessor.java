@@ -102,7 +102,7 @@ public class ServerMissionJsonProcessor extends MissionJsonProcessor {
 			newMission.setSurvey(s);
 		}
 		
-		newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(newMission, session));
+		newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(ca, session));
 		
 		session.persist(newMission);
 		

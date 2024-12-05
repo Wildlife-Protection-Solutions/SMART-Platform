@@ -749,6 +749,7 @@ public class Messages extends NLS {
 	public static String DialogConstants_ImportButton_Label;
 	public static String DialogConstants_LoadingText;
 	public static String DialogConstants_SaveButton_Label;
+	public static String DialogConstants_SavingLabel;
 	public static String DialogConstants_SelectAll;
 	public static String DialogConstants_xmlfiles;
 	public static String DialogConstants_xmorzipfiles;

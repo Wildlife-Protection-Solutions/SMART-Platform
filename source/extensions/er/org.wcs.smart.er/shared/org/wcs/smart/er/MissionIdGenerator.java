@@ -24,20 +24,15 @@ package org.wcs.smart.er;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.IErLabelProvider;
-import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.hibernate.QueryFactory;
-
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
 
 /**
  * Mission/Survey ID Generator
@@ -60,33 +55,29 @@ public enum MissionIdGenerator {
 	 * 
 	 * @return next id for given mission
 	 */
-	public String generateMissionId(Mission mission,Session s) {
+	public String generateMissionId(ConservationArea ca,Session s) {
 		
-		StringBuilder sb = new StringBuilder();
 
-		if (mission.getSurvey() != null && mission.getSurvey().getSurveyDesign() != null) {
-			sb.append(mission.getSurvey().getSurveyDesign().getConservationArea().getId());
-		}
+		List<String> results = s.createQuery("SELECT id FROM Mission m WHERE id like :id and m.survey.surveyDesign.conservationArea = :ca", String.class) //$NON-NLS-1$
+				.setParameter("id", ca.getId() + "_%") //$NON-NLS-1$ //$NON-NLS-2$
+				.setParameter("ca", ca) //$NON-NLS-1$
+				.list();
 
-		CriteriaBuilder cb = s.getCriteriaBuilder();
-		CriteriaQuery<Mission> c = cb.createQuery(Mission.class);
-		Root<Mission> from = c.from(Mission.class);
-		c.where(cb.like(from.get("id"), sb.toString() + "%")); //$NON-NLS-1$ //$NON-NLS-2$
-		c.orderBy(cb.desc(from.get("id"))); //$NON-NLS-1$
-		List<Mission> results = s.createQuery(c).getResultList();
-		
 		long idNumber = 0;
-		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-			Mission m =  (Mission) iterator.next();
-			String localId = m.getId(); 
+		for (String localId : results) {
+	
 			try {
 				int offset = localId.lastIndexOf('_') + 1;
-				idNumber = Integer.parseInt(localId.substring(offset));
-				break;
+				int num = Integer.parseInt(localId.substring(offset));
+				if (num > idNumber) {
+					idNumber = num;
+				}
 			} catch (Exception ex) {
 				// not of the form CAID_# skip this one
 			}
 		}
+		StringBuilder sb = new StringBuilder();
+		sb.append(ca.getId());
 		sb.append("_"); //$NON-NLS-1$
 		//sb.append("M"); //$NON-NLS-1$  //not so good for non-english language installs. Just going to leave it without a prefix I guess.
 		idNumber = (idNumber + 1) % 1000000;

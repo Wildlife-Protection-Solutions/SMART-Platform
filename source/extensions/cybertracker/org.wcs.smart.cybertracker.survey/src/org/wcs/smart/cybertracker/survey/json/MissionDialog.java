@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.survey.json;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -39,6 +40,7 @@ import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -58,6 +60,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
 import org.wcs.smart.cybertracker.survey.model.CtMissionWpLink;
@@ -73,6 +76,7 @@ import org.wcs.smart.er.ui.SurveyFilteredComboViewer;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SharedUtils;
 
 /**
@@ -128,35 +132,64 @@ public class MissionDialog extends SmartStyledTitleDialog {
 			MessageDialog.openError(getShell(), Messages.MissionDialog_ErrorTitle, Messages.MissionDialog_PageErrorMsg);
 			return ;
 		}
-		//validate();
-		try{
-			//process new missions first
-			for (Entry<UUID, UiData> e : uiItems.entrySet()){
-				if (!e.getValue().btnExisting.getSelection()){
-					Survey addTo = e.getValue().cmbSurvey.getSelection();
-					if (addTo.getUuid() != null){
-						addTo = (Survey)session.get(Survey.class, addTo.getUuid());
+		
+		HashMap<UUID, Object[]> items = new HashMap<>();
+		for (Entry<UUID, UiData> e : uiItems.entrySet()){
+			items.put(e.getKey(), new Object[] {
+					e.getValue().btnExisting.getSelection(),
+					e.getValue().cmbSurvey.getSelection(),
+					e.getValue().cmbMission.getSelection()});
+		}
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getParentShell());
+		try {
+			pmd.run(true, false, monitor -> {
+				monitor.beginTask(MessageFormat.format("{0} ({1}/{2})", DialogConstants.SAVING, 0, uiItems.size()*2), uiItems.size()); //$NON-NLS-1$
+				int cnt = 0;
+				try{
+					//process new missions first
+					for (Entry<UUID, Object[]> e : items.entrySet()){
+
+						if (! (boolean)e.getValue()[0]){
+							monitor.setTaskName(MessageFormat.format("{0} ({1}/{2})", DialogConstants.SAVING, cnt++, uiItems.size())); //$NON-NLS-1$
+							
+							Survey addTo = (Survey) e.getValue()[1];
+							if (addTo.getUuid() != null){
+								addTo = (Survey)session.get(Survey.class, addTo.getUuid());
+							}
+							Mission p = createNewMission(e.getKey(), missions.get(e.getKey()), addTo);
+							newMission.add(p);
+							
+							monitor.worked(1);
+						}
 					}
-					Mission p = createNewMission(e.getKey(), missions.get(e.getKey()), addTo);
-					newMission.add(p);
-				}
-			}
-			
-			//process new merged options second
-			for (Entry<UUID, UiData> e : uiItems.entrySet()){
-				if (e.getValue().btnExisting.getSelection()){
-					Mission addTo = (Mission)session.get(Mission.class, e.getValue().cmbMission.getSelection().getUuid());
-					mergeMission(e.getKey(), missions.get(e.getKey()), addTo);
-					mergedMissions.add(addTo);
-				}
 					
-			}
-		}catch (Exception ex){
-			ex.printStackTrace();
+					//process new merged options second
+					for (Entry<UUID, Object[]> e : items.entrySet()){
+
+						if ((boolean)e.getValue()[0]){
+							monitor.setTaskName(MessageFormat.format("{0} ({1}/{2})", DialogConstants.SAVING, cnt++, uiItems.size())); //$NON-NLS-1$
+							
+							Mission addTo = (Mission)session.get(Mission.class, ((Mission)e.getValue()[2]).getUuid());
+							mergeMission(e.getKey(), missions.get(e.getKey()), addTo);
+							mergedMissions.add(addTo);
+							
+							monitor.worked(1);
+						}
+							
+					}
+				}catch (Exception ex){
+					throw new InvocationTargetException(ex);
+				}
+				//validate();
+			});
+		} catch (Exception ex) {
 			MessageDialog.openWarning(getShell(), Messages.MissionDialog_ErrorTitle, Messages.MissionDialog_SaveError);
+			CyberTrackerPlugIn.log(ex.getMessage(), ex);
 			super.cancelPressed();
 			return;
 		}
+
 		super.okPressed();
 	}
 	
@@ -283,7 +316,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 		}
 		newMission.setStartDate(startDate);
 		newMission.setEndDate(endDate);
-		newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(newMission, session));
+		newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(survey.getSurveyDesign().getConservationArea(), session));
 
 		newMission = SurveyHibernateManager.saveMission(newMission, session, true);
 		session.flush();

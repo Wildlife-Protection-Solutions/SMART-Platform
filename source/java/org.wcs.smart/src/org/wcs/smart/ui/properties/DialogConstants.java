@@ -71,4 +71,6 @@ public class DialogConstants {
 	
 	public static final String SELECT_ALL = Messages.DialogConstants_SelectAll;
 	public static final String DESELECT_ALL = Messages.DialogConstants_DeSelectAll;
+	
+	public static final String SAVING = Messages.DialogConstants_SavingLabel;
 }
