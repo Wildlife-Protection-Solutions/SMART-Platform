@@ -38,6 +38,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
@@ -189,6 +190,8 @@ public class DateFilterComposite extends Composite {
 	private Label lblStartDateBetween;
 	private DateTime dtEnd;
 	private DateTime dtStart;
+	private Button btnIncludeAll;
+	
 
 	private Listener validateListener = new Listener() {
 
@@ -208,6 +211,10 @@ public class DateFilterComposite extends Composite {
 		setLayout(new GridLayout(5, false));
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		btnIncludeAll = new Button(this, SWT.CHECK);
+		btnIncludeAll.setText(Messages.DateFilterComposite_IncludeAllDates_Label);
+		btnIncludeAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 5, 1));
+		
 		dateViewer = new ComboViewer(this, SWT.READ_ONLY);
 		dateViewer.setContentProvider(ArrayContentProvider.getInstance());
 		dateViewer.setLabelProvider(new LabelProvider(){
@@ -226,10 +233,7 @@ public class DateFilterComposite extends Composite {
 			public void selectionChanged(SelectionChangedEvent event) {
 				DateFilter ff = (DateFilter)((StructuredSelection)dateViewer.getSelection()).getFirstElement();
 				boolean enabled =  (ff != null && ff == DateFilter.CUSTOM);
-				dtStart.setEnabled(enabled);
-				dtEnd.setEnabled(enabled);
-				lblStartDateAnd.setEnabled(enabled);
-				lblStartDateBetween.setEnabled(enabled);
+				setDateRangeControlsEnabled(enabled);
 			}
 		});
 		dateViewer.getCombo().addListener(SWT.Modify, validateListener );
@@ -244,6 +248,11 @@ public class DateFilterComposite extends Composite {
 		dtEnd = new DateTime(this, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER | SWT.DATE);
 		dtEnd.addListener(SWT.Selection, validateListener );
 		
+		btnIncludeAll.addListener(SWT.Selection, e->{
+			setFilteringEnabled(!btnIncludeAll.getSelection());
+		});
+		btnIncludeAll.setSelection(true);
+
 	}
 
 	protected DateFilter[] getDefaultDateViewerInput() {
@@ -282,11 +291,8 @@ public class DateFilterComposite extends Composite {
 	}
 	
 	private DateFilter getCurrentDateFilter() {
-		IStructuredSelection selection = (IStructuredSelection) dateViewer.getSelection();
-		if (selection != null) {
-			return (DateFilter) selection.getFirstElement();
-		}
-		return null;
+		if (btnIncludeAll.getSelection()) return null;
+		return (DateFilter) ((IStructuredSelection)dateViewer.getSelection()).getFirstElement();
 	}
 
 	public void applyState(DateFilter dateFilter, LocalDate startDate, LocalDate endDate) {
@@ -300,8 +306,10 @@ public class DateFilterComposite extends Composite {
 		} else {
 			dateViewer.setSelection(getDefaultDateViewerSelection());
 		}
-		setFilteringEnabled(enabled);
-		
+		//setFilteringEnabled(enabled);
+		btnIncludeAll.setSelection(!enabled);
+		setFilteringEnabled(!btnIncludeAll.getSelection());
+
 	}
 	
 	private void setFilteringEnabled(boolean enabled) {
@@ -317,7 +325,7 @@ public class DateFilterComposite extends Composite {
 	}
 
 	public DateFilter getDateFilterForModel() {
-		return (DateFilter) ((IStructuredSelection)dateViewer.getSelection()).getFirstElement();
+		return getCurrentDateFilter();
 	}
 
 	public LocalDate getStartDateForModel() {

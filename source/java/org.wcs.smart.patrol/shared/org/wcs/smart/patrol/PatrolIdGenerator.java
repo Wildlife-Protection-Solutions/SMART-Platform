@@ -26,6 +26,8 @@ import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.hibernate.Session;
 import org.wcs.smart.IdGeneratorEngine;
@@ -152,29 +154,47 @@ public enum PatrolIdGenerator {
 		}
 		if (!makeUnique) return nextId;
 		
-		int cnt = 1;
-		
-		String cntstr = IdGeneratorEngine.INSTANCE.formatUniqueNumber(cnt, unqString);
-		String id = nextId + cntstr;
-		if (id.length() > Patrol.MAX_ID_LENGTH) {
-			String part = cntstr;
-			id = nextId.substring(0,  nextId.length() - 1 - part.length()) + part;
-		}
-		
+
 		while(true) {
-			Long number = s.createQuery("SELECT count(*) FROM Patrol WHERE id = :id AND conservationArea = :ca", Long.class) //$NON-NLS-1$
-					.setParameter("id", id) //$NON-NLS-1$
+			List<String> items = s.createQuery("SELECT id FROM Patrol WHERE id like :id AND conservationArea = :ca", String.class) //$NON-NLS-1$
+					.setParameter("id", nextId + "%") //$NON-NLS-1$ //$NON-NLS-2$
 					.setParameter("ca", p.getConservationArea()) //$NON-NLS-1$
-					.uniqueResult();
-			if (number == 0) return id;
+					.list();
+			if (items.size() == 0) return nextId;
 			
-			cntstr = IdGeneratorEngine.INSTANCE.formatUniqueNumber(cnt, unqString);
-			id = nextId + cntstr;
+			Pattern ptn = Pattern.compile("(.*)\\{(0+)\\}(.*)"); //$NON-NLS-1$
+			Matcher m = ptn.matcher(unqString);
+			if (!m.matches()) {
+				//invalid format
+				return nextId;
+			}
+			String prefix = m.group(1);
+			String numberpart = m.group(2);
+			String postfix = m.group(3);
+			
+			int length = numberpart.length();
+			String p2 = prefix + "(\\d{" + length + "})" + postfix; //$NON-NLS-1$ //$NON-NLS-2$
+			Pattern ptn2 = Pattern.compile(p2);
+
+			int max = 0;
+			for (String id2 : items) {
+				m = ptn2.matcher(id2.substring(nextId.length()));
+				if (m.matches()) {
+					int num = Integer.parseInt(m.group(1));
+					if (num > max) max = num;
+				}
+			}
+			if (max != 0) max++;
+			
+			String cntstr = IdGeneratorEngine.INSTANCE.formatUniqueNumber(max, unqString);
+			String id = nextId + cntstr;
 			if (id.length() > Patrol.MAX_ID_LENGTH) {
 				String part = cntstr;
 				id = nextId.substring(0,  nextId.length() - 1 - part.length()) + part;
 			}
-			cnt++;
+			return id;
 		}
 	}
+	
+	
 }
