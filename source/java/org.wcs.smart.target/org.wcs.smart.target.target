@@ -15,10 +15,13 @@
             <repository location="https://download.eclipse.org/efxclipse/runtime-released/3.9.0/site/"/>
             <unit id="org.eclipse.fx.runtime.min.feature.feature.group" version="3.9.0.202210162353"/>
         </location>
-	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
-		    <repository location="http://download.eclipse.org/e4/snapshots/org.eclipse.e4.tools/latest/"/>
-		    <!--<unit id="org.eclipse.e4.tools.spies.feature.feature.group" version="0.18.0.v20200923-1237"/>-->
-	    </location>
+
+		<!-- For Debuggin UI issues -->
+	    <!-- <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit"> -->
+		<!--     <repository location="http://download.eclipse.org/e4/snapshots/org.eclipse.e4.tools/latest/"/> -->
+		<!--     <unit id="org.eclipse.e4.tools.spies.feature.feature.group" version="0.18.0.v20200923-1237"/> -->
+	    <!-- </location> -->
+
 	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="https://download.eclipse.org/nebula/archive/releases/3.1.1"/>
 		    <unit id="org.eclipse.nebula.widgets.tablecombo" version="1.2.0.202402011804"/>
@@ -29,7 +32,6 @@
 			<repository location="https://download.eclipse.org/eclipse/updates/4.34"/>
 			<unit id="org.eclipse.equinox.executable.feature.group" version="0.0.0"/>
 			<unit id="org.eclipse.sdk.feature.group" version="0.0.0"/>
-			<!--<unit id="org.eclipse.rcp.configuration.feature.group" version="0.0.0"/>-->
 			<unit id="org.eclipse.e4.core.tools.feature.feature.group" version="0.0.0"/>
 			<unit id="org.eclipse.ecf.core.feature.feature.group" version="0.0.0"/>
 		    <unit id="org.eclipse.ecf.core.ssl.feature.feature.group" version="0.0.0"/>
@@ -39,7 +41,6 @@
 		    <unit id="org.eclipse.equinox.core.sdk.feature.group" version="0.0.0"/>
 		    <unit id="org.eclipse.equinox.p2.sdk.feature.group" version="0.0.0"/>
 		    <unit id="org.eclipse.equinox.sdk.feature.group" version="0.0.0"/>
-		    
 		    <unit id="org.eclipse.orbit.xml-apis-ext" version="0.0.0"/>
 		</location>
 		
@@ -52,15 +53,12 @@
 			<unit id="org.eclipse.xsd.feature.group" version="0.0.0"/>
 		</location>
 		
-		<!--todo orbit has changed/move need to change this -->
 		<location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 			<repository location="https://download.eclipse.org/tools/orbit/simrel/orbit-aggregation/2024-12"/>
 			<unit id="org.eclipse.orbit.maven.xalan.feature.group" version="4.34.0"/>
 			<unit id="org.eclipse.orbit.maven.xalan.source.feature.group" version="4.34.0"/>
 		</location>
 		
-		
-		<!--https://github.com/diffplug/osgiX-->
 	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 			<repository location="https://download.eclipse.org/birt/updates/release/4.18.0"/>
 		     
@@ -73,14 +71,12 @@
 		    <unit id="org.eclipse.birt.nl.feature.group" version="0.0.0"/>
 		    <unit id="org.eclipse.birt.osgi.runtime.sdk.feature.group" version="0.0.0"/>
 	    </location>
+
 	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="https://download.eclipse.org/tools/gef/classic/release/3.22.0"/>
 		    <unit id="org.eclipse.gef.feature.group" version="3.22.0.202411181923"/>
 		    <unit id="org.eclipse.zest.feature.group" version="3.22.0.202411181923"/>
 	    </location>
-	    
-	    
-	    
 	    
 	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
 		    <repository location="https://download.eclipse.org/technology/babel/update-site/R0.20.0/2022-09/"/>
@@ -109,6 +105,7 @@
 		    <unit id="org.eclipse.babel.nls_eclipse_vi.feature.group" version="4.25.0.v20230221050449"/>
 		    <unit id="org.eclipse.babel.nls_eclipse_zh.feature.group" version="4.25.0.v20230221050449"/>
 	    </location>
+
 	    <location includeDependencyDepth="infinite" includeDependencyScopes="compile" includeSource="true" missingManifest="generate" type="Maven">
 		    <dependencies>
 			    <dependency>
@@ -137,16 +134,6 @@
 			    </dependency>
 			</dependencies>
 		</location>
-		<location includeDependencyDepth="none" includeSource="true" missingManifest="generate" type="Maven">
-		    <dependencies>			
-			    <dependency>
-				    <groupId>org.apache.commons</groupId>
-				    <artifactId>commons-exec</artifactId>
-				    <version>1.4.0</version>
-				</dependency>
-		    </dependencies>
-	    </location>
-	    
 	    
 	    <location includeDependencyDepth="none" includeSource="true" missingManifest="generate" type="Maven">
 			<dependencies>			
@@ -210,6 +197,11 @@
 					<artifactId>commons-codec</artifactId>
 					<version>1.17.1</version>
 					<type>jar</type>
+				</dependency>
+				<dependency>
+				    <groupId>org.apache.commons</groupId>
+				    <artifactId>commons-exec</artifactId>
+				    <version>1.4.0</version>
 				</dependency>
 		    </dependencies>
 		</location>
