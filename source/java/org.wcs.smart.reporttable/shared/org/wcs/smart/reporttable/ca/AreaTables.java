@@ -44,11 +44,11 @@ public class AreaTables implements IDynamicSmartTables {
 	public List<SmartBirtTable> getTables(SmartConnection connection) {
 		List<SmartBirtTable> tables = new ArrayList<SmartBirtTable>(); 
 		Session session = connection.getSession();
-		List<String> items = session.createQuery("SELECT distinct type FROM Area WHERE conservationArea in (:cas)", String.class) //$NON-NLS-1$
+		List<Area.AreaType> items = session.createQuery("SELECT distinct type FROM Area WHERE conservationArea in (:cas)", Area.AreaType.class) //$NON-NLS-1$
 		.setParameterList("cas", connection.getConservationAreas()) //$NON-NLS-1$
 		.getResultList();
-		for (Object i : items) {
-			tables.add(new AreaTable((Area.AreaType)i));
+		for (Area.AreaType i : items) {
+			tables.add(new AreaTable(i));
 		}
 		
 		return tables;
