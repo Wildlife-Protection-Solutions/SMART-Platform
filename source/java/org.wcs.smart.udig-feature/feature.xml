@@ -15,550 +15,312 @@
       Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
 
-<plugin
+   <plugin
          id="org.locationtech.udig.catalog"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.catalog.geotiff"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.catalog.rasterings"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.catalog.shp"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.catalog.ui"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.catalog.wms"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.core"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.legend"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.libs"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.mapgraphic"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.project"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.project.ui"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.render.feature.basic"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.render.feature.shapefile"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.render.gridcoverage.basic"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.render.wms.basic"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.style"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.style.sld"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.style.wms"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.tool.default"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.tool.select"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.ui"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.project.edit"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.project.ui.editor"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
-         
-         
-         
+         version="3.2.0.qualifier"/>
+
    <plugin
          id="org.locationtech.udig.catalog.worldimage"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.style.advanced.core"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.style.advanced.feature"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.style.advanced.raster"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.tool.measure"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.style.sld.raster"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
    <plugin
          id="org.locationtech.udig.catalog.arcgrid"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
-         
+         version="3.2.0.qualifier"/>
+
    <plugin
          id="org.locationtech.udig.info"
-         download-size="0"
-         install-size="0"
-         version="3.1.0.qualifier"
-         unpack="false"/>
+         version="3.2.0.qualifier"/>
 
-	<plugin
+   <plugin
          id="org.apache.ant"
-         download-size="0"
-         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.bridge"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.css"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.dom"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.dom.svg"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.parser"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.svggen"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.transcoder"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.util"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.xml"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.log4j"
-         download-size="0"
-         install-size="0"
          version="0.0.0"/>
 
    <plugin
          id="org.apache.xerces"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.xml.resolver"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.compare.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.core.net"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.core.variables"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.draw2d"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.emf.common"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.emf.common.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.emf.ecore"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.emf.ecore.change"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.emf.ecore.edit"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.emf.ecore.xmi"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.emf.edit"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.emf.edit.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.gef"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.jface.text"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.text"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.ui.cheatsheets"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.ui.forms"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.ui.views"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.ui.views.properties.tabbed"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.xsd"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="com.google.guava"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.equinox.transforms.hook"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.e4.tools.compat"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.e4.tools.services"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.equinox.transforms.xslt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.anim"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.codec"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.constants"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.gvt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.script"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.xalan"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.awt.util"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.apache.batik.ext"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>

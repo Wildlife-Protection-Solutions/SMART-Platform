@@ -748,6 +748,13 @@
 			<artifactId>commons-io</artifactId>
 			<version>${commons-io.version}</version>
 		</dependency>    
+		<!-- for BIRT -->
+		<dependency>
+	    		<groupId>com.github.jtidy</groupId>
+    			<artifactId>jtidy</artifactId>
+    			<version>1.0.5</version>
+		</dependency>
+
         <!-- required for reports with images; support Display class loading-->
         <dependency>
             <groupId>swt</groupId>

@@ -2,14 +2,11 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry exported="true" kind="lib" path="lib/slf4j-log4j12-1.6.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jakarta.activation-api-2.1.0.jar"/>
 	<classpathentry excluding="**/.svn/" kind="src" path="src"/>
 	<classpathentry kind="src" path="shared"/>
 	<classpathentry exported="true" kind="lib" path="lib/cache-api-1.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/classmate-1.5.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/slf4j-api-1.7.36.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/hibernate-commons-annotations-6.0.6.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/istack-commons-runtime-4.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jakarta.inject-api-2.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jakarta.persistence-api-3.1.0.jar"/>
@@ -19,17 +16,17 @@
 	<classpathentry exported="true" kind="lib" path="lib/jaxb-runtime-4.0.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-logging-3.5.0.Final.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/txw2-4.0.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jandex-3.1.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/ehcache-3.10.8-jakarta.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/antlr4-runtime-4.13.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/byte-buddy-1.14.11.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/c3p0-0.10.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/derby-10.17.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/derbyshared-10.17.1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/derbytools-10.17.1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/hibernate-c3p0-6.4.4.Final.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/mchange-commons-java-0.3.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/hibernate-core-6.4.4.Final.jar" sourcepath="lib-src/hibernate-core-6.4.4.Final-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/hibernate-jcache-6.4.4.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/byte-buddy-1.14.18.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/c3p0-0.10.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-c3p0-6.6.3.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-commons-annotations-7.0.3.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-core-6.6.3.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/hibernate-jcache-6.6.3.Final.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/mchange-commons-java-0.3.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
