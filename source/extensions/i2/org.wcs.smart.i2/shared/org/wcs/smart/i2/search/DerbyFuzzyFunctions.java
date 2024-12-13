@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.regex.Pattern;
 
 import org.apache.commons.codec.language.DoubleMetaphone;
+
 /**
  * Fuzzy search functions for use in Derby
  * 

@@ -6,20 +6,20 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart</artifactId>
-		<version>8.0.0-SNAPSHOT</version>
+		<version>8.0.3-SNAPSHOT</version>
 		<relativePath>../pom-libs.xml</relativePath>
 	</parent>
 	
 	<name>SMART Hibernate Libraries Module</name>
 	<artifactId>org.wcs.smart.libs</artifactId>
   	<packaging>pom</packaging>
-	<version>8.0.0-SNAPSHOT</version>
+	<version>8.0.3-SNAPSHOT</version>
 		
 	<properties>
-		<hibernate.version>6.4.4.Final</hibernate.version>
+		<hibernate.version>6.6.3.Final</hibernate.version>
 		<ehcache.version>3.10.8</ehcache.version>
 		<derby.version>10.17.1.0</derby.version>
-		<c3p0.version>0.10.0</c3p0.version>
+		<c3p0.version>0.10.1</c3p0.version>
 	</properties>
     
 	<dependencies>
@@ -73,10 +73,11 @@
     			<artifactId>c3p0</artifactId>
     			<version>${c3p0.version}</version>
 		</dependency>
+		
 		<dependency>
-			<groupId>org.slf4j</groupId>
-  			<artifactId>slf4j-log4j12</artifactId>
-  			<version>1.6.4</version>
-        	</dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>2.24.2</version>
+		</dependency>
 	</dependencies>
 </project>

@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.wcs.smart.connect</groupId>
         <artifactId>org.wcs.smart.connect</artifactId>
-        <version>8.0.2-SNAPSHOT</version>
+        <version>8.0.3-SNAPSHOT</version>
     </parent>
     <groupId>org.wcs.smart.connect.server</groupId>
     <artifactId>org.wcs.smart.connect.server</artifactId>
@@ -753,6 +753,13 @@
 			<artifactId>commons-io</artifactId>
 			<version>${commons-io.version}</version>
 		</dependency>   
+		
+		<!-- for BIRT -->
+		<dependency>
+    		<groupId>com.github.jtidy</groupId>
+    		<artifactId>jtidy</artifactId>
+    		<version>1.0.5</version>
+		</dependency>
         <!-- required for reports with images; support Display class loading-->
         <dependency>
             <groupId>swt</groupId>
