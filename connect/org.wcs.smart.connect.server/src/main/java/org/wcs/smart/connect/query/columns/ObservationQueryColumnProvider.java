@@ -80,6 +80,11 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 			FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+			
+			if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID) continue;
+			if (item == FixedQueryColumn.FixedColumns.OBSERVATION_UUID) continue;
+			if (item == FixedQueryColumn.FixedColumns.WAYPOINT_UUID) continue;
+			
 			boolean add = true;
 			if (item == FixedQueryColumn.FixedColumns.CA_ID || 
 					item == FixedQueryColumn.FixedColumns.CA_NAME){
@@ -91,10 +96,6 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				add = QueryColumnUtils.trackDistanceDirection(ops);
 			}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
 				add = QueryColumnUtils.trackObserver(ops);
-			}else if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID ||
-					item == FixedQueryColumn.FixedColumns.WAYPOINT_UUID ||
-					item == FixedQueryColumn.FixedColumns.OBSERVATION_UUID){
-				add = false;
 			}
 			if (add){
 				keys.add(new FixedQueryColumn(item, l));
@@ -120,6 +121,8 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 			FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+		    if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID) continue;
+		    
 			boolean add = true;
 			if (item == FixedQueryColumn.FixedColumns.CA_ID || 
 					item == FixedQueryColumn.FixedColumns.CA_NAME){
@@ -130,11 +133,7 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				item == FixedQueryColumn.FixedColumns.WAYPOINT_RAWY){
 				add = QueryColumnUtils.trackDistanceDirection(ops);
 			}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
-				add = false;
-			}else if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID ||
-					item == FixedQueryColumn.FixedColumns.WAYPOINT_UUID ||
-					item == FixedQueryColumn.FixedColumns.OBSERVATION_UUID){
-				add = false;
+				add = false;			
 			}
 			if (add){
 				keys.add(new FixedQueryColumn(item, l));
