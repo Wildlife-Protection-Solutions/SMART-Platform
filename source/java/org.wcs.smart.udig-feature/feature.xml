@@ -5,7 +5,7 @@
       version="8.0.3.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="8.0.0.qualifier">
+      license-feature-version="8.0.3.qualifier">
 
    <description>
       Provides all the required uDig functions to support mapping.

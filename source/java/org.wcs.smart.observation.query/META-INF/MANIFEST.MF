@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Observation Query PlugIn
 Bundle-SymbolicName: org.wcs.smart.observation.query;singleton:=true
-Bundle-Version: 8.0.0.qualifier
+Bundle-Version: 8.0.3.qualifier
 Bundle-Activator: org.wcs.smart.observation.query.ObservationQueryPlugIn
 Bundle-Vendor: org.wcs.smart
-Require-Bundle: org.wcs.smart.query;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
- org.wcs.smart.observation;bundle-version="[8.0.0,9.0.0)";visibility:=reexport,
+Require-Bundle: org.wcs.smart.query;bundle-version="[8.0.3,9.0.0)";visibility:=reexport,
+ org.wcs.smart.observation;bundle-version="[8.0.3,9.0.0)";visibility:=reexport,
  org.eclipse.ui.forms
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
