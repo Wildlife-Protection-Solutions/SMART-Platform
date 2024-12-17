@@ -33,6 +33,7 @@ import java.util.UUID;
 
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentDisruption;
@@ -355,10 +356,10 @@ public class FixedColumnEngine implements IColumnEngine {
 		sb.append(") as foo "); //$NON-NLS-1$
 		sb.append(" GROUP BY uuid"); //$NON-NLS-1$
 		
-		Query<Tuple> query = session.createNativeQuery(sb.toString(), Tuple.class);
-		query.setParameter("ca", ca); //$NON-NLS-1$
+		NativeQuery<Tuple> query = session.createNativeQuery(sb.toString(), Tuple.class);
+		query.setParameter("ca",  UuidUtils.uuidToByte(ca.getUuid())); //$NON-NLS-1$
 		if (dFilter != null) {
-				query.setParameter("startDate", dFilter[0]) //$NON-NLS-1$
+			query.setParameter("startDate", dFilter[0]) //$NON-NLS-1$
 				.setParameter("endDate", dFilter[1]); //$NON-NLS-1$
 		}
 		List<Tuple> qresults = query.list();
