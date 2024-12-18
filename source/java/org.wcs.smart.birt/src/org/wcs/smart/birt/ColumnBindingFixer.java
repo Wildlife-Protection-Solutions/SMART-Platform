@@ -55,11 +55,22 @@ import org.eclipse.swt.widgets.Display;
 
 public class ColumnBindingFixer {
 
+	
+	/*
+	 * This returns a map of column name to column key for both an old column name 
+	 * and a new column names. This allows us to update data bindings to use the
+	 * column key instead of the column name; which should be more robust if
+	 * column names change.
+	 */
 	@SuppressWarnings("unchecked")
-	public static void fixBindings(final DataSetHandle dataset) throws Exception{
+	public static Map<String,String> fixBindings(final DataSetHandle dataset) throws Exception{
 		// refresh the columns in the query
 		//not running in display thread causes invalid thread access
 		Map<String,String> col2name = new HashMap<>();
+		
+		
+		Map<String,String> nameToKey = new HashMap<>();
+		
 		final Exception[] errors = new Exception[]{null};
 		runInDisplayThread(new Callable(){
 			@Override
@@ -68,11 +79,9 @@ public class ColumnBindingFixer {
 					if ( dataset.getCachedMetaDataHandle( ) != null && dataset.getCachedMetaDataHandle( ).getResultSet( ) != null ) {
 						dataset.getCachedMetaDataHandle( ).getResultSet( ).clearValue( );
 					}
-						
-					
-					if ( dataset instanceof OdaDataSetHandle && dataset.getPropertyHandle( OdaDataSetHandle.RESULT_SET_PROP ).isLocal( ) )
+					if ( dataset instanceof OdaDataSetHandle && dataset.getPropertyHandle( OdaDataSetHandle.RESULT_SET_PROP ).isLocal( ) ) {
 							dataset.getPropertyHandle( OdaDataSetHandle.RESULT_SET_PROP ).setValue( new ArrayList( ) );
-					//DataSetUIUtil.updateColumnCache(dataset, false);
+					}
 					col2name.putAll(updateColumnCache(dataset, false));
 				}catch (Throwable ex){
 					errors[0] = new Exception(ex);	
@@ -81,7 +90,7 @@ public class ColumnBindingFixer {
 		});
 			
 		if (errors[0] != null) throw errors[0];
-		
+
 		// update the column hints to include any new columns (in
 		// particular the geometry columns); and remove any old
 		//columns
@@ -114,7 +123,7 @@ public class ColumnBindingFixer {
 					if (cc.getPosition().equals(c.getPosition())) {
 						name = cc.getColumnName();
 						break;
-					}
+					}					
 				}
 				newHint.setProperty(ColumnHint.COLUMN_NAME_MEMBER,c.getColumnName());
 				newHint.setProperty(ColumnHint.ALIAS_MEMBER, name);
@@ -123,6 +132,10 @@ public class ColumnBindingFixer {
 				newHints.add(newHint);
 			}else {
 				String name = col2name.get(c.getColumnName());
+				
+				nameToKey.put(found.getProperty(dataset.getModule(), ColumnHint.ALIAS_MEMBER).toString(), c.getColumnName());
+				nameToKey.put(name,  c.getColumnName());
+				
 				found.setProperty(ColumnHint.ALIAS_MEMBER, name);
 				found.setProperty(ColumnHint.DISPLAY_NAME_MEMBER,name);
 				found.setProperty(ColumnHint.HEADING_MEMBER, name);
@@ -181,6 +194,8 @@ public class ColumnBindingFixer {
 			}	
 		});
 		if (errors[0] != null) throw errors[0];
+		
+		return nameToKey;
 
 	}
 	

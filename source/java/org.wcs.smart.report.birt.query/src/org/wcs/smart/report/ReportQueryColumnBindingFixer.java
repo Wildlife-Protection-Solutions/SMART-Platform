@@ -22,15 +22,23 @@
 package org.wcs.smart.report;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.eclipse.birt.report.model.api.DesignElementHandle;
 import org.eclipse.birt.report.model.api.ModuleHandle;
 import org.eclipse.birt.report.model.api.OdaDataSourceHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
+import org.eclipse.birt.report.model.api.SlotHandle;
+import org.eclipse.birt.report.model.api.elements.structures.ComputedColumn;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.birt.ColumnBindingFixer;
@@ -80,6 +88,9 @@ public class ReportQueryColumnBindingFixer {
 	public void fixReport(ModuleHandle reportHandle, IProgressMonitor monitor) throws Exception{
 
 		List<?> datasets = reportHandle.getAllDataSets();
+		
+		Map<String, Map<String,String>> columnstoUpdate = new HashMap<>();
+		
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
 			final DataSetHandle dataset = (DataSetHandle) iterator.next();
 			monitor.subTask(MessageFormat.format(Messages.ReportQueryColumnBindingFixer_ProcessingMsg, dataset.getName() + (report == null ? "" : " [" + report.getName() + "]"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -88,9 +99,59 @@ public class ReportQueryColumnBindingFixer {
 					&& ((OdaDataSourceHandle) dataset.getDataSource())
 							.getExtensionID().equals(SmartConnection.ODA_DATA_SOURCE_ID)) {
 			
-				ColumnBindingFixer.fixBindings(dataset);				
+				Map<String,String> updates = ColumnBindingFixer.fixBindings(dataset);
+				columnstoUpdate.put(dataset.getName(), updates);
 			}
 		}
+		
+		List<DesignElementHandle> toProcess = new ArrayList<>();
+		for (Iterator<DesignElementHandle> i = ((ReportDesignHandle) reportHandle).getBody().iterator(); i.hasNext();) {
+			
+			DesignElementHandle xx = i.next();
+			toProcess.add(xx);
+		}
+		while(!toProcess.isEmpty()) {
+			DesignElementHandle element = toProcess.remove(0);
+			if (element == null) continue;
+
+			//add children for processing
+			for (Iterator<SlotHandle> shi = element.slotsIterator(); shi.hasNext();) {
+				SlotHandle sh = shi.next();
+				for (Iterator<DesignElementHandle> i = sh.iterator(); i.hasNext();) {
+					toProcess.add(i.next());
+				}
+			}
+			
+			
+			//process element
+			if (element.getProperty("dataSet") == null) continue; //$NON-NLS-1$
+			String dataset = element.getProperty("dataSet").toString(); //$NON-NLS-1$
+			if (dataset == null) continue;
+			if (!columnstoUpdate.containsKey(dataset)) continue;
+			
+			List<ComputedColumn> cols = (List<ComputedColumn>) element.getProperty("boundDataColumns"); //$NON-NLS-1$
+			if (cols == null) continue;
+			
+			Map<String,String> updates = columnstoUpdate.get(dataset);
+			//TODO: this doesn't deal with more complex expressions
+			//example: dataSetRow["Distance (km)"] +" km"
+			//we could make this smarter
+			Pattern p = Pattern.compile("\s*dataSetRow\\s*\\[\"(.*)\"\\]\\s*"); //$NON-NLS-1$
+			
+			for (ComputedColumn c : cols) {
+				String expression = c.getExpression();
+				if (expression == null) continue;
+				Matcher m = p.matcher(expression);
+				if (!m.matches()) continue;
+				String col = m.group(1);
+				if (col == null) continue;
+				
+				if (updates.containsKey(col)) {
+					c.setExpression("dataSetRow[\"" + updates.get(col) + "\"]"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}			
+		}
+		
 	}
 	
 }
