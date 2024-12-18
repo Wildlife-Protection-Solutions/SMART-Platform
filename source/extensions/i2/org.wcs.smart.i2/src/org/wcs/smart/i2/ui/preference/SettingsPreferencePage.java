@@ -88,11 +88,16 @@ public class SettingsPreferencePage extends PreferencePage implements IIntelPref
 				for(Name n : toDelete) {
 					if (n.op.getUuid() != null) session.remove(n.op);
 				}
+				session.flush();
+				for (Name n : items) {
+					if (n.op.getUuid() != null) {
+						n.op = session.merge(n.op);
+					}
+				}
+				session.flush();
 				for (Name n : items) {
 					if (n.op.getUuid() == null) {
 						session.persist(n.op);
-					}else {
-						n.op = session.merge(n.op);
 					}
 				}
 				session.getTransaction().commit();
@@ -133,10 +138,12 @@ public class SettingsPreferencePage extends PreferencePage implements IIntelPref
 						return;
 					}
 				}
+				
 				if (lang.contains(item.getLanguage())) {
 					setErrorMessage(MessageFormat.format(Messages.ConfigurationDialog_DuplicateLanguage,item.getLanguage()));
 					return;
 				}
+				lang.add(item.getLanguage());
 			}
 		}
 		save();
