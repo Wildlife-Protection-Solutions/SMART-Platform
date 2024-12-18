@@ -355,7 +355,7 @@ public class PatrolPackageExporter {
 		JSONObject transportScreen = CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.TRANSPORT.name()), 
 				activett, PatrolMetadataField.TRANSPORT.getJsonKey(), 
 				Messages.PatrolPackageExporter_TransportTypePageLabel2,
-				getTranslations(Messages.PatrolPackageExporter_TransportTypePageLabel2, "PatrolPackageExporter_TransportTypePageLabel"), //$NON-NLS-1$
+				getTranslations(Messages.PatrolPackageExporter_TransportTypePageLabel2, "PatrolPackageExporter_TransportTypePageLabel2"), //$NON-NLS-1$
 				PatrolMetadataField.TRANSPORT.getIcon(set),
 				false, session, ctpackage.getConservationArea(),
 				set, workingDir,
