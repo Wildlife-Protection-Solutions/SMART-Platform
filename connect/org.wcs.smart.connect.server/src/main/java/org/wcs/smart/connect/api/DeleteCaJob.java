@@ -101,6 +101,7 @@ public class DeleteCaJob implements Runnable {
 							java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
 									.resolve(CyberTracker.CT_NAVIGATION_DATASTORE_LOCATION).resolve(layer.getFilename());
 							filesToDelete.add(toDelete);
+							session.remove(layer);
 						}
 						
 						List<CyberTrackerPackage> ctpackages = QueryFactory.buildQuery(session, CyberTrackerPackage.class, 
@@ -109,6 +110,7 @@ public class DeleteCaJob implements Runnable {
 							java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
 									.resolve(CyberTracker.CT_PACKAGE_DATASTORE_LOCATION).resolve(layer.getFilename());
 							filesToDelete.add(toDelete);
+							session.remove(layer);
 						}
 						
 						//workitem files
@@ -119,6 +121,7 @@ public class DeleteCaJob implements Runnable {
 								java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getFile(workitem.getLocalFilename());
 								filesToDelete.add(toDelete);
 							}
+							session.remove(workitem);
 						}
 				
 					}

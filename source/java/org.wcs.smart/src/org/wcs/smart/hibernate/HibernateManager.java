@@ -638,17 +638,16 @@ public class HibernateManager extends SmartHibernateManager{
 	 */
 	public static void saveNewConservationArea(ConservationArea newCa, Path logoFile) throws Exception{
 		
-//		/* need to login as admin user to create CA */
-//		HibernateManager.endSessionFactory(true);
-//		SmartHibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
-//		
 		try(Session s = HibernateManager.openSession()) {
 			s.beginTransaction();
 			try {
+				for(Employee e: newCa.getEmployees()){
+					generateEmployeeId(e, s);
+				}
+				
 				//save conservation area
 				s.persist(newCa);
 				for(Employee e: newCa.getEmployees()){
-					generateEmployeeId(e, s);
 					s.persist(e);
 				}		
 				
@@ -686,9 +685,6 @@ public class HibernateManager extends SmartHibernateManager{
 				s.getTransaction().rollback();
 				throw ex;
 			}
-//		} finally {
-//			HibernateManager.endSessionFactory(true);	
-//			SmartHibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
 		}
 	}
 
