@@ -194,7 +194,12 @@ public class ReportManager {
 		String newId = "000001"; //$NON-NLS-1$
 		Query<Long> q = session.createQuery("SELECT max(id) FROM Report WHERE conservationArea = :ca", Long.class); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
-		Object maxid = q.list().get(0);
+		
+		Long maxid = 0l;
+		if (q.getResultCount() > 0) {
+			maxid = q.list().get(0);
+		}
+		
 		if (maxid != null){
 			int x = Integer.parseInt(maxid.toString());
 			x++;

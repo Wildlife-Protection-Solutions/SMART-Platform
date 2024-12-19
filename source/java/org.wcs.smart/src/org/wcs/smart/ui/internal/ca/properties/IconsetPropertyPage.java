@@ -613,6 +613,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	
 	private Image getImageIcon(Icon element, IconSet s) {
 		IconFile ff = ((Icon)element).getIconFile(s);
+		if (ff == null) return null;
 		String key = ff.getUuid().toString();
 		Image i = imgr.get(key);
 		if (i != null) return i;

@@ -2261,7 +2261,7 @@ public class UpgradeServlet extends HttpServlet {
 									    IF (NEW.type = 'DOWN_CA' OR NEW.type = 'RECOVERY_CA') THEN
 											INSERT INTO connect.work_item_summary (ca_uuid, username, ip, last_sync_up, last_sync_down, last_ca_up, last_ca_down)
 											VALUES(NEW.ca_uuid, NEW.username, NEW.ip, null, null, null, nowutc)
-											ON CONFLICT (ca_uuid, ip) DO UPDATE SET last_sync_up = null, last_sync_down = null, last_ca_up = null, last_ca_down = nowutc, username=NEW.username;
+											ON CONFLICT (ca_uuid, ip) DO UPDATE SET last_sync_up = null, last_sync_down = null, last_ca_down = nowutc, username=NEW.username;
 									    END IF; 
 									    IF (NEW.type = 'DOWN_SYNC') THEN
 											INSERT INTO connect.work_item_summary (ca_uuid, username, ip, last_sync_up, last_sync_down, last_ca_up, last_ca_down)
