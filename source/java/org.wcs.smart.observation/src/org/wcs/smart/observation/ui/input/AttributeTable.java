@@ -33,6 +33,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.IconCache;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -117,7 +118,7 @@ public class AttributeTable {
 			this.iconCache = new IconCache(viewer.getControl(), IconManager.Size.ICON);
 			this.attribute = attribute;
 			this.viewer = viewer;
-			yellow = new Color(viewer.getControl().getDisplay(), 255, 255, 212);
+			yellow = SmartPlugIn.createYellow();
 			viewer.getControl().addDisposeListener(e->{
 				yellow.dispose();
 			});

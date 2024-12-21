@@ -61,6 +61,7 @@ public abstract class ILabelProvider {
 		QaError_Status_Deleted,
 		QaError_Status_Error,
 		QaError_Status_Fixed,
+		QaError_Status_Unknown,
 	}
 
 	public abstract String getString(Key key, Locale l);

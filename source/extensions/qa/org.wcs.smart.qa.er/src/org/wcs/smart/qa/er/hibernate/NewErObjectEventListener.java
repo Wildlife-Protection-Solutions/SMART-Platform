@@ -29,6 +29,7 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.qa.RoutineExtensionManager;
 import org.wcs.smart.qa.SingleItemDataProvider;
 import org.wcs.smart.qa.auto.AutoValidateJob;
+import org.wcs.smart.qa.er.ErTrackDataProvider;
 import org.wcs.smart.qa.er.ErWaypointDataProvider;
 import org.wcs.smart.qa.er.TrackLocationData;
 import org.wcs.smart.qa.routine.WaypointLocationData;
@@ -55,7 +56,7 @@ public class NewErObjectEventListener implements PostCommitInsertEventListener{
 		}else if (x instanceof MissionTrack){
 			//register track for validation
 			TrackLocationData data = new TrackLocationData((MissionTrack)x);
-			SingleItemDataProvider provider = new SingleItemDataProvider(RoutineExtensionManager.INSTANCE.findDataProvider(ErWaypointDataProvider.ID), data);
+			SingleItemDataProvider provider = new SingleItemDataProvider(RoutineExtensionManager.INSTANCE.findDataProvider(ErTrackDataProvider.ID), data);
 			AutoValidateJob.INSTANCE.addTask(provider);
 		}
 	}

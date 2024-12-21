@@ -10,6 +10,7 @@ public class Messages extends NLS {
 	public static String AutomatedResultsEditor_ConfirmDelete;
 	public static String AutomatedResultsEditor_DeleteMessage;
 	public static String AutomatedResultsEditor_FormTitle;
+	public static String AutomatedResultsEditor_GeneralWarning;
 	public static String AutomatedResultsEditor_LoadResultsJobName;
 	public static String AutomatedResultsEditor_RelaodTooltip;
 	public static String AutomatedResultsEditor_RemoveTooltip1;
@@ -95,6 +96,7 @@ public class Messages extends NLS {
 	public static String QaLabelProvider_StatusFixed;
 	public static String QaLabelProvider_StatusIgnored;
 	public static String QaLabelProvider_StatusNew;
+	public static String QaLabelProvider_StatusUnknown;
 	public static String QaLabelProvider_ValidationSubTask;
 	public static String QaLabelProvider_ValidationTaskName;
 	public static String QaLabelProvider_ValidGeometryNotFound;
@@ -132,6 +134,8 @@ public class Messages extends NLS {
 	public static String TableMapQaErrorComposite_filterHideTooltip;
 	public static String TableMapQaErrorComposite_FixColumnName;
 	public static String TableMapQaErrorComposite_FixLbl;
+	public static String TableMapQaErrorComposite_LocationMovedWarningLabel;
+	public static String TableMapQaErrorComposite_LocationMovedWarningTooltip;
 	public static String TableMapQaErrorComposite_ResultsLabel;
 	public static String TableMapQaErrorComposite_RoutineColumnName;
 	public static String TableMapQaErrorComposite_RoutineLbl;

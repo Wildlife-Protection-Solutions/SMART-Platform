@@ -33,6 +33,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -40,6 +42,8 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.IQaRoutineType;
+import org.wcs.smart.qa.model.QaError;
+import org.wcs.smart.qa.model.QaError.Status;
 import org.wcs.smart.qa.patrol.ILabelProvider;
 import org.wcs.smart.qa.patrol.ILabelProvider.Key;
 import org.wcs.smart.qa.routine.LocationRoutineType;
@@ -134,8 +138,20 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 		return ((TrackLocationData)obj).getTrack().getUuid();
 	}
 
-	@Override
-	public boolean exsits(Session session, UUID srcIdentifier) {
-		return (session.get(Track.class, srcIdentifier) != null);
+	public boolean recheck(Session session, QaError error) {
+		Track t = session.get(Track.class, error.getSourceId());
+		if (t == null) return false;
+		if (error.getStatus() == Status.UNKNOWN) return true;
+		Geometry current = null;
+		try {
+			current = t.getGeometry();
+		} catch (ParseException e) {
+			Logger.getLogger(PatrolTrackDataProvider.class.getName()).log(Level.WARNING, e.getMessage(), e);
+		}
+		if (current != null && !current.equalsExact(error.getGeometryObject())) {
+			error.setStatus(QaError.Status.UNKNOWN);
+			error.setGeometryObject(current);
+		}
+		return true;
 	}
 }

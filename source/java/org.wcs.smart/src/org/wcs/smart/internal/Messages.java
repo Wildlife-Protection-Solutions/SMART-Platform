@@ -738,6 +738,7 @@ public class Messages extends NLS {
 	public static String DialogConstants_DeSelectAll;
 	public static String DialogConstants_DisableAllButton_Label;
 	public static String DialogConstants_DisableButton_Label;
+	public static String DialogConstants_DISMISS_LABEL;
 	public static String DialogConstants_EditButton_Label;
 	public static String DialogConstants_EditKeyButtonText;
 	public static String DialogConstants_EditLinkLabel;

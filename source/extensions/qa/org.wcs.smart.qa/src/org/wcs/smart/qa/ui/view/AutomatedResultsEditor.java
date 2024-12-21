@@ -33,9 +33,12 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
@@ -44,8 +47,11 @@ import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -135,7 +141,12 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		@Override
 		public void partClosed(IWorkbenchPartReference partRef) {
             if (isModified && partRef.getPart(false) == AutomatedResultsEditor.this) {
-				if (MessageDialog.openQuestion(getSite().getShell(), Messages.AutomatedResultsEditor_CleanTitle, MessageFormat.format(Messages.AutomatedResultsEditor_CleanMsg, QaError.Status.NEW.getGuiName(Locale.getDefault())))){
+            	
+            	String newtypes = MessageFormat.format("{0}, {1}", QaError.Status.NEW.getGuiName(Locale.getDefault()), QaError.Status.UNKNOWN.getGuiName(Locale.getDefault())); //$NON-NLS-1$
+				
+            	if (MessageDialog.openQuestion(getSite().getShell(),
+						Messages.AutomatedResultsEditor_CleanTitle, 
+						MessageFormat.format(Messages.AutomatedResultsEditor_CleanMsg, newtypes))){					
 					InternalExtensionManager.INSTANCE.cleanAutoResults();
 				}
 				
@@ -194,7 +205,10 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		btnClean.setToolTipText(Messages.AutomatedResultsEditor_RemoveTooltip1);
 		btnClean.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnClean.addListener(SWT.Selection, e->{
-			if (MessageDialog.openQuestion(getSite().getShell(), Messages.AutomatedResultsEditor_ConfirmDelete, MessageFormat.format(Messages.AutomatedResultsEditor_DeleteMessage,QaError.Status.NEW.getGuiName(Locale.getDefault())))){
+			String newtypes = MessageFormat.format("{0}, {1}", QaError.Status.NEW.getGuiName(Locale.getDefault()), QaError.Status.UNKNOWN.getGuiName(Locale.getDefault())); //$NON-NLS-1$
+			
+			if (MessageDialog.openQuestion(getSite().getShell(), Messages.AutomatedResultsEditor_ConfirmDelete, 
+					MessageFormat.format(Messages.AutomatedResultsEditor_DeleteMessage, newtypes))){
 				try(Session session = HibernateManager.openSession()){
 					try{
 						session.beginTransaction();
@@ -231,7 +245,38 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		form.setText(Messages.AutomatedResultsEditor_FormTitle);
 		form.getBody().setLayout(new GridLayout());
 		
-		super.createPartControl(form.getBody());
+		Composite part = toolkit.createComposite(form.getBody());
+		part.setLayout(new GridLayout());
+		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)part.getLayout()).marginWidth = 0;
+		((GridLayout)part.getLayout()).marginHeight = 0;
+		
+		Composite warning = toolkit.createComposite(part,  SWT.BORDER);
+		warning.setLayout(new GridLayout(3, false));
+		warning.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Color yellow = SmartPlugIn.createYellow();
+		warning.setBackground(yellow);
+		warning.addListener(SWT.Dispose, e->yellow.dispose());
+		
+		Label l = toolkit.createLabel(warning, ""); //$NON-NLS-1$
+		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		l.setBackground(warning.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		l = toolkit.createLabel(warning, Messages.AutomatedResultsEditor_GeneralWarning);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		l.setBackground(warning.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		Hyperlink link = toolkit.createHyperlink(warning, DialogConstants.DISMISS, SWT.NONE);
+		link.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				warning.dispose();
+				part.layout(true);
+			}
+		});
+		link.setBackground(warning.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		super.createPartControl(part);
 		loadData();
 	}
 
@@ -276,9 +321,9 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 					for (int i = 0; i < allErrors.size(); i ++) {
 						QaError e = allErrors.get(i);
 						
-						boolean exists = RoutineExtensionManager.INSTANCE.findDataProvider(e.getDataProviderId())
-							.exsits(s, e.getSourceId());
-						
+						boolean exists = RoutineExtensionManager.INSTANCE
+								.findDataProvider(e.getDataProviderId())
+								.recheck(s, e);
 						if (!exists) {
 							//can't find source object so remove error from the database
 							s.remove(e);

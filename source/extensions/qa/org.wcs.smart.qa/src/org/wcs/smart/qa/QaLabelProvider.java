@@ -87,6 +87,8 @@ public class QaLabelProvider extends ILabelProvider {
 			return Messages.QaLabelProvider_StatusError;
 		case QaError_Status_Fixed:
 			return Messages.QaLabelProvider_StatusFixed;
+		case QaError_Status_Unknown:
+			return Messages.QaLabelProvider_StatusUnknown;
 		default:
 			break;
 		

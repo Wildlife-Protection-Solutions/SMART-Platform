@@ -55,7 +55,9 @@ public class FeatureFactory {
 	
 	public static Filter newStatusFilter(){
 		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
-		return ff.equals(ff.property("status"), ff.literal(QaError.Status.NEW.name())); //$NON-NLS-1$
+		Filter f1 = ff.equals(ff.property("status"), ff.literal(QaError.Status.NEW.name())); //$NON-NLS-1$
+		Filter f2 = ff.equals(ff.property("status"), ff.literal(QaError.Status.UNKNOWN.name())); //$NON-NLS-1$
+		return ff.or(f1, f2);
 	}
 	
 	public static SimpleFeatureType createPointQaErrorFeatureType() throws SchemaException{

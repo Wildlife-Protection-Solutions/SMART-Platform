@@ -67,7 +67,12 @@ public class QaError extends UuidItem{
 		IGNORED,
 		DELETED,
 		ERROR,
-		FIXED;
+		FIXED,
+		UNKNOWN;
+		
+		public boolean isNew() {
+			return this == NEW || this == UNKNOWN;
+		}
 		
 		public String getGuiName(Locale l){
 			switch(this){
@@ -81,6 +86,8 @@ public class QaError extends UuidItem{
 				return ILabelProvider.getLabel(Key.QaError_Status_Ignored, l);
 			case NEW:
 				return ILabelProvider.getLabel(Key.QaError_Status_New, l);
+			case UNKNOWN:
+				return ILabelProvider.getLabel(Key.QaError_Status_Unknown, l);
 			}
 			return this.name();
 		}

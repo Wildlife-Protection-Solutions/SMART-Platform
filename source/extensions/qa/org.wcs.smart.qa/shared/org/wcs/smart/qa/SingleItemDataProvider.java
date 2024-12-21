@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.IQaRoutineType;
+import org.wcs.smart.qa.model.QaError;
 
 /**
  * Wrapper around any data provider that overrides the getData method
@@ -91,7 +92,7 @@ public class SingleItemDataProvider extends IQaDataProvider{
 	}
 
 	@Override
-	public boolean exsits(Session session, UUID srcIdentifier) {
-		return parentProvider.exsits(session, srcIdentifier);
+	public boolean recheck(Session session, QaError error) {
+		return parentProvider.recheck(session, error);
 	}
 }

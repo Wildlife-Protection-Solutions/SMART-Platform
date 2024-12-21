@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.locationtech.udig.catalog.CatalogPlugin;
@@ -564,5 +566,15 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		log(message, t);
 		MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.SmartPlugIn_Error_Dialog_Title, message);
 		System.exit(1);
+	}
+	
+	/**
+	 * Creates the SWT color light yellow - it's up to users
+	 * to properly dispose of color when done with it.
+	 * 
+	 * @return
+	 */
+	public static Color createYellow() {
+		return new Color(Display.getDefault(), new RGB(255, 255, 212));
 	}
 }

@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -49,6 +50,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -282,6 +284,9 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		
 		List<String> labels = new ArrayList<>();
 		labels.add(Messages.TableMapQaErrorComposite_StatusLabel + r.getStatus().getGuiName(Locale.getDefault()));
+		if (r.getStatus() == QaError.Status.UNKNOWN) {
+			labels.add(Messages.TableMapQaErrorComposite_LocationMovedWarningLabel);
+		}
 		if (r.getFixMessage() != null && !r.getFixMessage().isEmpty()){
 			labels.add("\n" + Messages.TableMapQaErrorComposite_FixLbl + "\n" + r.getFixMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -397,13 +402,25 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		tblResults.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblResults.getTable().setEnabled(false);
 		
+		ColumnViewerToolTipSupport.enableFor( tblResults, ToolTip.NO_RECREATE );
+		
 		for (ResultTableColumn c : tableColumns){
 			TableViewerColumn column = new TableViewerColumn(tblResults, SWT.NONE);
 			column.getColumn().setText(c.title);
 			column.getColumn().setWidth(c.getWidth());
 			column.setLabelProvider(new ColumnLabelProvider(){
+				@Override
 				public String getText(Object element){
 					return c.getLabel(element);
+				}
+
+				@Override
+				public String getToolTipText(Object element) {
+					if(!(element instanceof QaError error)) return null; 
+					if (c == ResultTableColumn.STATUS && error.getStatus() == QaError.Status.UNKNOWN) {
+						return Messages.TableMapQaErrorComposite_LocationMovedWarningTooltip;
+					}
+					return super.getToolTipText(element);
 				}
 			});
 			
@@ -739,8 +756,8 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 			tblResults.setFilters(new ViewerFilter[]{new ViewerFilter() {
 				@Override
 				public boolean select(Viewer viewer, Object parentElement, Object element) {
-					if (element instanceof QaError){
-						if (((QaError) element).getStatus() == QaError.Status.NEW) return true;
+					if (element instanceof QaError e){
+						if (e.getStatus().isNew()) return true;
 						return false;
 					}
 					return true;

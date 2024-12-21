@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
@@ -41,6 +42,8 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.qa.er.ILabelProvider.Key;
 import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.IQaRoutineType;
+import org.wcs.smart.qa.model.QaError;
+import org.wcs.smart.qa.model.QaError.Status;
 import org.wcs.smart.qa.routine.LocationRoutineType;
 
 /**
@@ -121,8 +124,20 @@ public class ErTrackDataProvider extends IQaDataProvider {
 		return ((TrackLocationData)obj).getTrack().getUuid();
 	}
 
-	@Override
-	public boolean exsits(Session session, UUID srcIdentifier) {
-		return (session.get(MissionTrack.class, srcIdentifier) != null);
+	public boolean recheck(Session session, QaError error) {
+		MissionTrack t = session.get(MissionTrack.class, error.getSourceId());
+		if (t == null) return false;		
+		if (error.getStatus() == Status.UNKNOWN) return true;		
+		Geometry current = null;
+		try {
+			current = t.getLineString();
+		} catch (Exception e) {
+			Logger.getLogger(ErTrackDataProvider.class.getName()).log(Level.WARNING, e.getMessage(), e);
+		}
+		if (current != null && !current.equalsExact(error.getGeometryObject())) {
+			error.setStatus(QaError.Status.UNKNOWN);
+			error.setGeometryObject(current);
+		}
+		return true;
 	}
 }

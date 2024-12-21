@@ -36,14 +36,14 @@ public enum QaErrorCleaner {
 
 	/**
 	 * Deletes all QaErrors from the database that are not 
-	 * of ERROR state
+	 * NEW or MODIFIED
 	 * @param ca the conservation area to delete form
 	 * @param session the active session
 	 */
 	public void cleanItems(ConservationArea ca, Session session) throws Exception{
-		session.createMutationQuery("DELETE FROM QaError WHERE conservationArea = :ca and status != :status") //$NON-NLS-1$
+		session.createMutationQuery("DELETE FROM QaError WHERE conservationArea = :ca and status NOT IN (:status)") //$NON-NLS-1$
 			.setParameter("ca", ca) //$NON-NLS-1$
-			.setParameter("status", QaError.Status.NEW) //$NON-NLS-1$
+			.setParameterList("status", new QaError.Status[] {QaError.Status.NEW, QaError.Status.UNKNOWN}) //$NON-NLS-1$
 			.executeUpdate();
 	}
 }

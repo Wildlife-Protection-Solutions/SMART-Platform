@@ -82,12 +82,18 @@ public abstract class IQaDataProvider {
 	public abstract String getFeatureId(Session session, Object obj, Locale l);
 	
 	/**
-	 * Checks if the data represented by the srcIdentifiers still exists in the database. 
+	 * Checks if the data represented by the srcIdentifier still exists in the database
+	 * and the geometry is the same as the geometry checked by the QA routine. 
 	 * 
-	 * @param srcIdentifier
-	 * @return
+	 * This function should update the QaError object as follows:
+	 * If the current object geometry is different from the geometry
+	 * used by the original QA check the status should be updated to UNKNOWN and 
+	 * the geometry object updated to the current geometry;  
+	 * 
+	 * @return false if the item no longer exists in the database; true (with updated error object) otherwise 
+	 *
 	 */
-	public abstract boolean exsits(Session session, UUID srcIdentifier);
+	public abstract boolean recheck(Session session, QaError error);
 	
 	/**
 	 * From an object returned by the getData call, the function determines

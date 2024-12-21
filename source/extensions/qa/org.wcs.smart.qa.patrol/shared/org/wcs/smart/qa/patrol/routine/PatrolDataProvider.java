@@ -33,6 +33,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.IQaRoutineType;
+import org.wcs.smart.qa.model.QaError;
 import org.wcs.smart.qa.patrol.ILabelProvider;
 import org.wcs.smart.qa.patrol.ILabelProvider.Key;
 
@@ -75,7 +76,7 @@ public class PatrolDataProvider extends IQaDataProvider {
 	public String getFeatureId(Session session, Object obj, Locale l){
 		Patrol p = session.get(Patrol.class,  ((PatrolLocationData)obj).getPatrol().getUuid());
 		if (p == null){
-			return ILabelProvider.getLabel(Key.PatrolWaypointDataProvider_WpNotFound, l);
+			return ILabelProvider.getLabel(Key.PatrolDataProvider_PatrolNotFound, l);
 		}
 		return p.getId();		
 	}
@@ -92,8 +93,12 @@ public class PatrolDataProvider extends IQaDataProvider {
 	}
 
 	@Override
-	public boolean exsits(Session session, UUID srcIdentifier) {
-		return (session.get(Patrol.class, srcIdentifier) != null);
+	public boolean recheck(Session session, QaError error) {
+		Patrol patrol = session.get(Patrol.class, error.getSourceId());
+		if (patrol == null) return false;
+		
+		//we don't check geometries for this one
+		//its not part of the auto qa check.
+		return true;		
 	}
-
 }

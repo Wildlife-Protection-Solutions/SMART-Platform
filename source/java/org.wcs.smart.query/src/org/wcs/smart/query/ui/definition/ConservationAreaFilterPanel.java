@@ -113,15 +113,9 @@ public class ConservationAreaFilterPanel implements IQueryDefinitionPanel, Selec
 		caWarning = new Composite(content, SWT.NONE | SWT.BORDER);
 		caWarning.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		yellow = new Color(Display.getDefault(), new RGB(255, 255, 212));
-		main.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				if (yellow != null){
-					yellow.dispose();
-				}
-			}
-		});
+		yellow = SmartPlugIn.createYellow();
+		main.addListener(SWT.Dispose, e->{if (yellow != null) yellow.dispose();});
+		
 		caWarning.setLayout(new GridLayout(2, false));
 		caWarning.setBackground(yellow);
 		

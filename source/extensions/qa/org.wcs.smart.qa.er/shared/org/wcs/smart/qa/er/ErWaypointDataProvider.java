@@ -33,14 +33,19 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.qa.er.ILabelProvider.Key;
 import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.IQaRoutineType;
+import org.wcs.smart.qa.model.QaError;
+import org.wcs.smart.qa.model.QaError.Status;
 import org.wcs.smart.qa.routine.LocationRoutineType;
 import org.wcs.smart.qa.routine.WaypointLocationData;
 
@@ -110,7 +115,21 @@ public class ErWaypointDataProvider extends IQaDataProvider {
 	}
 	
 	@Override
-	public boolean exsits(Session session, UUID srcIdentifier) {
-		return (session.get(Waypoint.class, srcIdentifier) != null);
+	public boolean recheck(Session session, QaError error) {
+		Waypoint wp = session.get(Waypoint.class, error.getSourceId());
+		if (wp == null) return false;
+		//already checked and determine modified so we don't need to re-check
+		if (error.getStatus() == Status.UNKNOWN) return true;
+		
+		if (!(error.getGeometryObject() instanceof Point)) return true;
+		
+		//check geometry object
+		Point pnt = (Point)error.getGeometryObject();
+		if (wp.getRawX() == pnt.getX() && wp.getRawY() == pnt.getY()) return true;
+
+		//different geometries
+		error.setStatus(QaError.Status.UNKNOWN);
+		error.setGeometryObject(GeometryFactoryProvider.getFactory().createPoint(new Coordinate(wp.getRawX(), wp.getRawY())));
+		return true;
 	}
 }
