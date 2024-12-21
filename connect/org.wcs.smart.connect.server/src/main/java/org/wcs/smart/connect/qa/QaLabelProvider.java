@@ -63,6 +63,8 @@ public class QaLabelProvider extends ILabelProvider {
 			return Messages.getString("QaLabelProvider.StatusError", l); //$NON-NLS-1$
 		case QaError_Status_Fixed:
 			return Messages.getString("QaLabelProvider.StatusFixed", l); //$NON-NLS-1$		
+		case QaError_Status_Unknown:
+			return Messages.getString("QaLabelProvider.StatusUnknown", l); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 	}
