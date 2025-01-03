@@ -102,5 +102,4 @@ public class SmartQuery extends AbstractSmartBirtQuery {
 			}
 		}
 	}
-	
 }

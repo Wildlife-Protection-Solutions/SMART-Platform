@@ -23,6 +23,7 @@ package org.wcs.smart.report;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.designer.ui.ReportPlugin;
@@ -42,6 +43,8 @@ import org.wcs.smart.birt.BirtResourceLocator;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.query.event.QueryEventManager;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.report.model.Report;
@@ -204,5 +207,21 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	 */
 	public Path getReportFile(Report r){
 		return getReportDirectory(r.getConservationArea()).resolve(r.getFilename());
+	}
+	
+
+	public static final String generateQueryDatasetName(QueryEditorInput smartQuery) {
+		return generateQueryDatasetName(smartQuery.getName(), smartQuery.getId());
+	}
+	
+	public static final String generateQueryDatasetName(Query smartQuery) {
+		return generateQueryDatasetName(smartQuery.getName(), smartQuery.getId());
+	}
+	
+	private static final String generateQueryDatasetName(String queryName, String queryId) {
+		// names can not contain: / \ . ! ; , 
+		//See NamePropertyType.isValidName
+		String lname = queryName.replaceAll("[/\\\\.!;,]", "_");  //$NON-NLS-1$//$NON-NLS-2$
+		return MessageFormat.format("{0} [{1}]", lname, queryId); //$NON-NLS-1$
 	}
 }

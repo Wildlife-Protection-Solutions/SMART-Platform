@@ -645,6 +645,10 @@ public class ImportReportEngine {
 		String newQueryText = smartQuery.getTypeKey() + ":" + UuidUtils.uuidToString(smartQuery.getUuid());  //$NON-NLS-1$
 		oldToNewQueries.put(handle.getQueryText(), newQueryText);
 		handle.setQueryText( newQueryText );
+		
+		String newName = ReportPlugIn.generateQueryDatasetName(smartQuery);
+		handle.setDisplayName(newName);
+		handle.setName(newName);
 		return true;
 	}
 	

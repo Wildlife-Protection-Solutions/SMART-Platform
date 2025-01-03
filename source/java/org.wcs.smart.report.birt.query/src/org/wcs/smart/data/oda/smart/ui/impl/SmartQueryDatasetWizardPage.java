@@ -75,6 +75,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.querylist.QueryListContentProvider;
 import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
 import org.wcs.smart.query.ui.querylist.SavedQueryTree;
+import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.birt.query.Activator;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.ui.SmartReportEditorInput;
@@ -411,11 +412,8 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 		 * See DesignSessionUtil for more convenience methods to define a data
 		 * set design instance.
 		 */
-		// names can not contain: / \ . ! ; , 
-		//See NamePropertyType.isValidName
-		String lname = smartQuery.getName();
-		lname = lname.replaceAll("[/\\\\.!;,]", "_");  //$NON-NLS-1$//$NON-NLS-2$
-		dataSetDesign.setDisplayName(lname + " [" + smartQuery.getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		dataSetDesign.setDisplayName(ReportPlugIn.generateQueryDatasetName(smartQuery));
 
 	}
 
