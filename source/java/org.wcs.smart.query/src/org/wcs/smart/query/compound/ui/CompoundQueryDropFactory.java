@@ -3,6 +3,7 @@ package org.wcs.smart.query.compound.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
@@ -53,7 +54,8 @@ public class CompoundQueryDropFactory implements IQueryDropItemFactory{
 				items.add(di);
 			}
 		}
-		q.setDropItems(CompoundDefinitionPanel.ID, items);
+		
+		Display.getDefault().syncExec(()->q.setDropItems(CompoundDefinitionPanel.ID, items));
 		
 	}
 

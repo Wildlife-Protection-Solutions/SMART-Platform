@@ -17,6 +17,9 @@ public class Messages extends NLS {
 	public static String AbstractValueDropItem_ChangeRate;
 	public static String AbstractValueDropItem_ComputeRate;
 	public static String AbstractValueDropItem_EncounterRatePerRatio;
+	public static String AttachmentQueryExporter_ExporterName;
+	public static String AttachmentQueryExporter_NotADirectoryError;
+	public static String AttachmentQueryExporter_taskname;
 	public static String AttachmentTable_SearchingText;
 	public static String CategoryFilter_InvalidPrefix;
 	public static String DerbyFilterToSqlGenerator_DateFilteNotSupported;
@@ -159,6 +162,9 @@ public class Messages extends NLS {
 	public static String ExportQueryListPage_QueriesLabel;
 	public static String ExportQueryListPage_QueryRequired;
 	public static String ExportQueryLocationPage_AllFilesFilterName;
+	public static String ExportQueryLocationPage_attachmentop;
+	public static String ExportQueryLocationPage_attachmentoutputinfo;
+	public static String ExportQueryLocationPage_attachmenttooltip;
 	public static String ExportQueryLocationPage_BrowseButton;
 	public static String ExportQueryLocationPage_CharsetLabel;
 	public static String ExportQueryLocationPage_Charsettooltip;
@@ -178,6 +184,7 @@ public class Messages extends NLS {
 	public static String ExportQueryWizard_CompleteWError;
 	public static String ExportQueryWizard_DialogTitle;
 	public static String ExportQueryWizard_DirectoryDoesNotExist;
+	public static String ExportQueryWizard_DirectoryExistsMessage;
 	public static String ExportQueryWizard_ExportCancelled;
 	public static String ExportQueryWizard_ExportCancelled_DialogMessage;
 	public static String ExportQueryWizard_ExportCompleted;
@@ -195,6 +202,7 @@ public class Messages extends NLS {
 	public static String ExportQueryWizard_ImportStatus;
 	public static String ExportQueryWizard_OverwriteDialogMessage;
 	public static String ExportQueryWizard_OverwriteDialogTitle;
+	public static String ExportQueryWizard_ProgressMessage;
 	public static String ExportQueryWizard_QueryNotFound;
 	public static String ExportQueryWizard_QueryNotFoundMsg;
 	public static String ExportQueryWizard_Title1;
@@ -563,6 +571,8 @@ public class Messages extends NLS {
 	public static String RunExportFormatPage_ApplyAll;
 	public static String RunExportFormatPage_PageMessage;
 	public static String RunExportFormatPage_PageTitle;
+	public static String RunExportOptionsPage_attachmentsoption;
+	public static String RunExportOptionsPage_attachmentstooltip;
 	public static String RunExportOptionsPage_DelimiterLbl;
 	public static String RunExportOptionsPage_DirectoryMsg;
 	public static String RunExportOptionsPage_DirectoryTitle;
@@ -598,6 +608,8 @@ public class Messages extends NLS {
 	public static String QueryPropertiesDialog_StyleLabel;
 	public static String QueryPropertiesDialog_SystemIdLabel;
 	public static String CsvSimpleQueryExporter_CSV_ExpoterName;
+	public static String CsvSimpleQueryExporter_obuuidcolumnname;
+	public static String CsvSimpleQueryExporter_wpuuidcolumnname;
 	public static String CsvSummaryExporter_CSV_ExporterName;
 	public static String CsvSummaryExporter_QueryNotRun;
 	public static String CustomAreaDropItem_CustomAreaLabel;

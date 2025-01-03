@@ -64,6 +64,7 @@ import org.wcs.smart.ca.AttachmentTag;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.AttachmentNamer;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
@@ -381,24 +382,8 @@ public class QueryResultsImagePage extends EditorPart  implements AttachmentTabl
 					int size = 0;
 					for (IAttachmentResultItem a : imageTable.getSelection()) {
 						size++;
-
-						//check duplicate filenames
-						String name = a.getAttachment().getFilename();
-						String prefix = name;
-						String suffix = name;
-						int index = prefix.lastIndexOf("."); //$NON-NLS-1$
-						if (index > 0) {
-							prefix = prefix.substring(0, index);
-							suffix = name.substring(index);
-						}
-						Path outputFile = exportPath.resolve(prefix + suffix);
-						int cnter = 1;
-						while(Files.exists(outputFile)) {
-							outputFile = exportPath.resolve(prefix + "_" + cnter + suffix); //$NON-NLS-1$
-							cnter ++;
-						}
-						
 						try {
+							Path outputFile = AttachmentNamer.INSTANCE.createUniqueFilenameForExport(a.getAttachment(), exportPath);
 							EncryptUtils.decryptAttachment(a.getAttachment(), outputFile);
 							cnt ++;
 						}catch (Exception e1) {

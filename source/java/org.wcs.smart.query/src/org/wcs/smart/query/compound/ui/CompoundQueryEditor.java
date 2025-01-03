@@ -63,6 +63,7 @@ import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 
 /**
  * Editor for compound queries.
@@ -189,43 +190,19 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 
 	@Override
 	public void reparseQuery() {
-		Job j = new Job(Messages.CompoundQueryEditor_jobname){
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try(Session session = HibernateManager.openSession()){
-					session.beginTransaction();
-					try {
-						//this must be done in the display thread; but the session needs to be in it's own thread
-						//to not conflict with other operations
-						getSite().getShell().getDisplay().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									getQueryProxy().getQueryType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
-								} catch (Exception ex) {
-									QueryPlugIn.log(ex.getMessage(), ex);
-								}
-							}
-						});
-						
-					} catch (Exception ex) {
-						QueryPlugIn.log(ex.getMessage(), ex);
-					} finally {
-						session.getTransaction().rollback();
-					}
-				}
-				return Status.OK_STATUS;
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				QueryProxy proxy = getQueryProxy();
+				IQueryDropItemFactory factory = proxy.getQueryType().getDropItemFactory();
+				factory.generateDropItems(proxy, session);
+			} catch (Exception ex) {
+				QueryPlugIn.log(ex.getMessage(), ex);
+			} finally {
+				session.getTransaction().rollback();
 			}
-		};
-		
-		j.setSystem(true);
-		j.schedule();
-		try {
-			j.join();
-		} catch (InterruptedException e) {
-			QueryPlugIn.log(e.getMessage(), e);
 		}
+		
 		QueryEventManager.getInstance().fireRefreshQuery(getQueryProxy().getQuery());
 	}
 

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.common.engine;
 
+import java.util.UUID;
+
 /**
  * A query result item that includes at least one geometry column.
  * 
@@ -29,5 +31,5 @@ package org.wcs.smart.query.common.engine;
  */
 public interface IWaypointQueryResultItem extends IResultItem {
 	
-	
+	public UUID getWaypointUuid();
 }

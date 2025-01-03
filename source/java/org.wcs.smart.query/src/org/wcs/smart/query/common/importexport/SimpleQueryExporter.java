@@ -64,11 +64,9 @@ public abstract class SimpleQueryExporter {
 		
 		monitor.beginTask(Messages.SimpleQueryExporter_Progress_ExportingFile, dataSize + 2);
 		try {
-			monitor.subTask(Messages.SimpleQueryExporter_Progress_InitializingWriter);
 			init();
 			monitor.worked(1);
 
-			monitor.subTask(Messages.SimpleQueryExporter_Progress_WritingData);
 			while (data.hasNext()) {
 				IResultItem it = data.next();
 				writeRow(it);
@@ -78,7 +76,6 @@ public abstract class SimpleQueryExporter {
 				}
 			}
 
-			monitor.subTask(Messages.SimpleQueryExporter_Progress_CleanUp);
 			finish();
 			monitor.worked(1);
 

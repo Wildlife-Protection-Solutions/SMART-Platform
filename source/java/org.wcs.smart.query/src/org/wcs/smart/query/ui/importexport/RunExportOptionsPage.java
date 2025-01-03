@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -52,6 +53,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.ui.ProjectionLabelProvider;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.ReprojectUtils;
 
 /**
@@ -67,9 +69,9 @@ public class RunExportOptionsPage extends WizardPage {
 	
 	private static final String DIR_PREF_KEY = "org.wcs.smart.query.export.location"; //$NON-NLS-1$
 	
-	private Label lblProjection, lblDelimiter, lblLocation;
+	private Label lblProjection, lblDelimiter, lblLocation, lblAttachment;
 	private Text txtDir;
-	private ComboViewer cmbProjection;
+	private ComboViewer cmbProjection, cmbAttachment;
 	private DelimiterCombo cmbDelimiter;
 	
 	protected RunExportOptionsPage() {
@@ -95,11 +97,18 @@ public class RunExportOptionsPage extends WizardPage {
 		}
 	}
 	
+	public Boolean getAttachmentOption() {
+		if (cmbAttachment == null || !cmbAttachment.getControl().isVisible()) return false;
+		return (cmbAttachment.getStructuredSelection().getFirstElement() == SmartLabelProvider.BOOLEAN_TRUE_LABEL);
+	}
+	
 	public void updateControls() {
 		lblProjection.setVisible(getWizardInternal().needsProjection());
 		cmbProjection.getControl().setVisible(getWizardInternal().needsProjection());
 		lblDelimiter.setVisible(getWizardInternal().needsDelimitier());
 		cmbDelimiter.getControl().setVisible(getWizardInternal().needsDelimitier());
+		lblAttachment.setVisible(getWizardInternal().hasAttachmentOp());
+		cmbAttachment.getControl().setVisible(getWizardInternal().hasAttachmentOp());
 	}
 	
 	public String getOutputDirectory() {
@@ -172,6 +181,18 @@ public class RunExportOptionsPage extends WizardPage {
 		lblDelimiter.setText(Messages.RunExportOptionsPage_DelimiterLbl);
 		cmbDelimiter = new DelimiterCombo(core, SWT.DROP_DOWN | SWT.READ_ONLY);
 		
+		
+		lblAttachment = new Label(core, SWT.NONE);
+		lblAttachment.setText(Messages.RunExportOptionsPage_attachmentsoption);
+		lblAttachment.setToolTipText(Messages.RunExportOptionsPage_attachmentstooltip);
+		
+		cmbAttachment = new ComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbAttachment.setContentProvider(ArrayContentProvider.getInstance());
+		cmbAttachment.setLabelProvider(new LabelProvider());
+		cmbAttachment.setInput( new String[] {SmartLabelProvider.BOOLEAN_FALSE_LABEL, SmartLabelProvider.BOOLEAN_TRUE_LABEL} );
+		cmbAttachment.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbAttachment.setSelection(new StructuredSelection(SmartLabelProvider.BOOLEAN_FALSE_LABEL));
+
 		setControl(core.getParent());
 		
 		setTitle(Messages.RunExportOptionsPage_PageTitle);

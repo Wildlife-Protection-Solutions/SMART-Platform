@@ -72,6 +72,14 @@ public interface IQueryExporter {
 	 */
 	public static final String ENCODING_KEY = "ENCODING_KEY"; //$NON-NLS-1$
 	
+
+	/**
+	 * Option keys for including attachments in exports. If set, the value
+	 * for this parameter must be a Boolean.
+	 * Currently this is only supported by the csv exporter.
+	 */
+	public static final String ATTACHMENTS_KEY = "ATTACHMENTS_KEY"; //$NON-NLS-1$
+	
 	/**
 	 * 
 	 * @return unique exporter identifier 
@@ -89,6 +97,12 @@ public interface IQueryExporter {
 	 * @return true if the exporter supports different character encodings
 	 */
 	public default boolean supportsCharEncodings() { return false; }
+	
+	/**
+	 * 
+	 * @return true if the exporter supports including attachments in exports
+	 */
+	public default boolean supportsAttachments() { return false; }
 	
 	/**
 	 * @return the exporter name
@@ -130,4 +144,9 @@ public interface IQueryExporter {
 	 * while exporting
 	 */
 	void export (Query query, IQueryResult results, Path file, Map<String, Object> parameters, IProgressMonitor monitor) throws Exception;
+	
+	public static boolean includeAttachments(Map<String,Object> parameters) {
+		return parameters.containsKey(ICsvQueryExporter.ATTACHMENTS_KEY) && (Boolean)parameters.get(ICsvQueryExporter.ATTACHMENTS_KEY);
+
+	}
 }

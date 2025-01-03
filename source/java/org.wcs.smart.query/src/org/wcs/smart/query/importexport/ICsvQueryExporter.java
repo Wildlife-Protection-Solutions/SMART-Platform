@@ -35,7 +35,6 @@ public interface ICsvQueryExporter extends IQueryExporter{
 	 * Option key for delimiter export parameter
 	 */
 	public static final String DELIMITER_KEY = "DELIMITER_KEY"; //$NON-NLS-1$
-
 	
 	public static final char DEFAULT_DELIMITER = ',';
 }

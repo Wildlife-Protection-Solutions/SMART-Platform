@@ -265,6 +265,9 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 				column.setVisible(true);
 			}
 		}
+		
+		monitor.subTask(geometryColumn.getName());
+
 		//get all data in default projection and reproject when we write out features
 		if (results instanceof IPagedQueryResultSet){
 			super.setData((IPagedQueryResultSet<?>)results, geometryColumn, columns, file);

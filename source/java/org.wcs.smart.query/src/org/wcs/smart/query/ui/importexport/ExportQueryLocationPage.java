@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.HashMap;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -53,10 +54,12 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.export.dialog.DelimiterCombo;
+import org.wcs.smart.query.common.importexport.AttachmentQueryExporter;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.ui.ProjectionLabelProvider;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.ReprojectUtils;
 
 /**
@@ -75,13 +78,17 @@ public class ExportQueryLocationPage extends WizardPage {
 	private DelimiterCombo cmbDelimiter;
 	private Label lblSpacer;
 	
+	private Label lblAttachment;
+	private ComboViewer cmbAttachment;
+	private Label lblSpacer4;
+	
 	private Label lblCharset;
 	private ComboViewer cmbCharset;
 	private Label lblSpacer2;
 	
 	private ComboViewer cmbProjection;
 	private Label lblProjection;
-	private Label lblSpacer3;
+	private Label lblSpacer3, lblSpacer5, lblAttachInfo;
 	
 	private Composite main;
 	
@@ -140,7 +147,11 @@ public class ExportQueryLocationPage extends WizardPage {
 
 		boolean isDelimiter =  ((ExportQueryWizard)getWizard()).getQueryExporter() instanceof ICsvQueryExporter;
 		
-		Object[] ctrs = new Object[]{lblDelimiter, cmbDelimiter, lblSpacer, lblSpacer3, lblProjection, cmbProjection, lblSpacer2, cmbCharset, lblCharset};
+		Object[] ctrs = new Object[]{lblDelimiter, cmbDelimiter, 
+				lblSpacer, lblSpacer3, lblProjection, 
+				cmbProjection, lblSpacer2, cmbCharset, lblCharset,
+				lblAttachment, cmbAttachment, lblSpacer4,
+				lblSpacer5, lblAttachInfo};
 		
 		for (Object c : ctrs){
 			if (c == null) continue;
@@ -158,6 +169,11 @@ public class ExportQueryLocationPage extends WizardPage {
 		lblSpacer2 = null;
 		lblSpacer3 = null;
 		cmbCharset = null;
+		lblAttachment = null;
+		cmbAttachment = null;
+		lblSpacer4 = null;
+		lblSpacer5 = null;
+		lblAttachInfo = null;
 		
 		if (isDelimiter){
 			createDelimiterOption();	
@@ -171,8 +187,17 @@ public class ExportQueryLocationPage extends WizardPage {
 			createCharsetOption();
 		}
 		
+		if (exporter != null && exporter.supportsAttachments() && canExportAttachments()) {
+			createAttachmentOption();
+		}
+		
 		main.layout(true);
 		setPageComplete(false);
+	}
+	
+	private boolean canExportAttachments() {
+		ExportQueryWizard wizard = (ExportQueryWizard) getWizard();
+		return AttachmentQueryExporter.INSTANCE.canExport(wizard.getQuery());
 	}
 	
 	/**
@@ -243,6 +268,34 @@ public class ExportQueryLocationPage extends WizardPage {
 		setControl(main);
 	}
 
+	private void createAttachmentOption() {
+		lblAttachment = new Label(main, SWT.NONE);
+		lblAttachment.setText(Messages.ExportQueryLocationPage_attachmentop);
+		lblAttachment.setToolTipText(Messages.ExportQueryLocationPage_attachmenttooltip);
+		lblAttachment.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		cmbAttachment = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbAttachment.setContentProvider(ArrayContentProvider.getInstance());
+		cmbAttachment.setLabelProvider(new LabelProvider());
+		cmbAttachment.setInput( new String[] {SmartLabelProvider.BOOLEAN_FALSE_LABEL, SmartLabelProvider.BOOLEAN_TRUE_LABEL} );
+		cmbAttachment.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbAttachment.getControl().setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbAttachment.setSelection(new StructuredSelection(SmartLabelProvider.BOOLEAN_FALSE_LABEL));
+		
+		lblSpacer4 = new Label(main, SWT.NONE);
+		lblSpacer4.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		lblSpacer5 = new Label(main, SWT.NONE);
+		lblSpacer5.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		lblAttachInfo = new Label(main, SWT.WRAP);
+		lblAttachInfo.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		lblAttachInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		((GridData)lblAttachInfo.getLayoutData()).widthHint = 150;
+		lblAttachInfo.setText(MessageFormat.format(Messages.ExportQueryLocationPage_attachmentoutputinfo, AttachmentQueryExporter.OUTPUT_DIR));
+		
+	}
+	
 	private void createCharsetOption() {
 		lblCharset = new Label(main, SWT.NONE);
 		lblCharset.setText(Messages.ExportQueryLocationPage_CharsetLabel);
@@ -339,6 +392,10 @@ public class ExportQueryLocationPage extends WizardPage {
 		}
 		if (cmbCharset != null) {
 			ops.put(IQueryExporter.ENCODING_KEY, cmbCharset.getStructuredSelection().getFirstElement());
+		}
+		if (cmbAttachment != null) {
+			boolean include = cmbAttachment.getStructuredSelection().getFirstElement() ==SmartLabelProvider.BOOLEAN_TRUE_LABEL;
+			ops.put(ICsvQueryExporter.ATTACHMENTS_KEY, include);
 		}
 		
 		if (ops.isEmpty()) return null;

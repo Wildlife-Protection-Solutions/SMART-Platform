@@ -30,8 +30,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTWriter;
@@ -44,6 +46,10 @@ import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
+import org.wcs.smart.query.common.engine.ObservationQueryResult;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResult;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.IColumnAutoConfigQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -54,7 +60,9 @@ import org.wcs.smart.query.model.IMemoryQuery;
 import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -124,6 +132,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 		if (value != null)	data[data.length - 1] = wktWriter.write(value);
 		ICsvDataExporter.removeLineFeeds(data);
 		writer.writeNext(data);
+	
 	}
 
 	@Override
@@ -193,7 +202,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 		List<QueryColumn> columns = (List<QueryColumn>) parameters.get(IQueryExporter.QUERY_COLUMN_KEY);
 		if (columns == null) {
 			try(Session session = HibernateManager.openSession()){
-				columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, provider);
+				columns = ((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), session, provider);
 			}
 		}
 		this.geometryColumn = (QueryColumn) parameters.get(IQueryExporter.GEOMETRY_COLUMN_KEY);
@@ -219,6 +228,18 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 			}
 		}
 		
+		if (IQueryExporter.includeAttachments(parameters)) {
+			//add uuid columns so can link attachments to record
+			if (result instanceof WaypointQueryResult<?>) {
+				QueryColumn qc = createColumn(Messages.CsvSimpleQueryExporter_wpuuidcolumnname, "wp_uuid", item->UuidUtils.uuidToString(  ((WaypointQueryResultItem)item).getWaypointUuid())); //$NON-NLS-1$
+				columns.add(qc);
+			}
+			if (result instanceof ObservationQueryResult<?>) {
+				QueryColumn qc = createColumn(Messages.CsvSimpleQueryExporter_obuuidcolumnname, "obs_uuid", item->UuidUtils.uuidToString(  ((ObservationQueryResultItem)item).getObservationUuid())); //$NON-NLS-1$
+				columns.add(qc);				
+			}
+		}
+		
 		//set data
 		if (result instanceof IPagedQueryResultSet){
 			super.setData((IPagedQueryResultSet<?>)result, geometryColumn, columns, file);
@@ -227,9 +248,24 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 		}else if (result instanceof GridQueryResult){
 			super.setData( ((GridQueryResult)result).getData(), geometryColumn, columns, file);
 		}
-		//export
-		super.export(monitor);		
+		
+		monitor.subTask(geometryColumn.getName());
+		
+		if (IQueryExporter.includeAttachments(parameters)) {
+			SubMonitor status = SubMonitor.convert(monitor);
+			status.setWorkRemaining(2);
+
+			super.export(status.split(1));
+			Path attachmentFolder = file.getParent().resolve(SharedUtils.getFilenameWithoutExtension(file.getFileName().toString()) + "_" + AttachmentQueryExporter.OUTPUT_DIR); //$NON-NLS-1$
+			AttachmentQueryExporter.INSTANCE.export(simpleQuery, result, attachmentFolder, parameters, status.split(1));
+			
+		}else {
+			SubMonitor status = SubMonitor.convert(monitor);
+			status.setWorkRemaining(1);
+			super.export(status.split(1));
+		}
 	}
+	
 	
 	/**
 	 * Simple queries not support reprojection
@@ -242,5 +278,25 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 	@Override
 	public boolean supportsCharEncodings() {
 		return true;
+	}
+	
+	@Override
+	public boolean supportsAttachments() {
+		return true;
+	}
+	
+	private QueryColumn createColumn(String name, String key, Function<IResultItem, String> converter) {
+		return new QueryColumn(name, key, ColumnType.STRING) {
+			
+			@Override
+			public Object getValue(IResultItem item) {
+				return converter.apply(item);						
+			}
+			
+			@Override
+			public QueryColumn clone() {
+				return this;
+			}
+		};
 	}
 }

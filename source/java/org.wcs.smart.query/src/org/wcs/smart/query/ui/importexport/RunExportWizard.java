@@ -96,6 +96,9 @@ public class RunExportWizard extends Wizard {
 		if (needsDelimitier()) {
 			exportOps.put(ICsvQueryExporter.DELIMITER_KEY, oppage.getDelimiter());
 		}
+		if (hasAttachmentOp()) {
+			exportOps.put(IQueryExporter.ATTACHMENTS_KEY, oppage.getAttachmentOption());
+		}
 		
 		String t = oppage.getOutputDirectory();
 		if (t.strip().isBlank()) {
@@ -214,6 +217,13 @@ public class RunExportWizard extends Wizard {
 			if (((IQueryExporter)cmb.getStructuredSelection().getFirstElement()) instanceof ICsvQueryExporter) return true;
 		}
 		return false;
+	}
+
+	public boolean hasAttachmentOp() {
+		for (ComboViewer cmb : formatpage.getFormats().values()) {
+			if (!((IQueryExporter)cmb.getStructuredSelection().getFirstElement()).supportsAttachments()) return false;
+		}
+		return true;
 	}
 	
 	public List<IDateFieldFilter> getDateFilters() {

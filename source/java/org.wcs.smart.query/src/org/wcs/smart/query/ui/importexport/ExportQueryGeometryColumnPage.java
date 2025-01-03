@@ -99,8 +99,14 @@ public class ExportQueryGeometryColumnPage extends WizardPage {
 	}
 
 	public void initValues() {
-		outputOptions.setInput(   ((ExportQueryWizard)getWizard()).getGeometryColumns(((ExportQueryWizard)getWizard()).getQueryExporter()) );
-		outputOptions.setAllChecked(true);
+		List<QueryColumn> geoms = ((ExportQueryWizard)getWizard()).getGeometryColumns(((ExportQueryWizard)getWizard()).getQueryExporter());
+		outputOptions.setInput( geoms );
+		outputOptions.setAllChecked(false);
+		for (QueryColumn qc : geoms) {
+			if (qc.isDefaultGeometryColumn()) {
+				outputOptions.setChecked(qc, true);
+			}
+		}
 		setPageComplete(outputOptions.getCheckedElements().length != 0);
 	}
 	
