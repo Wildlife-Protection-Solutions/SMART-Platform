@@ -282,14 +282,15 @@ public class ConservationAreaClonerEngine {
 			}
 		}
 		
-//		SmartHibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 		session = HibernateManager.openSession(interceptor);
 		Transaction t = session.beginTransaction();
 		try{
 			session.persist(newCa);
 			for(Employee e : newCa.getEmployees()){
-				HibernateManager.generateEmployeeId(e, getSession());
 				session.persist(e);
+			}
+			for(Employee e : newCa.getEmployees()){
+				HibernateManager.generateEmployeeId(e, getSession());				
 			}
 			session.flush();
 			
