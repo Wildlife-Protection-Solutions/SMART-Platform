@@ -21,12 +21,14 @@
  */
 package org.wcs.smart.common.filter;
 
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -183,7 +185,7 @@ public class DateFilterComposite extends Composite {
 		
 	}
 	
-	private SmartFilterDialog dialog;
+	private TitleAreaDialog dialog;
 	
 	private ComboViewer dateViewer;
 	private Label lblStartDateAnd;
@@ -191,7 +193,7 @@ public class DateFilterComposite extends Composite {
 	private DateTime dtEnd;
 	private DateTime dtStart;
 	private Button btnIncludeAll;
-	
+	private Label lblDates;
 
 	private Listener validateListener = new Listener() {
 
@@ -201,19 +203,19 @@ public class DateFilterComposite extends Composite {
 		}
 	};
 
-	public DateFilterComposite(Composite parent, int style, SmartFilterDialog dialog) {
+	public DateFilterComposite(Composite parent, int style, TitleAreaDialog dialog) {
 		super(parent, style);
 		this.dialog = dialog;
 		createControls();
 	}
-
+	
 	private void createControls() {
-		setLayout(new GridLayout(5, false));
+		setLayout(new GridLayout(6, false));
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		btnIncludeAll = new Button(this, SWT.CHECK);
 		btnIncludeAll.setText(Messages.DateFilterComposite_IncludeAllDates_Label);
-		btnIncludeAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 5, 1));
+		btnIncludeAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 6, 1));
 		
 		dateViewer = new ComboViewer(this, SWT.READ_ONLY);
 		dateViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -237,10 +239,15 @@ public class DateFilterComposite extends Composite {
 			}
 		});
 		dateViewer.getCombo().addListener(SWT.Modify, validateListener );
+		
+		
+		lblDates = new Label(this, SWT.NONE);
+		lblDates.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
 		lblStartDateBetween = new Label(this, SWT.NONE);
 		lblStartDateBetween.setText(Messages.DateFilterComposite_ContainsDate_Label_A);
-		
-		
+		lblStartDateBetween.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+
 		dtStart = new DateTime(this, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER | SWT.DATE);
 		dtStart.addListener(SWT.Selection, validateListener );
 		lblStartDateAnd = new Label(this, SWT.NONE);
@@ -252,8 +259,11 @@ public class DateFilterComposite extends Composite {
 			setFilteringEnabled(!btnIncludeAll.getSelection());
 		});
 		btnIncludeAll.setSelection(true);
+		setFilteringEnabled(!btnIncludeAll.getSelection());
 
 	}
+	
+	
 
 	protected DateFilter[] getDefaultDateViewerInput() {
 		return new DateFilter[] {
@@ -306,7 +316,6 @@ public class DateFilterComposite extends Composite {
 		} else {
 			dateViewer.setSelection(getDefaultDateViewerSelection());
 		}
-		//setFilteringEnabled(enabled);
 		btnIncludeAll.setSelection(!enabled);
 		setFilteringEnabled(!btnIncludeAll.getSelection());
 
@@ -314,6 +323,7 @@ public class DateFilterComposite extends Composite {
 	
 	private void setFilteringEnabled(boolean enabled) {
 		dateViewer.getControl().setEnabled(enabled);
+		lblDates.setEnabled(enabled);
 		setDateRangeControlsEnabled(enabled && DateFilter.CUSTOM.equals(getCurrentDateFilter()));
 	}
 	
@@ -322,6 +332,32 @@ public class DateFilterComposite extends Composite {
 		dtEnd.setEnabled(enabled);
 		lblStartDateAnd.setEnabled(enabled);
 		lblStartDateBetween.setEnabled(enabled);
+		
+		
+		dtStart.setVisible(enabled);
+		dtEnd.setVisible(enabled);
+		lblStartDateAnd.setVisible(enabled);
+		lblStartDateBetween.setVisible(enabled);
+		
+		DateFilter filter = (DateFilter) dateViewer.getStructuredSelection().getFirstElement();
+		
+		if (filter != DateFilter.CUSTOM) {
+			((GridData)lblStartDateBetween.getLayoutData()).widthHint = 0;
+		}else {
+			((GridData)lblStartDateBetween.getLayoutData()).widthHint = lblStartDateBetween.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		}
+		
+		if (filter == DateFilter.ALL || filter == DateFilter.CUSTOM) {
+			lblDates.setText(""); //$NON-NLS-1$
+			lblDates.setVisible(false);
+			((GridData)lblDates.getLayoutData()).widthHint = 0;
+			lblDates.getParent().layout(true);
+		}else {
+			lblDates.setText(MessageFormat.format(Messages.DateFilterComposite_datefromtolabel,  DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(filter.getStartDate()), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(filter.getEndDate())));
+			lblDates.setVisible(true);
+			((GridData)lblDates.getLayoutData()).widthHint = lblDates.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+			lblDates.getParent().layout(true);
+		}
 	}
 
 	public DateFilter getDateFilterForModel() {

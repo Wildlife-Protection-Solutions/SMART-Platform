@@ -661,6 +661,7 @@ public class Messages extends NLS {
 	public static String DateFilterComposite_ContainsDate_Label_B;
 	public static String DateFilterComposite_CurrentMonth;
 	public static String DateFilterComposite_CurrentYear;
+	public static String DateFilterComposite_datefromtolabel;
 	public static String DateFilterComposite_DateRequired_Error;
 	public static String DateFilterComposite_EndDateRange_Error;
 	public static String DateFilterComposite_FilterDates_Label;

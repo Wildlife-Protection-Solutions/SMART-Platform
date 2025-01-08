@@ -383,6 +383,44 @@ public class Messages extends NLS {
 	public static String WaypointInfoView_UpdateJobName;
 	public static String WaypointInfoView_WaypointIdLabel;
 
+	public static String ImageResizeProcessor_invalidTargetSize;
+	public static String ImageResizeProcessor_JobName;
+	public static String ImageResizeProcessor_NoReaderFound;
+	public static String ImageResizeProcessor_NothingToDo;
+	public static String ProcessingStatusDialog_CancelledMessage;
+	public static String ProcessingStatusDialog_ErrorStatusLabel;
+	public static String ProcessingStatusDialog_FileColumnName;
+	public static String ProcessingStatusDialog_Message;
+	public static String ProcessingStatusDialog_MessageColumName;
+	public static String ProcessingStatusDialog_NoDataHeader;
+	public static String ProcessingStatusDialog_NoDataMessage;
+	public static String ProcessingStatusDialog_OkStatusLbl;
+	public static String ProcessingStatusDialog_ProcessingCompleteMsg;
+	public static String ProcessingStatusDialog_ProcessingMsg;
+	public static String ProcessingStatusDialog_SearchingStatus;
+	public static String ProcessingStatusDialog_SourceTableHeader;
+	public static String ProcessingStatusDialog_StatusColumnName;
+	public static String ProcessingStatusDialog_Title;
+	public static String ProcessingStatusDialog_WarningStatusLbl;
+	public static String ResizeAttachmentDialog_CustomLabel;
+	public static String ResizeAttachmentDialog_DataTypesLabel;
+	public static String ResizeAttachmentDialog_DateFilterLabel;
+	public static String ResizeAttachmentDialog_FiltersHeader;
+	public static String ResizeAttachmentDialog_Height;
+	public static String ResizeAttachmentDialog_InvalidHeight;
+	public static String ResizeAttachmentDialog_InvalidMaxSize;
+	public static String ResizeAttachmentDialog_InvalidWidth;
+	public static String ResizeAttachmentDialog_MaxSize;
+	public static String ResizeAttachmentDialog_MaxSizeMessage;
+	public static String ResizeAttachmentDialog_Message;
+	public static String ResizeAttachmentDialog_NewSize;
+	public static String ResizeAttachmentDialog_NewSizeMessage;
+	public static String ResizeAttachmentDialog_OneTypeRequired;
+	public static String ResizeAttachmentDialog_ResizeImagesButton;
+	public static String ResizeAttachmentDialog_Title;
+	public static String ResizeAttachmentDialog_typesLabel;
+	public static String ResizeAttachmentDialog_typesmessage;
+	public static String ResizeAttachmentDialog_Width;
 	
 	static {
 		// initialize resource bundle

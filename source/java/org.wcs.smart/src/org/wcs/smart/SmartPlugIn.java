@@ -288,6 +288,10 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	
 	public static final String ICON_INTEGRATE = "org.wcs.smart.integrate"; //$NON-NLS-1$
 	
+	public static final String ICON_STATUS_OK = "org.wcs.smart.status.ok"; //$NON-NLS-1$
+	public static final String ICON_STATUS_OKWARN = "org.wcs.smart.status.okwarn"; //$NON-NLS-1$
+	public static final String ICON_STATUS_INPROGRESS = "org.wcs.smart.status.inprogress"; //$NON-NLS-1$
+	
 	/**
 	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution
 	 * might result in SQLException. This will ensure that jobs are running one by one.
@@ -505,6 +509,10 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     
 	     reg.put(ICON_INTEGRATE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/integrate.png")); //$NON-NLS-1$);
 	     
+	     
+	     reg.put(ICON_STATUS_OK, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/status_ok.png")); //$NON-NLS-1$);
+	     reg.put(ICON_STATUS_OKWARN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/status_warn.png")); //$NON-NLS-1$);
+	     reg.put(ICON_STATUS_INPROGRESS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/status_inprogress.png")); //$NON-NLS-1$);	 	
 	}
 	
 	/**

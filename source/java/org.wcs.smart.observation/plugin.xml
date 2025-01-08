@@ -121,6 +121,26 @@
                   </test>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.wcs.smart.imageprocessor.resize"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                     </or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                  </and>
+               </visibleWhen>
+            </command>
             <separator
                   name="org.wcs.smart.fielddata.dataseparater4"
                   visible="true">
@@ -298,6 +318,10 @@
                   id="org.wcs.smart.observation.import.json"
                   name="%command.name.importjson">
             </command>
+            <command
+                  id="org.wcs.smart.imageprocessor.resize"
+                  name="Resize Images...">
+            </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -336,6 +360,10 @@
       <handler
             class="org.wcs.smart.observation.ui.ImportJsonDataHandler$ImportJsonDataHandlerWrapper"
             commandId="org.wcs.smart.observation.import.json">
+      </handler>
+      <handler
+            class="org.wcs.smart.imageprocessor.ui.ShowResizeHandler$ShowResizeHandlerWrapper"
+            commandId="org.wcs.smart.imageprocessor.resize">
       </handler>
    </extension>
    <extension
