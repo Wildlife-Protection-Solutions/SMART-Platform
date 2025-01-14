@@ -875,6 +875,7 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
 		//here as these fields have been trimmed to the filters
 		if (valueItem.getAssetValueOption() == AssetValueOption.ASSET_HOURS) {
 			sb.append(" SUM({fn TIMESTAMPDIFF( SQL_TSI_FRAC_SECOND,  filter.start_date, case when filter.end_date is null then CURRENT_TIMESTAMP else filter.end_date END)} / 1000000000.0)"); //$NON-NLS-1$
+			
 		}else if (valueItem.getAssetValueOption() == AssetValueOption.ASSET_ACTIVEHOURS) {
 		
 			sb.append(" SUM({fn TIMESTAMPDIFF( SQL_TSI_FRAC_SECOND,  filter.start_date, case when filter.end_date is null then CURRENT_TIMESTAMP else filter.end_date END)} / 1000000000.0"); //$NON-NLS-1$
@@ -891,7 +892,11 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
 					filterStart = bits[0].atTime(LocalTime.MIDNIGHT) ;
 				}else if (bits.length == 2){
 					filterStart = bits[0].atTime(LocalTime.MIDNIGHT);
-					filterEnd = bits[1].atTime(LocalTime.MAX);
+					if (this.localDateFilter.getDateFilterOption().isEndDateInclusive()) {
+						filterEnd = bits[1].atTime(LocalTime.MAX);
+					}else {
+						filterEnd = bits[1].atTime(LocalTime.MIDNIGHT).minusDays(5);
+					}
 				}else {
 					throw new IllegalStateException("Invalid date filter"); //$NON-NLS-1$
 				}
@@ -949,10 +954,10 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
 					df.append(" ( cast(" + startField + " as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
 					df.append(" and cast(" + startField + " as date) <= " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					df.append(" OR "); //$NON-NLS-1$
-					df.append(" ( cast(" + endField  +" as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
+					df.append(" ( cast(" + endField + " as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
 					df.append(" and cast(" + endField + " as date) <= " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					df.append(" OR "); //$NON-NLS-1$
-					df.append(" ( cast(" + startField  +" as date) <= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
+					df.append(" ( cast(" + startField  + " as date) <= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
 					df.append(" and cast(" + endField + " as date) >= " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					df.append(")"); //$NON-NLS-1$
 					
@@ -964,7 +969,7 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
 					df.append(" ( cast(" + startField + " as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
 					df.append(" and cast(" + startField + " as date) < " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					df.append(" OR "); //$NON-NLS-1$
-					df.append(" ( cast(" + endField  +" as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
+					df.append(" ( cast(" + endField + "  as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
 					df.append(" and cast(" + endField + " as date) < " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					df.append(" OR "); //$NON-NLS-1$
 					df.append(" ( cast(" + startField  +" as date) <= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$

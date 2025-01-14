@@ -318,11 +318,11 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine implements IS
 			try(PsqlNamedPreparedStatement selectps = parseQueryString(c, sb.toString())){
 				try(ResultSet rs = selectps.executeQuery()){
 					while(rs.next()) {
-						byte[] locationUuid = rs.getBytes(1);
+						UUID locationUuid = (UUID) rs.getObject(1);
 						String keyid = rs.getString(2);
 				
 						ps.setString(1, keyid);
-						ps.setBytes(2, locationUuid);
+						ps.setObject(2, locationUuid);
 						
 						ps.executeUpdate();
 					}
@@ -840,7 +840,11 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine implements IS
 					filterStart = bits[0].atTime(LocalTime.MIDNIGHT);
 				}else if (bits.length == 2){
 					filterStart = bits[0].atTime(LocalTime.MIDNIGHT);
-					filterEnd = bits[1].atTime(LocalTime.MAX);
+					if (this.localDateFilter.getDateFilterOption().isEndDateInclusive()) {
+						filterEnd = bits[1].atTime(LocalTime.MAX);
+					}else {
+						filterEnd = bits[1].atTime(LocalTime.MIDNIGHT).minusDays(5);
+					}
 				}else {
 					throw new IllegalStateException("Invalid date filter"); //$NON-NLS-1$
 				}

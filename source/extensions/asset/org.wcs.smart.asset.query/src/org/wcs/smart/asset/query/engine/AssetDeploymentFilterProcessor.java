@@ -200,7 +200,11 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 				filterStart = bits[0].atTime(LocalTime.MIDNIGHT) ;
 			}else if (bits.length == 2){
 				filterStart = bits[0].atTime(LocalTime.MIDNIGHT);
-				filterEnd = bits[1].atTime(LocalTime.MAX);
+				if (dateFilter.getDateFilterOption().isEndDateInclusive()) {
+					filterEnd = bits[1].atTime(LocalTime.MAX);
+				}else {
+					filterEnd = bits[1].atTime(LocalTime.MIDNIGHT);
+				}
 			}else {
 				throw new IllegalStateException(Messages.AssetDeploymentFilterProcessor_InvalidDateFilter);
 			}
@@ -329,11 +333,11 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 					df.append(" ( cast(" + startField + " as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
 					df.append(" and cast(" + startField + " as date) <= " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					df.append(" OR "); //$NON-NLS-1$
-					df.append(" ( cast(" + endField  +" as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
-					df.append(" and cast(" + endField + " as date) <= " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					df.append(" ( cast(case when " + endField + " is null then current_timestamp else " + endField + " end as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
+					df.append(" and cast(case when " + endField + " is null then current_timestamp else " + endField + " end as date) <= " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					df.append(" OR "); //$NON-NLS-1$
 					df.append(" ( cast(" + startField  +" as date) <= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
-					df.append(" and cast(" + endField + " as date) >= " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					df.append(" and cast(case when " + endField  + " is null then current_timestamp else " + endField + " end as date) >= " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					df.append(")"); //$NON-NLS-1$
 					
 				}else if (bits.length == 2){
@@ -344,11 +348,11 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 					df.append(" ( cast(" + startField + " as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
 					df.append(" and cast(" + startField + " as date) < " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					df.append(" OR "); //$NON-NLS-1$
-					df.append(" ( cast(" + endField  +" as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
-					df.append(" and cast(" + endField + " as date) < " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					df.append(" ( cast(case when " + endField  +" is null then current_timestamp else " + endField + " end as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
+					df.append(" and cast(case when " + endField  +" is null then current_timestamp else " + endField + " end as date) < " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					df.append(" OR "); //$NON-NLS-1$
 					df.append(" ( cast(" + startField  +" as date) <= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
-					df.append(" and cast(" + endField + " as date) > " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					df.append(" and cast(case when " + endField + " is null then current_timestamp else " + endField + " end  as date) > " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					df.append(")"); //$NON-NLS-1$
 				}else {
 					throw new IllegalStateException(Messages.AssetDeploymentFilterProcessor_InvalidDateFilter);
