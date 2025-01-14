@@ -230,7 +230,9 @@ public class MapComposite extends Composite implements MapPart {
 			public void done(IJobChangeEvent event) {
 				if (isDisposed() || mapViewer == null)
 					return;
-
+				
+				basemapLoaded();
+				
 				mapViewer.getMap().sendCommandSync(new ZoomExtentCommand());
 				mapViewer.getMap().getRenderManager().refresh(null);
 			}
@@ -247,6 +249,12 @@ public class MapComposite extends Composite implements MapPart {
 		});
 	}
 	
+	/**
+	 * called after the basemap is loaded, but before the map is refreshed
+	 */
+	protected void basemapLoaded(){
+		
+	}
 	
 	@Override
 	public Map getMap() {
