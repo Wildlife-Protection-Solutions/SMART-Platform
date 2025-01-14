@@ -23,6 +23,7 @@ package org.wcs.smart.asset.ui.views.asset;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.wcs.smart.asset.engine.StatisticsEngine;
 import org.wcs.smart.asset.model.AssetDeployment;
@@ -63,5 +64,20 @@ class AssetDeploymentWrapper {
 	public void addStatistic(Map<StatisticsEngine.Statistic, Object> values) {
 		if (statValues == null) statValues = new HashMap<>();
 		statValues.putAll(values);
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (other == null) return false;
+		if (other == this) return true;
+		if (other instanceof AssetDeploymentWrapper w) {
+			return Objects.equals(deployment,  w.deployment);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+		return deployment.hashCode();
 	}
 }
