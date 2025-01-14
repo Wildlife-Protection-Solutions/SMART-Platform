@@ -23,6 +23,7 @@ package org.wcs.smart.ui.map.location;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -40,6 +41,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.udig.project.IMap;
+import org.locationtech.udig.project.command.Command;
+import org.locationtech.udig.project.command.MapCommand;
+import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
@@ -231,6 +236,8 @@ public class MapComposite extends Composite implements MapPart {
 				if (isDisposed() || mapViewer == null)
 					return;
 
+				basemapLoaded();
+				
 				mapViewer.getMap().sendCommandSync(new ZoomExtentCommand());
 				mapViewer.getMap().getRenderManager().refresh(null);
 			}
@@ -245,6 +252,13 @@ public class MapComposite extends Composite implements MapPart {
 				defaultLayer.cancel();
 			}
 		});
+	}
+	
+	/**
+	 * called after the basemap is loaded, but before the map is refreshed
+	 */
+	protected void basemapLoaded(){
+		
 	}
 	
 	

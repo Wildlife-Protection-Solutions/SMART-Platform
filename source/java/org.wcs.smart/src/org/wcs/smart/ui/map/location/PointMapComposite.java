@@ -49,7 +49,12 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.ILayer;
+import org.locationtech.udig.project.IMap;
+import org.locationtech.udig.project.command.Command;
+import org.locationtech.udig.project.command.MapCommand;
+import org.locationtech.udig.project.command.UndoableMapCommand;
 import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.feature.simple.SimpleFeature;
@@ -145,6 +150,43 @@ public class PointMapComposite extends MapComposite  {
 			SmartPlugIn.displayLog(Messages.MapComposite_PointLayer_Add_Error, exception);
 		}
 		
+	}
+	
+	protected void basemapLoaded(){
+		//ensure point layer is rendered on top
+		if (pointLayer != null) {
+			getMap().sendCommandSync(new UndoableMapCommand() {
+
+				@Override
+				public void run(IProgressMonitor monitor) throws Exception {
+					List<Layer> l = getMap().getLayersInternal();
+					l.remove(pointLayer);
+					l.add(l.size(), pointLayer);
+				}
+
+				@Override
+				public Command copy() {
+					return null;
+				}
+
+				@Override
+				public String getName() {
+					return "move layer"; //$NON-NLS-1$
+				}
+
+				@Override
+				public void setMap(IMap map) {
+				}
+
+				@Override
+				public Map getMap() {
+					return PointMapComposite.this.getMap();
+				}
+
+				@Override
+				public void rollback(IProgressMonitor monitor) throws Exception {
+				}});
+		}
 	}
 
 	public void updatePointsLayer() {
