@@ -592,14 +592,17 @@ public class AssetDeploymentPage {
 		newDeployment.setStartDate(LocalDateTime.now());
 		newDeployment.setAssetWaypoints(new ArrayList<>());
 		newDeployment.setDisruptions(new ArrayList<>());
-		AssetDeploymentDialog dialog = new AssetDeploymentDialog(parentEditor.getSite().getShell(), newDeployment, allDeployments);
+		
+		AssetDeploymentDialog dialog = new AssetDeploymentDialog(parentEditor.getSite().getShell(), 
+				newDeployment, allDeployments);
 		ContextInjectionFactory.inject(dialog, parentContext);
 		if (dialog.open() != Window.OK) return;
 		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				HibernateManager.saveOrMerge(session, newDeployment);
+				session.persist(newDeployment);
+				allDeployments.add(new AssetDeploymentWrapper(newDeployment));
 				parentEditor.getAsset().computeStatus(session);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
@@ -608,9 +611,8 @@ public class AssetDeploymentPage {
 			}
 		}
 		
-		allDeployments.add(new AssetDeploymentWrapper(newDeployment));
 		sortDeployments();
-		tblDeployments.refresh();
+		refreshTable();
 		parentEditor.fireAssetModified(false);
 		parentEditor.deploymentModified(Collections.singletonList(newDeployment), AssetEvents.ASSETDEPLOYMENT_NEW);
 	}
@@ -677,7 +679,7 @@ public class AssetDeploymentPage {
 		}
 		
 		sortDeployments();
-		tblDeployments.refresh();
+		refreshTable();
 		parentEditor.fireAssetModified(false);
 		parentEditor.reloadDataPage();
 	}
@@ -816,7 +818,7 @@ public class AssetDeploymentPage {
 			}
 		}
 		allDeployments.removeAll(toDelete);
-		tblDeployments.refresh();
+		refreshTable();
 		parentEditor.fireAssetModified(false);
 		parentEditor.deploymentModified(toDelete.stream().map(e->e.getDeployment()).collect(Collectors.toList()), AssetEvents.ASSETDEPLOYMENT_DELETE);
 		parentEditor.reloadDataPage();
@@ -827,7 +829,7 @@ public class AssetDeploymentPage {
 		Object toEdit = ((IStructuredSelection)tblDeployments.getSelection()).getFirstElement();
 		if (toEdit == null) return;
 		if (!(toEdit instanceof AssetDeploymentWrapper)) return;
-		
+
 		AssetDeployment toUpdate = ((AssetDeploymentWrapper)toEdit).getDeployment();
 		
 		AssetDeploymentDialog dialog = new AssetDeploymentDialog(parentEditor.getSite().getShell(), toUpdate, allDeployments);
@@ -851,10 +853,16 @@ public class AssetDeploymentPage {
 			parentEditor.getAsset().computeStatus(session);
 		}
 		sortDeployments();
-		tblDeployments.refresh();
+		refreshTable();
 		parentEditor.fireAssetModified(false);
 		parentEditor.deploymentModified(Collections.singletonList(toUpdate), AssetEvents.ASSETDEPLOYMENT_MODIFIED);
 		updateDetailsPane(toUpdate);
+	}
+	
+	private void refreshTable() {
+		IStructuredSelection x = tblDeployments.getStructuredSelection();
+		tblDeployments.refresh();
+		tblDeployments.setSelection(x);
 	}
 	
 	private void addDisruption() {
@@ -873,6 +881,14 @@ public class AssetDeploymentPage {
 	
 	private void editDisruption(AssetDeploymentDisruption disruption) {
 		
+		AssetDeploymentWrapper wrapper = null;
+		for (AssetDeploymentWrapper w : allDeployments) {
+			if (w.getDeployment().equals(disruption.getAssetDeployment())) {
+				wrapper = w;
+			}
+		}
+		if (wrapper == null) return;
+		
 		AssetDeployment toUpdate = disruption.getAssetDeployment();
 		
 		DisruptionDialog dialog = new DisruptionDialog(parentEditor.getSite().getShell(), disruption);
@@ -882,8 +898,15 @@ public class AssetDeploymentPage {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				if (!toUpdate.getDisruptions().contains(disruption)) toUpdate.getDisruptions().add(disruption);
-				HibernateManager.saveOrMerge(session, toUpdate);
+				toUpdate = session.merge(toUpdate);
+				
+				if (disruption.getUuid() == null) {
+					session.persist(disruption);
+				}
+				Hibernate.initialize(toUpdate.getStationLocation());
+				Hibernate.initialize(toUpdate.getStationLocation().getStation());
+				
+				wrapper.updateDeployment(toUpdate);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -891,7 +914,7 @@ public class AssetDeploymentPage {
 			}
 			parentEditor.getAsset().computeStatus(session);
 		}
-		tblDeployments.refresh();
+		refreshTable();
 		parentEditor.fireAssetModified(false);
 		parentEditor.deploymentModified(Collections.singletonList(toUpdate), AssetEvents.ASSETDEPLOYMENT_MODIFIED);
 		updateDetailsPane(toUpdate);
@@ -906,8 +929,9 @@ public class AssetDeploymentPage {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
+				session.remove(disruption);
 				deployment.getDisruptions().remove(disruption);
-				HibernateManager.saveOrMerge(session, deployment);
+				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
@@ -915,7 +939,7 @@ public class AssetDeploymentPage {
 			}
 			parentEditor.getAsset().computeStatus(session);
 		}
-		tblDeployments.refresh();
+		refreshTable();
 		parentEditor.fireAssetModified(false);
 		parentEditor.deploymentModified(Collections.singletonList(deployment), AssetEvents.ASSETDEPLOYMENT_MODIFIED);
 		updateDetailsPane(deployment);
@@ -1005,6 +1029,8 @@ public class AssetDeploymentPage {
 			
 			//update ui
 			Display.getDefault().syncExec(()->{
+				IStructuredSelection selection = tblDeployments.getStructuredSelection();
+				
 				for(TableColumn tc : tblDeployments.getTable().getColumns()) tc.dispose();
 				for (AssetDeploymentTableColumn column : tableColumns) {
 					TableViewerColumn c = new TableViewerColumn(tblDeployments, SWT.NONE);
@@ -1016,7 +1042,7 @@ public class AssetDeploymentPage {
 					c.pack();
 					c.setWidth(c.getWidth() + 20);
 				}
-				
+				tblDeployments.setSelection(selection);
 			});
 			computeDeploymentStats.schedule();
 			return org.eclipse.core.runtime.Status.OK_STATUS;
