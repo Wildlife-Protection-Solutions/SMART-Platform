@@ -649,7 +649,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			return;
 		}
 		
-		lastValidationEngine = new ValidationEngine(Locale.getDefault());
+		lastValidationEngine = new ValidationEngine(Locale.getDefault(), true);
 		for (Object x  : tblRoutines.getCheckedElements()){
 			if (x instanceof DataValidator){
 				ValidationTask task = new ValidationTask(((DataValidator) x).getRoutine(), ((DataValidator) x).getDataProvider(), startDate, endDate, SmartDB.getCurrentConservationArea(), Locale.getDefault());

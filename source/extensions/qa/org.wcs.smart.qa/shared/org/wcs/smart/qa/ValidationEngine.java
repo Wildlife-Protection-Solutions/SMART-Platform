@@ -46,6 +46,12 @@ public class ValidationEngine {
 	private List<ValidationTask> tasks;
 	private List<Exception> exceptions;
 	private Locale l;
+	private boolean isManual = false;
+	
+	public ValidationEngine(Locale l, boolean isManual){
+		this(l);
+		this.isManual = isManual;
+	}
 	
 	/**
 	 * Creates a new engine with no tasks
@@ -89,7 +95,7 @@ public class ValidationEngine {
 			try{
 				QaRoutine r = (QaRoutine) session.get(QaRoutine.class, t.getRoutine().getUuid());
 				
-				if (r.getRoutineType().canRunAutomatically()) {
+				if (isManual || r.getRoutineType().canRunAutomatically()) {
 					t.setQaRoutine(r);
 				
 					Collection<QaError> localErrors = r.getRoutineType().validateData(t, session, m.newChild(1));
