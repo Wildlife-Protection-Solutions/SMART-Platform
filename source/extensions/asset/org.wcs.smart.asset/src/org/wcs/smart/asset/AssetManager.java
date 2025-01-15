@@ -117,6 +117,9 @@ public enum AssetManager {
 		}
 		session.flush();
 		
+		hql = "DELETE FROM AssetDeploymentDisruption WHERE assetDeployment in (FROM AssetDeployment WHERE asset = :asset)"; //$NON-NLS-1$
+		session.createMutationQuery(hql).setParameter("asset",  asset).executeUpdate(); //$NON-NLS-1$
+		session.flush();
 		
 		hql = "DELETE FROM AssetDeployment WHERE asset = :asset"; //$NON-NLS-1$
 		session.createMutationQuery(hql).setParameter("asset",  asset).executeUpdate(); //$NON-NLS-1$
