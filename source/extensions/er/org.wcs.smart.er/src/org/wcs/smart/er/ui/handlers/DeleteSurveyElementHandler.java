@@ -369,7 +369,8 @@ public class DeleteSurveyElementHandler {
 					if (md.getWaypoints() == null) continue;
 					for (SurveyWaypoint w : md.getWaypoints()){
 						toDelete.add(w.getWaypoint());
-					}					
+						session.remove(w);
+					}				
 				}
 				
 				//delete mission
