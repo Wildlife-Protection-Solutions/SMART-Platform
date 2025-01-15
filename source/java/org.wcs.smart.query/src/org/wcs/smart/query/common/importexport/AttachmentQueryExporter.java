@@ -121,8 +121,10 @@ public class AttachmentQueryExporter implements IQueryExporter{
 			while(itr.hasNext()) {
 				IAttachmentResultItem item = itr.next();
 			  	ISmartAttachment attachment = item.getAttachment();
-				Path toFile = AttachmentNamer.INSTANCE.createUniqueFilenameForExport(attachment, file);
-				EncryptUtils.decryptAttachment(attachment, toFile);
+			  	Path toFile = AttachmentNamer.INSTANCE.createUniqueFilenameForExport(attachment, file);
+			  	if (Files.exists(attachment.getAttachmentFile())) {
+			  		EncryptUtils.decryptAttachment(attachment, toFile);
+			  	}
 				sub.split(1);
 			}
 		}
