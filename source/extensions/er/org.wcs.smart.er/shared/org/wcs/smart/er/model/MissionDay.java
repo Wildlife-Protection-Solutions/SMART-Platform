@@ -118,7 +118,7 @@ public class MissionDay extends UuidItem{
 		return time;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="missionDay")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="missionDay", cascade={CascadeType.ALL})
 	public List<SurveyWaypoint> getWaypoints() {
 		if (waypoints == null) {
 			waypoints = new ArrayList<SurveyWaypoint>();
