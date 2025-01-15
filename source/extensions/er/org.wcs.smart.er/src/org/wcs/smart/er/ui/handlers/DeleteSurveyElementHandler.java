@@ -60,6 +60,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -363,16 +364,21 @@ public class DeleteSurveyElementHandler {
 			if (DeleteManager.canDelete(mission, session)){
 				
 				//waypoint delete not cascaded so we need to delete
-				//explicitly
+				List<Waypoint> toDelete = new ArrayList<>();
 				for (MissionDay md : mission.getMissionDays()){
-					if (md.getWaypoints() != null){
-						for (SurveyWaypoint w : md.getWaypoints()){
-							session.remove(w.getWaypoint());
-						}
-					}
+					if (md.getWaypoints() == null) continue;
+					for (SurveyWaypoint w : md.getWaypoints()){
+						toDelete.add(w.getWaypoint());
+					}					
 				}
+				
 				//delete mission
 				session.remove(mission);
+				session.flush();
+				
+				//remove waypoints
+				for (Waypoint wp : toDelete) session.remove(wp);
+				
 				session.getTransaction().commit();
 				
 				//delete filestore
