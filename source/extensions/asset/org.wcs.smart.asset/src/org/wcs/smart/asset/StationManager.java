@@ -155,7 +155,7 @@ public enum StationManager {
 		session.flush();
 		
 		//delete any waypoints not associated with asset waypoint
-		try (ScrollableResults<Waypoint> scroll = session.createQuery("FROM Waypoint ww WHERE source = :source and ww not in (SELECT waypoint FROM AssetWaypoint)", Waypoint.class).setParameter("source", AssetWaypointSource.KEY).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
+		try (ScrollableResults<Waypoint> scroll = session.createQuery("FROM Waypoint ww WHERE sourceId = :source and ww not in (SELECT waypoint FROM AssetWaypoint)", Waypoint.class).setParameter("source", AssetWaypointSource.KEY).scroll()){ //$NON-NLS-1$ //$NON-NLS-2$
 			while(scroll.next()) {
 				Waypoint wp = scroll.get();
 				session.remove(wp);
@@ -166,6 +166,10 @@ public enum StationManager {
 		hql = "DELETE FROM AssetDeploymentAttributeValue WHERE id.assetDeployment IN (FROM AssetDeployment WHERE stationLocation = :location)"; //$NON-NLS-1$
 		session.createMutationQuery(hql).setParameter("location",  location).executeUpdate(); //$NON-NLS-1$
 		session.flush();	
+		
+		hql = "DELETE FROM AssetDeploymentDisruption WHERE assetDeployment IN (FROM AssetDeployment WHERE stationLocation = :location)"; //$NON-NLS-1$
+		session.createMutationQuery(hql).setParameter("location",  location).executeUpdate(); //$NON-NLS-1$
+		session.flush();
 		
 		hql = "DELETE FROM AssetDeployment WHERE stationLocation = :location "; //$NON-NLS-1$
 		session.createMutationQuery(hql).setParameter("location",  location).executeUpdate(); //$NON-NLS-1$
