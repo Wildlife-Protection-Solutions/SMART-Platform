@@ -241,9 +241,10 @@ public class CleanPatrolEngine {
 				}
 			}
 		}
+		if (c.isEmpty()) return true;
+		
 		if (settings.getValidTrackDistance() == -1) {
-			if (c.size() > 0) return false;
-			return true;
+			return false;
 		}
 
 		//transform coordinates to a meters based projection for distance calculations
