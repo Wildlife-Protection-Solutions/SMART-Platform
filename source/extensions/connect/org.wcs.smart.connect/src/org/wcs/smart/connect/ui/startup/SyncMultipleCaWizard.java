@@ -44,6 +44,7 @@ import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.internal.Messages;
+import org.wcs.smart.connect.internal.server.replication.ApplyChangeLogJob;
 import org.wcs.smart.connect.internal.server.replication.SyncChangesRunnable;
 import org.wcs.smart.connect.internal.server.replication.SyncHistoryManager;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -72,6 +73,7 @@ public class SyncMultipleCaWizard extends Wizard {
 	public boolean performFinish() {
 		
 		final Shell activeShell = Display.getDefault().getActiveShell();
+		activeShell.setData(ApplyChangeLogJob.SHELL_NO_CHECK, Boolean.TRUE);
 		final List<ConservationArea> allCas = page1.getSelection();
 		final String username = page1.getUsername();
 		final String password = page1.getPassword();

@@ -82,6 +82,8 @@ import org.wcs.smart.util.ZipUtil;
  *
  */
 public class ApplyChangeLogJob extends Job {
+	
+	public static final String SHELL_NO_CHECK = "SHELL_NO_CHECK"; //$NON-NLS-1$
 
 	private Path changeLogPackageFile;
 	private Path changeLogFile;
@@ -132,11 +134,11 @@ public class ApplyChangeLogJob extends Job {
 							//otherwise we are running from login screen and we don't care about dialogs
 							for (Shell s : Display.getDefault().getShells()){
 								if (!s.isVisible()) continue; //not visible shells
+								if (s.getData(SHELL_NO_CHECK) == Boolean.TRUE) continue;  //specific shells we know have no open connections we don't want to check issue #3831
 								if ((s.getStyle() & SWT.APPLICATION_MODAL) == SWT.APPLICATION_MODAL ||
 										(s.getStyle() & SWT.SYSTEM_MODAL) == SWT.SYSTEM_MODAL ||
 										(s.getStyle() & SWT.PRIMARY_MODAL) == SWT.PRIMARY_MODAL){
 									closed[0] = false;
-									
 								}
 							}
 						}
