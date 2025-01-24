@@ -10,6 +10,8 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/cybertracker.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/qrcode.min.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/userssharedfunctions.js"></script>
+
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/fontawesome.min.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/solid.min.css" />
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/fontawesome/css/regular.min.css" />
@@ -23,15 +25,23 @@
 <%@include file="menu.jsp" %>
 
 <div id="main">
-  <div class="tabheader pageheader"><fmt:message key="cybertracker.header"/></div>
-  <p class="infomessage" style="padding-bottom:10px"><fmt:message key="cybertracker.info"/></p>
+
+  <div class="tabheader pageheader">
+  		<a id="sm_packages" class="tab"><fmt:message key="cybertracker.header"/></a>
+  		<a id="sm_routes" class="tab"><fmt:message key="cybertracker.routestable"/></a>
+  		<a id="sm_announcements" class="tab">Announcements</a>
+  		<a id="sm_keys" class="tab"><fmt:message key="cybertracker.apikeys"/></a>
+  		<a id="sm_collectusers" class="tab"><fmt:message key="cybertracker.collectusersection"/></a>
+  </div>
+  	
   <div>
     <div id="message" class="msgsection"></div>
   </div>
+
+    <div id="sm_packages_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
   
-  <div style="height: 100%;overflow: auto;">
 	  <!-- Package Table -->
-	  <p class="top-spacer label-header" style="border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.uploadedpackages"/></p>
+	  <p class="top-spacer label-header" style="padding-top:4px"><fmt:message key="cybertracker.uploadedpackages"/></p>
 	  
 	  <div class="top-spacer" >
 	    <div id="ctpackagetable" class="table-cell smart-table">
@@ -50,11 +60,11 @@
 		  </div>
 	    </div>
 	    <a id="refreshnow" href="#"><fmt:message key="cybertracker.refresh"/></a>
-	  </div>	
+	  </div>
+	</div>	
 
-	  <!-- Navigation Layer Table -->
-	  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.routestable"/></p>
-	  
+    <div id="sm_routes_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
+	<p class="top-spacer label-header" style="padding-top:4px">Uploaded SMART Mobile Routes.</p>
 	  <div class="top-spacer" >
 	    <div id="navlayertable" class="table-cell smart-table">
 	  	  <div class="table-row smart-table-header">
@@ -67,9 +77,32 @@
 	    </div>
 	    <a id="navrefreshnow" href="#"><fmt:message key="cybertracker.refresh"/></a>
 	  </div>
+	</div>
 	  
+	  
+	  <!-- Announcements Table -->
+	<div id="sm_announcements_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
+	  <p class="top-spacer" style="padding-top:4px">Here you can setup and configure announcements that are display on SMART Mobile devices. Announcements are configured per Conservation Area.</p>
+	  <p style="padding-top:4px">Announcements are automatically deleted from the system 3 months after their expiry date.</p>
+	  
+	  <button class="block button top-spacer" onclick="showCreateAnnouncementDialog()" >Create New Announcement</button>
+	  	
+	  <div class="top-spacer" >
+	    <div id="announcementstable" class="table-cell smart-table">
+	  	  <div class="table-row smart-table-header">
+			  <div class="table-cell smart-table-cell">Conservation Area</div>
+			  <div class="table-cell smart-table-cell" style="width: 1500px">Message</div>
+			  <div class="table-cell smart-table-cell">Created Date</div>
+			  <div class="table-cell smart-table-cell">Expiry Date</div>			  		
+			  <div class="table-cell smart-table-cell"></div>
+		  </div>
+	    </div>
+	    <a id="refreshannouncements" href="#"><fmt:message key="cybertracker.refresh"/></a>
+	  </div>
+	</div>	
+	
 	  <!--  API Key Table -->
-	  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.apikeys"/></p>
+	<div id="sm_keys_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
 	  <p><fmt:message key="cybertracker.apikeysmessage1"/></p>
 	   <div class="top-spacer" >
 	  
@@ -81,10 +114,10 @@
 		  </div>
 	    </div>
 	   </div>
+	 </div>	   
 	   
-	   
-	  <!--  collect Users -->
-	  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.collectusersection"/></p>
+	<!--  collect Users -->      	  
+	<div id="sm_collectusers_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
 	  <p><fmt:message key="cybertracker.collectusersectionmsg"/></p>
 	  <div class="top-spacer"> 
 		<!-- Search Parameters -->
@@ -105,7 +138,8 @@
 	   <p class="top-spacer"><fmt:message key="cybertracker.maxusers1"/> <a href="../api/smartcollect/source" target="collectusers"><fmt:message key="cybertracker.maxusers2"/></a></p>
 	   
 	 </div>
-</div>		
+</div>
+		
 
 	<%@include file="footer.jsp" %>
 
@@ -165,6 +199,38 @@
 	    </div>
 	  </form>
   </div>
+  
+  
+  <div id="createAnnouncementDialog" style="display: none;" class="dialog">
+    <div class="dialog-title" id="announcementdialogtitle">Create New Announcement</div>
+  
+	<section id="tab2" class="">
+		<p>
+		<form id="newannouncementform" style="padding-left:10px">
+     		<div id="announcementerror" class="errorsection"></div>
+     		<input id="announcement_uuid" type="hidden">
+     		<label class="top-spacer block">Conservation Area</label>
+     		<select name="announcement_ca" class="block  formtext ">
+	     		<c:forEach var="ca" items="${cas}" varStatus="count">
+	     			<option value="${ca.getUuid()}">${ca.getLabel()} </option> 
+				</c:forEach> 
+     		</select>
+     		
+			<label class="top-spacer block">Expires On:</label>
+			<input id="announcement_expiry" type="datetime-local" class="formtext" style="width: 20em">
+			
+			
+			<label class="top-spacer block">Message</label>
+			<textarea name="announcement_message" rows="5" cols="45"></textarea>
+			
+			<div class="block top-spacer" style="text-align:right">
+   			  <input class="button top-spacer" type="submit" value="   Submit   "/>
+   			  <input class="button" type="button" onClick="closeDialog('createAnnouncementDialog')" value="   Cancel   "/>
+   			  </div>
+    	</form>
+		</p>
+	</section>
+</div>
   
 </body>
 </html>

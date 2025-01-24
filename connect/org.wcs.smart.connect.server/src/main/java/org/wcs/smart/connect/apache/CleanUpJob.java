@@ -44,6 +44,7 @@ import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.wcs.smart.cipher.EncryptUtils;
+import org.wcs.smart.connect.api.AnnouncementApi;
 import org.wcs.smart.connect.api.DataQueue;
 import org.wcs.smart.connect.api.ReportApi;
 import org.wcs.smart.connect.api.Uploader;
@@ -179,12 +180,19 @@ public class CleanUpJob implements Runnable {
 						
 			//clean up tile image cache
 			cleanUpTileImageCache(s);
+			
+			//clean up tile image cache
+			cleanUpAnnouncements(s);
 		}
 		
 		cleanReportImages();
 		cleanTemporaryFiles();
 	}
 	
+	private void cleanUpAnnouncements(Session session) {
+		AnnouncementApi.cleanUpExpired(session);
+		
+	}
 	private void cleanUpTileImageCache(Session session) {
 		session.beginTransaction();
 		LocalDateTime deleteData = LocalDate.now().minusMonths(2).atStartOfDay();

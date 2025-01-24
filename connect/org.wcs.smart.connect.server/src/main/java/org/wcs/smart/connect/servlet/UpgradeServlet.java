@@ -2301,6 +2301,18 @@ public class UpgradeServlet extends HttpServlet {
 								$$LANGUAGE plpgsql; 
 							""", //$NON-NLS-1$
 							
+							//notifications - ticket 3612
+							"""
+							CREATE TABLE connect.announcement(
+									uuid uuid not null, 
+									ca_uuid uuid not null, 
+									message varchar,
+									created_on timestamp not null,
+									expires_on timestamp,
+									primary key (uuid));
+							""",  //$NON-NLS-1$
+							"ALTER TABLE connect.announcement ADD FOREIGN KEY (ca_uuid) REFERENCES connect.ca_info(ca_uuid) on delete cascade on update restrict deferrable initially deferred",  //$NON-NLS-1$
+							
 							//versions
 							"update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$
 							"update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$

@@ -132,6 +132,7 @@ th {
 	padding: 4px;
 	color: #3A4469;
 	text-decoration:none;
+	cursor: pointer;
 }
 
 .button:hover{

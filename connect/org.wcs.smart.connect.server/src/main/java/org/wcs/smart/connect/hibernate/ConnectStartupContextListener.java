@@ -106,6 +106,7 @@ import org.wcs.smart.connect.model.AbstractSmartAction;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.model.AlertType;
+import org.wcs.smart.connect.model.Announcement;
 import org.wcs.smart.connect.model.BasemapBounds;
 import org.wcs.smart.connect.model.BasemapTile;
 import org.wcs.smart.connect.model.CaPluginVersion;
@@ -434,6 +435,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		config.addAnnotatedClass(BasemapTile.class);
 		config.addAnnotatedClass(BasemapBounds.class);
 		config.addAnnotatedClass(ConnectSetting.class);
+		config.addAnnotatedClass(Announcement.class);
 		try{
 			for(Class<?> c : SmartHibernateConfiguration.INSTANCE.getTables()){
 				config.addAnnotatedClass(c);

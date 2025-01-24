@@ -62,6 +62,7 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.apache.BcryptCredentialHandler;
+import org.wcs.smart.connect.api.AnnouncementApi;
 import org.wcs.smart.connect.api.ConnectAlert;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.CyberTracker;
@@ -79,6 +80,9 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
+import org.wcs.smart.connect.model.Announcement;
+import org.wcs.smart.connect.model.AnnouncementProxy;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.CyberTrackerApiKey;
 import org.wcs.smart.connect.model.CyberTrackerNavigationLayer;
 import org.wcs.smart.connect.model.CyberTrackerPackage;
@@ -675,4 +679,48 @@ public class CyberTrackerNoa {
 
 	}
 
+	/**
+	 * Gets announcements associated with the given conservation area.
+	 */
+	@GET
+    @Path(AnnouncementApi.PATH + "/{cauuid}")
+	@Produces({ MediaType.APPLICATION_JSON })
+	@Operation(description = "Gets all non-expired announcements associated with the given Conservation Area",
+			security = {@SecurityRequirement(name="apikeyheader"), @SecurityRequirement(name="apikeyquery")})
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=AnnouncementProxy.class))})
+	@ApiResponse(responseCode = "400", description = "Invalid package identifier")
+	@ApiResponse(responseCode = "401", description = "Invalid authorization credientials")
+	public List<AnnouncementProxy> getAnnouncements(@PathParam("cauuid") String cauuid){
+		
+		UUID tokenCaUuid = validateToken();
+
+		AnnouncementApi.cleanUpExpired(context);
+		
+		UUID uuid = UuidUtils.stringToUuid(cauuid);
+		if (!tokenCaUuid.equals(uuid)) {
+			throw new SmartConnectException(Response.Status.BAD_REQUEST);
+		}
+		
+		try(Session s = HibernateManager.getSession(context, request.getLocale())){
+			
+			s.beginTransaction();
+			try {
+				ConservationAreaInfo info = s.get(ConservationAreaInfo.class, uuid);
+				if (info == null) {
+					throw new SmartConnectException(Response.Status.NOT_FOUND); 
+				}
+				
+				return s.createQuery("FROM Announcement WHERE conservationArea = :info AND expiresOn >= :now", Announcement.class) //$NON-NLS-1$
+					.setParameter("info", info) //$NON-NLS-1$
+					.setParameter("now", ZonedDateTime.now()) //$NON-NLS-1$
+					.stream()
+					.map(e->e.toProxy())
+					.toList();
+				
+			}finally {
+				s.getTransaction().rollback();
+			}
+		}
+		
+	}
 }

@@ -29,6 +29,7 @@ import javax.ws.rs.core.Application;
 
 import org.wcs.smart.connect.exceptions.GeneralExceptionMapper;
 import org.wcs.smart.connect.exceptions.SmartConnectExceptionMapper;
+import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -59,6 +60,7 @@ public class ConnectRESTApplication extends Application {
 	@Override
 	public Set<Class<?>> getClasses() {
 		Set<Class<?>> resources = new HashSet<>();
+		resources.add(AnnouncementApi.class);
 		resources.add(ConnectAlert.class);
 		resources.add(ConnectAlertFilterDefault.class);
 		resources.add(ConnectMapLayers.class);
@@ -83,13 +85,12 @@ public class ConnectRESTApplication extends Application {
 		resources.add(Uploader.class);
 		resources.add(SmartCollectApi.class);
 		resources.add(BasemapTileServer.class);
-		
 		resources.add(SmartConnectExceptionMapper.class);
-		resources.add(GeneralExceptionMapper.class);
-		
+		resources.add(GeneralExceptionMapper.class);		
 		resources.add(ObjectMapperContextResolver.class);
-		
 		resources.add(SmartInfo.class);
+		
+		resources.add(ZonedDateTimeSerializer.class);
 		return resources;
 	}
 	 
