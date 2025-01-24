@@ -52,6 +52,8 @@ public class ConnectUrlContribution extends AbstractConnectPackageContribution {
 	public static final String PACKAGE_URL = "/noa/cybertracker/packages/"; //$NON-NLS-1$
 	private static final String NAVIGATION_URL = "/noa/cybertracker/navigation/"; //$NON-NLS-1$
 	
+	private static final String ANNOUNCEMENT_URL = "/noa/cybertracker/announcement/"; //$NON-NLS-1$
+	
 	public ConnectUrlContribution() {
 	}
 
@@ -95,7 +97,7 @@ public class ConnectUrlContribution extends AbstractConnectPackageContribution {
 			cc.setProjectMetadata(SmartMobilePackageFields.NAVLAYERS_JSONKEY, url + NAVIGATION_URL);
 			cc.setProjectMetadata(SmartMobilePackageFields.JSON_DOWNLOAD_KEY, url + PACKAGE_URL + ctpackage.getUuid().toString()); 
 			cc.setProjectMetadata(SmartMobilePackageFields.JSON_APIKEY, apikey);
-			
+			cc.setProjectMetadata(SmartMobilePackageFields.JSON_ANNOUNCEMENT_KEY, url + ANNOUNCEMENT_URL + ctpackage.getConservationArea().getUuid().toString());
 			
 		}
 		

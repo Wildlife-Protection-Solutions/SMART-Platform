@@ -129,7 +129,6 @@ public class IncidentToPatrolProcessor {
 				.list();
 		
 		for (Waypoint wp : toProcess) {
-			System.out.println(wp.getSourceId());
 			//if waypoints are old convert them to normal waypoints	
 			if (doExpire) {
 				if (ChronoUnit.DAYS.between(wp.getDateTime().toLocalDate(), LocalDate.now()) > expireDays) {

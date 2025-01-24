@@ -59,6 +59,9 @@ public class SmartMobilePackageFields {
 	
 	public static final String JSON_DOWNLOAD_KEY = "download_url"; //$NON-NLS-1$
 	
+	//key for announcements
+	public static final String JSON_ANNOUNCEMENT_KEY = "announcement_url"; //$NON-NLS-1$
+	
 	//json keys for navigation urls
 	public static final String NAVLAYERS_JSONKEY = "navigation_url"; //$NON-NLS-1$
 

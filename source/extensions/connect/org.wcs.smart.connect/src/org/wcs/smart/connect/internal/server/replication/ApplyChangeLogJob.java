@@ -52,6 +52,7 @@ import org.eclipse.ui.internal.ErrorEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.LogoutHandler;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IconFKManager;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -157,6 +158,9 @@ public class ApplyChangeLogJob extends Job {
 		}finally{
 			monitor.done();
 			cleanUp();
+			
+			//ensure replication state is reset
+			DerbyReplicationManager.INSTANCE.clearCachedReplicationState();
 		}
 		return org.eclipse.core.runtime.Status.OK_STATUS;
 	}
@@ -242,15 +246,20 @@ public class ApplyChangeLogJob extends Job {
 						try(Session session = HibernateManager.openSession()){
 							boolean isenabled = DerbyReplicationManager.INSTANCE.isReplicationSystemEnabled(session);
 							
+							Employee currentEmployee = SmartDB.getCurrentEmployee();
+							String currentPass = SmartDB.getPlainTextPassword();
+							ConservationAreaConfiguration currentConfig = SmartDB.getConservationAreaConfiguration();
+							ConservationArea currentCa = record.getConservationArea();
+							
 							if (!isenabled) {
-								SmartDB.setConservationAreaConfiguration(null,  null,  record.getConservationArea(), null);
+								SmartDB.setConservationAreaConfiguration(null,  null,  currentCa, null);
 								DerbyReplicationManager.INSTANCE.enableReplication(session);
 							}
 							try {
 								eventBroker.send(SmartPlugIn.E4_SYNC_DOWNLOAD_DONE, new Object[] {session, record.getConservationArea()});
 							}finally {
 								if (!isenabled) {
-									SmartDB.setConservationAreaConfiguration(null,  null, null, null);
+									SmartDB.setConservationAreaConfiguration(currentEmployee,  currentPass, currentCa, currentConfig);
 									DerbyReplicationManager.INSTANCE.disableReplication(session);
 								}
 							}
@@ -352,9 +361,6 @@ public class ApplyChangeLogJob extends Job {
 		
 		//gets the current user; for resetting after applying changes
 		try(Session session = HibernateManager.lockDatabase()){
-			
-			
-			
 			session.beginTransaction();
 			try {
 				IconFKManager.INSTANCE.dropIconFkConstraints(session);
