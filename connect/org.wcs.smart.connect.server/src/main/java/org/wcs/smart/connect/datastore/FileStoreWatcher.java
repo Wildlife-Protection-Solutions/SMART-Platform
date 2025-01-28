@@ -212,6 +212,12 @@ public class FileStoreWatcher implements Runnable {
     		type = ChangeLogItem.Action.FS_DELETE;
     	}
     	
+    	//skip shapefile index files in the map directory
+    	//Note: because we don't track delete when a shapefile is deleted from the
+    	//change log action we will need to delete all qix/fix files as well
+    	//otherwise they may hang around in the filestore
+    	if (ChangeLogItem.isIndexShp(p)) return; 
+    	
     	if (type == ChangeLogItem.Action.FS_UPDATE){
     		if (!Files.exists(p)){
     			//path has been deleted by next event skip

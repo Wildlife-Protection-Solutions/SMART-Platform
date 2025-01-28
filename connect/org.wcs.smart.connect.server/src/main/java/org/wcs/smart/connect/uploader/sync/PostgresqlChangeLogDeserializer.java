@@ -46,6 +46,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Postgresql specific change log deserializer. Deserializes a change log
@@ -121,6 +122,17 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 			FileUtils.deleteDirectory(toPath.toFile());
 		}else{
 			Files.deleteIfExists(toPath);
+			
+			if (ChangeLogItem.isMapDirShapeFile(toPath)) {
+				//look for any qix/fix files and make sure those are deleted as well
+				Path parent = toPath.getParent();
+				String name = SharedUtils.getFilenameWithoutExtension(toPath.getFileName().toString());
+				
+				for (String ext : new String[] {"qix", "fix"}) { //$NON-NLS-1$ //$NON-NLS-2$
+					Path qix = parent.resolve(name + "." + ext);  //$NON-NLS-1$
+					Files.deleteIfExists(qix);	
+				}
+			}
 		}
 		//add to list of events
 		fileEvents.add(new Object[] {toPath, StandardWatchEventKinds.ENTRY_DELETE});		

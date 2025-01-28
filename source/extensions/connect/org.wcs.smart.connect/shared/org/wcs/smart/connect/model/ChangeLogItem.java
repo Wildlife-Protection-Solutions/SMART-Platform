@@ -25,6 +25,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.nio.file.Path;
 import java.util.UUID;
 
 import org.wcs.smart.ca.UuidItem;
@@ -34,6 +35,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 /**
  * Change log item.
@@ -216,4 +218,47 @@ public class ChangeLogItem extends UuidItem implements Externalizable{
 		oo.writeObject(key2str);
 		oo.writeObject(caUuid.toString());	
 	}
+	
+	
+	/**
+	 * Determines in the file is a shapefile index files in the map directory
+	 * of the SMART filestore.
+	 * 
+	 * @param p
+	 * @return
+	 */
+	//New to 8.1 we are skipping the recording of all filestore events
+	//of qix and fix files in the SMART maps directory 
+	//Despite not getting marked as conflicts they still were getting flagged as changes
+	//prompting user to require a sync when there were no real changes.
+	//As a result of this we also had to update the delete events for shapefiles to ensure
+	//qix/fix files are deleted locally if a shapefile is deleted (otherwise they would hang
+	//around as they won't get recorded in the changelog).
+	//see: ticket #3599
+	@Transient
+    public static final boolean isIndexShp(Path p) {
+    	if (p.toString().endsWith(".qix") || p.toString().endsWith(".fix")){ //$NON-NLS-1$ //$NON-NLS-2$
+			if (p.getParent().getFileName().toString().equals("maps")){ //$NON-NLS-1$
+				return true;
+			}			
+		}
+    	return false;
+    }
+	
+	/**
+	 * Determines in the file is a shapefile in the map directory
+	 * of the SMART filestore.
+	 * 
+	 * @param p
+	 * @return
+	 */
+	@Transient
+    public static final boolean isMapDirShapeFile(Path p) {
+    	if (p.toString().endsWith(".shp") ){ //$NON-NLS-1$
+			if (p.getParent().getFileName().toString().equals("maps")){ //$NON-NLS-1$
+				return true;
+			}			
+		}
+    	return false;
+    }
 }

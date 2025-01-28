@@ -49,6 +49,7 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
 import org.wcs.smart.connect.replication.changelog.ConflictException;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -276,6 +277,17 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 			SmartUtils.deleteDirectory(toPath);
 		}else{
 			Files.deleteIfExists(toPath);
+			
+			if (ChangeLogItem.isMapDirShapeFile(toPath)) {
+				//look for any qix/fix files and make sure those are deleted as well
+				Path parent = toPath.getParent();
+				String name = SharedUtils.getFilenameWithoutExtension(toPath.getFileName().toString());
+				
+				for (String ext : new String[] {"qix", "fix"}) { //$NON-NLS-1$ //$NON-NLS-2$
+					Path qix = parent.resolve(name + "." + ext);  //$NON-NLS-1$
+					Files.deleteIfExists(qix);	
+				}
+			}
 		}
 	}
 
