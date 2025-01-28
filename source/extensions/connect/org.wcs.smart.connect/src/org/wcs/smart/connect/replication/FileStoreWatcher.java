@@ -55,6 +55,7 @@ import org.wcs.smart.connect.internal.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Source;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -143,6 +144,20 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
     }
 
     
+    private boolean isIndexShp(Path p) {
+    	if (p.toString().endsWith(".qix") || p.toString().endsWith(".fix")){
+			if (p.getParent().getFileName().toString().equals(MapSettings.MAP_DIRECTORY)){
+				//skip shapefile index files in the map directory
+				//NOTE: new 8.1; prior to 8.1 we didn't apply these so they didn't cause conflicts,
+				//but we really don't want them to be logged at all
+				//see: ticket #3599
+				System.out.println("skipping file: " + p.toString());
+				if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Skipping file " + p.toString() + " as it is a shapefile index file in the maps directory"); //$NON-NLS-1$ //$NON-NLS-2$
+				return true;
+			}			
+		}
+    	return false;
+    }
     private void processEvent(Path p, Kind<?> kind){
     	if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: file: '" + p.toString() + "', Kind: '" + kind.name() + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     	if (ignorePaths.contains(p) ||
@@ -172,7 +187,13 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
     		type = ChangeLogItem.Action.FS_DELETE;
     	}
     	
+    	if (type == ChangeLogItem.Action.FS_INSERT) {
+    		if (isIndexShp(p)) return;
+    	}
+    	
     	if (type == ChangeLogItem.Action.FS_UPDATE){
+    		if (isIndexShp(p)) return;
+    		
     		if (!Files.exists(p)){
     			//path has been deleted by next event skip
     			if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: IGNORED: path has been deleted by next event/skip"); //$NON-NLS-1$
