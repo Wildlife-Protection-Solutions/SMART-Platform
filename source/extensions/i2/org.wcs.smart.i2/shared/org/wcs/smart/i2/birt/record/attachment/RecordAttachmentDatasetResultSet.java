@@ -44,6 +44,7 @@ import org.hibernate.query.Query;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
+import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDatasetResultSet;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.record.RecordParameterMetadata;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
@@ -132,11 +133,6 @@ public class RecordAttachmentDatasetResultSet implements IResultSet {
 		m_currentRowId++;
 		if (results.next()){
 			currentItem = results.get();
-			try{
-				((IntelRecordAttachment)((Object[])currentItem)[0]).getAttachment().computeFileLocation(connection.getSession());
-			}catch (Exception ex){
-				Logger.getLogger(RecordAttachmentDatasetResultSet.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
-			}
 			return true;
 		}
 		return false;
@@ -174,6 +170,11 @@ public class RecordAttachmentDatasetResultSet implements IResultSet {
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
 		IntelRecordAttachment i = (IntelRecordAttachment)currentItem;
+		try {
+			i.getAttachment().computeFileLocation(connection.getSession());
+		} catch (Exception e) {
+			Logger.getLogger(EntityAttachmentDatasetResultSet.class.getName()).log(Level.INFO, e.getMessage(), e);
+		}
 		Object value = RecordAttachmentDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
 		if (value instanceof ISmartAttachment) {
 			return connection.decryptAttachment(((ISmartAttachment)value));
