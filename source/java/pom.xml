@@ -323,10 +323,13 @@
 			</modules>
 		</profile>
 		<profile>
-			<id>emily</id>
+			<id>smart804</id>
 			<modules>
 				<module>org.wcs.smart.license.feature</module>
-				<module>../translations/org.wcs.smart.feature.nl</module>
+				<module>org.wcs.smart.updatesite</module>				
+				<module>../extensions/i2/org.wcs.smart.i2</module>
+				<module>../extensions/i2/org.wcs.smart.i2.patrol</module>
+				<module>../extensions/i2/org.wcs.smart.i2.feature</module>
 			</modules>
 		</profile>
 		<profile>

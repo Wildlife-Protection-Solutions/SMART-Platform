@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.wcs.smart.core</groupId>
 		<artifactId>smart</artifactId>
-		<version>8.0.3-SNAPSHOT</version>
+		<version>8.0.4-SNAPSHOT</version>
 		<relativePath>../pom-shared.xml</relativePath>
 	</parent>
 	
@@ -45,6 +45,5 @@
     			<artifactId>org.wcs.smart.core.patrol.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
-		
-	</dependencies>	
+	</dependencies>
 </project>

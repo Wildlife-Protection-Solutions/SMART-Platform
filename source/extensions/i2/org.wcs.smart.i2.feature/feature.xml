@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.i2.feature"
       label="SMART Profiles Module"
-      version="8.0.3.qualifier"
+      version="8.0.4.qualifier"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
@@ -23,16 +23,10 @@ and relationships.
 
    <plugin
          id="org.wcs.smart.i2"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.wcs.smart.i2.patrol"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>

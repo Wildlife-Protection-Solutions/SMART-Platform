@@ -13,6 +13,6 @@
 	<name>SMART Profile Patrol Link</name>
 	<artifactId>org.wcs.smart.i2.patrol</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>8.0.3-SNAPSHOT</version>
+	<version>8.0.4-SNAPSHOT</version>
 	
 </project>
