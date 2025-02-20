@@ -40,7 +40,8 @@ import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.query.QueryManager;
 
 /**
- * Shared Link servlet. Used to allowed shared links/token access to Queries and Report, uses a sharedLink instead of Basic Auth
+ * Shared Link servlet. Used to allowed shared links/token access to Queries and Report, 
+ * uses a sharedLink instead of Basic Auth
  * 
  * @author Jeff
  *

@@ -70,7 +70,7 @@ public class MenuItemsFilter implements Filter {
 		QUEUE("MenuItemsFilter.DataQueueLabel","dataq.png",  ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		ER("MenuItemsFilter.EarthRangerLabel","earthranger32.png",  ConnectRESTApplication.SERVLET_PATH + "earthranger", (String)null), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		USERS("MenuItemsFilter.AccountsLabel", "users.png", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		CAUSERS("MenuItemsFilter.CaAccountsLabel", "users.png", ConnectRESTApplication.SERVLET_PATH + "causers", CaAdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		CAUSERS("MenuItemsFilter.CaAccountsLabel", "ca_users.png", ConnectRESTApplication.SERVLET_PATH + "causers", CaAdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		CT("MenuItemsFilter.CyberTrackerMenuItem1", "cybertracker.png", ConnectRESTApplication.SERVLET_PATH + "cybertracker", new HashSet<>(Arrays.asList(AdminAccountAction.KEY, CaAdminAccountAction.KEY, CyberTrackerAction.KEY))), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		SETTINGS("MenuItemsFilter.ConfigurationLabel", "settings.png", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY);   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		
@@ -116,6 +116,7 @@ public class MenuItemsFilter implements Filter {
 		Locale l = SmartUtils.getRequestLocale(request);
 		
 		List<String[]> menuItems = new ArrayList<String[]>();
+		Set<String> paths = new HashSet<>();
 		Session s = HibernateManager.getSession(request.getServletContext());
 		s.beginTransaction();
 		try{
@@ -135,10 +136,16 @@ public class MenuItemsFilter implements Filter {
 				
 				if (!canAccess) continue;
 				
+				String path = pathprefix + p.url;
+				if (paths.contains(path)) continue;
+				
+				paths.add(path);
+				
 				menuItems.add( new String[]{
 					Messages.getString(p.nameKey, l),
-					pathprefix + p.url,
-					styleAll, request.getServletContext().getContextPath() + "/css/images/" + p.imageFileName}); //$NON-NLS-1$
+					path, styleAll, 
+					request.getServletContext().getContextPath() + "/css/images/" + p.imageFileName}); //$NON-NLS-1$
+				
 			}
 		}finally{
 			s.getTransaction().commit();
