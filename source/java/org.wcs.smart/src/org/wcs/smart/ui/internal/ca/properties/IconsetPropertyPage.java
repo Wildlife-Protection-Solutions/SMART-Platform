@@ -209,17 +209,34 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	}
 	
 	private boolean doSave() {
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
-			session.getTransaction().commit();
-			IconFKManager.INSTANCE.createIconFkConstraints(session);
-			setDirty(false);
-			session.getTransaction().begin();
-			IconFKManager.INSTANCE.dropIconFkConstraints(session);
-			return true;
+			pmd.run(true, false, (monitor)->{
+				try {
+					monitor.beginTask(DialogConstants.SAVING, -1);
+					session.getTransaction().commit();
+					IconFKManager.INSTANCE.createIconFkConstraints(session);
+					
+					Display.getDefault().asyncExec(()->setDirty(false));
+					
+					//wait here to let any filestore events to be processed before
+					//we start another transaction and remove fk constraints
+					//which will prevent inserting into change log table (if installed)
+					//500 wasn't long enough in my test case
+					Thread.sleep(1000);
+					
+					session.getTransaction().begin();
+					IconFKManager.INSTANCE.dropIconFkConstraints(session);
+				}catch (Exception ex) {
+					throw new InvocationTargetException(ex);
+				}
+			});
 		}catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.IconsetPropertyPage_SaveError + ex.getMessage(), ex);
 			return false;
 		}
+		return true;
+		
 	}
 
 	@Override
@@ -248,7 +265,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		session = HibernateManager.openSession(new AttachmentInterceptor());
 		
 		session.beginTransaction();
-				
+			
 		IconFKManager.INSTANCE.dropIconFkConstraints(session);
 
 		main = new Composite(parent, SWT.NONE);
@@ -375,7 +392,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		tblIcons.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
-				okPressed();
+				editIcon();
 			}
 		});
 		tblIcons.getTable().addListener(SWT.KeyDown, e->{
@@ -638,9 +655,13 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		toEdit.getFiles().forEach(f->{
 			if(f.getUuid() == null) session.persist(f);
 		});
-		session.merge(toEdit);
 		
-		toEdit.getFiles().forEach(f->{
+		Icon updatedIcon = session.merge(toEdit);
+		int index = caicons.indexOf(toEdit);
+		caicons.remove(toEdit);
+		caicons.add(index, updatedIcon);
+		
+		updatedIcon.getFiles().forEach(f->{
 			IconManager.INSTANCE.clearThumbnailFile(f);
 			imgr.remove(f.getUuid().toString());
 		});
@@ -1131,4 +1152,8 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		}
 		
 	};
+	
+	
+	
+	
 }

@@ -232,8 +232,6 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 				f.setIconSet(item.getKey());
 				f.setCopyFromLocation(file);
 				f.setFilename(file.getFileName().toString());
-				f.setCopyFromLocation(file);
-				f.setFilename(file.getFileName().toString());
 				
 				selectedIcon.getFiles().add(f);
 			}
