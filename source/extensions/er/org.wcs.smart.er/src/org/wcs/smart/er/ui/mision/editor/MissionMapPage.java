@@ -35,6 +35,8 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.InternalEObject;
@@ -164,7 +166,7 @@ public class MissionMapPage extends SmartMapEditorPart {
 	    		
 				allLayers.addAll(sortedLayers);
 				
-	    		AddLayersCommand command = new AddLayersCommand(allLayers, 0) {
+	    		AddLayersCommand command = new AddLayersCommand(allLayers, getMap().getLayersInternal().size()) {
 	    			public void run( IProgressMonitor monitor ) throws Exception {
 	    				
 	    				((RenderManagerImpl)getMap().getRenderManagerInternal()).disableRendering();
@@ -292,12 +294,17 @@ public class MissionMapPage extends SmartMapEditorPart {
 	}
 
 	private void addLayers() {
-		addLayerJob.schedule();
-		
+
 		if (loadDefaultLayers != null) {
 			loadDefaultLayers.cancel();			
 		}
-		loadDefaultLayers = new LoadDefaultLayersJob(getMap());
+		loadDefaultLayers = new LoadDefaultLayersJob(getMap()) {
+			protected IStatus run(IProgressMonitor monitor) {
+				IStatus status = super.run(monitor);
+				addLayerJob.schedule();
+				return status;
+			}
+		};
 		loadDefaultLayers.schedule();
 	}
 	
