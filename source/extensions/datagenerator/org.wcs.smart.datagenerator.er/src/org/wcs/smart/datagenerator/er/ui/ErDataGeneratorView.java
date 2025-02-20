@@ -678,8 +678,8 @@ public class ErDataGeneratorView {
 			List<CategoryAttribute> allatts = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){
 				c = (Category) session.get(Category.class, next.getUuid());
-				c.getAllActiveAttributes().size();
-				
+				allatts.addAll(c.getAllActiveAttributes());
+
 				//lazy load trees & lists
 				ArrayDeque<AttributeTreeNode> nodes = new ArrayDeque<>();
 				for (CategoryAttribute ca : allatts) {
