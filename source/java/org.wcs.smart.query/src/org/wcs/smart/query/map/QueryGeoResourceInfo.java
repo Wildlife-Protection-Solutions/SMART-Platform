@@ -24,7 +24,6 @@ package org.wcs.smart.query.map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.locationtech.udig.catalog.IService;
 import org.opengis.feature.simple.SimpleFeature;
@@ -67,9 +66,7 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 				
 				IPagedQueryResultSet<?> rs = (IPagedQueryResultSet<?>) service.getQuery().getCachedResults();
 				if (rs != null){
-					Envelope local = rs.getEnvelope();
-					env.expandToInclude(local.getMinX(), local.getMinY());
-					env.expandToInclude(local.getMaxX(), local.getMaxY());
+					env.expandToInclude(rs.getEnvelope());
 				}
 				this.bounds = env;
 			}else{

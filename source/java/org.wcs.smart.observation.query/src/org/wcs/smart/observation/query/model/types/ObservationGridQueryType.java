@@ -240,7 +240,7 @@ public class ObservationGridQueryType implements IMappableQueryType {
 	
 	@Override
 	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider) {
-		return new RasterService((GriddedQuery)query);
+		return createRasterService(query);		
 	}
 	
 	/**

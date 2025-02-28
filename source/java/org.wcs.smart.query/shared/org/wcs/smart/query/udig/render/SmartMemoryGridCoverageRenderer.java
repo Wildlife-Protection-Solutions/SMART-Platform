@@ -39,6 +39,7 @@ import org.geotools.styling.Style;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.render.RenderException;
+import org.locationtech.udig.project.render.displayAdapter.IMapDisplay;
 import org.locationtech.udig.render.internal.gridcoverage.basic.MemoryGridCoverageRenderer;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.coverage.grid.GridGeometry;
@@ -80,6 +81,12 @@ public class SmartMemoryGridCoverageRenderer extends MemoryGridCoverageRenderer 
     
 	public synchronized void render( Graphics2D graphics, IProgressMonitor monitor )
             throws RenderException {
+    	
+        IMapDisplay mapDisplay = getContext().getMapDisplay();
+    	if (mapDisplay.getWidth() <= 0 || mapDisplay.getHeight() <= 0) {
+        	//map display is not configured so nothing to render
+        	return;
+        }
     	
 		//render image
 		super.render(graphics, monitor);

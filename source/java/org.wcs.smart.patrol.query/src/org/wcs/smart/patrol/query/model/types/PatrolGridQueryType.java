@@ -46,7 +46,6 @@ import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolDropItems;
 import org.wcs.smart.patrol.query.ui.editor.PatrolGriddedEditor;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.model.CustomArea;
@@ -265,7 +264,7 @@ public class PatrolGridQueryType implements IMappableQueryType {
 	 */
 	@Override
 	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider) {
-		return new RasterService((GriddedQuery)query);
+		return createRasterService(query);
 	}
 	
 	/**

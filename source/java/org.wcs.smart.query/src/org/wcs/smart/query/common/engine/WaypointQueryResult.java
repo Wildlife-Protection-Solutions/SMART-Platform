@@ -160,7 +160,12 @@ public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> ex
 							double miny = q.getDouble(3);
 							double maxy = q.getDouble(4);
 						
-							bounds = new Envelope(minx, maxx, miny, maxy);
+							if (minx == maxx && miny == maxy && minx == 0 && miny == 0) {
+								//assume no results; null envelope
+								bounds = new Envelope();
+							}else {
+								bounds = new Envelope(minx, maxx, miny, maxy);
+							}
 						}
 					}	
 				});

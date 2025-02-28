@@ -38,4 +38,5 @@ public interface IQueryResult {
 	 */
 	public boolean isDisposed();
 	
+	
 }

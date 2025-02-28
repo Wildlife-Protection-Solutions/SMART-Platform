@@ -22,7 +22,10 @@
 package org.wcs.smart.query.model;
 
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.query.common.model.GridQueryResult;
+import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.common.model.udig.RasterService;
 
 /**
  * For queries that are mappable.
@@ -42,4 +45,14 @@ public interface IMappableQueryType extends IQueryType {
 	 */
 	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider);
 	
+	
+	public default IQueryService createRasterService(Query query) {
+		if (query.getCachedResults() == null) return null;
+		
+		GriddedQuery gquery = (GriddedQuery)query;
+		if (  gquery.getCachedResults() instanceof GridQueryResult result ) {
+			if (result.getData().isEmpty()) return null;		
+		} 
+		return new RasterService(gquery);	
+	}
 }

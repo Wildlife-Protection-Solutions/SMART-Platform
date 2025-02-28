@@ -46,7 +46,6 @@ import org.wcs.smart.er.query.ui.panels.definition.GriddedDefinitionPanel;
 import org.wcs.smart.er.query.ui.panels.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
-import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.model.IMappableQueryType;
@@ -298,7 +297,7 @@ public class SurveyGridQueryType implements IMappableQueryType {
 	 */
 	@Override
 	public IQueryService createQueryService(Query query, IProjectionProvider prjProvider) {
-		return new RasterService((GriddedQuery)query);
+		return createRasterService(query);
 	}
 	
 	/**

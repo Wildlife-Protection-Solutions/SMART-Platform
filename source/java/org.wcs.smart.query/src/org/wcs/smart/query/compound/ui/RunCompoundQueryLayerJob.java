@@ -123,6 +123,7 @@ public class RunCompoundQueryLayerJob extends Job{
 				ProgressMonitorWrapper wrapper = new ProgressMonitorWrapper(monitor, item.getProgressBar());
 				IQueryResult results = QueryExecutor.INSTANCE.executeQuery(item.getQuery(), s, wrapper);
 				item.getQuery().setCachedResults(results);
+				
 				((CompoundMapQueryResults)mapEditor.getQueryProxy().getQuery().getCachedResults()).addResults(item.getQuery().getUuid(), results);
 				
 				if (results instanceof IPagedQueryResultSet){
