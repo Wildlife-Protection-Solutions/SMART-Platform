@@ -137,8 +137,15 @@ public class RunExportWizard extends Wizard {
 						
 						item.getKey().setDateFilter(df);
 						try(Session session = HibernateManager.openSession()){
-							IQueryResult result = QueryExecutor.INSTANCE.executeQuery(item.getKey(), session, mm.split(1));
-							item.getKey().setCachedResults(result);
+							session.beginTransaction();
+							try {
+								IQueryResult result = QueryExecutor.INSTANCE.executeQuery(item.getKey(), session, mm.split(1));
+								item.getKey().setCachedResults(result);
+								session.getTransaction().commit();
+							}catch(Exception ex) {
+								session.getTransaction().rollback();
+								throw ex;
+							}
 						}catch (OperationCanceledException ex) {
 							cancelled = true;
 							break;
