@@ -744,3 +744,11 @@ fieldset{
 .extrareport2dates{
 	display:none;
 }
+
+.p-2{
+	padding: .25rem;
+}
+
+.pt-5{
+	padding-top: 1rem;
+}

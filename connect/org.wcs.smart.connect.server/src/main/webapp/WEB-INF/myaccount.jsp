@@ -107,22 +107,18 @@
 
 <form style="width:220px; display: block" id="userform" onsubmit="return updateUser();" >
     <input type="hidden" name="currentuser" value="${username}"/>
-    <label class="block "><fmt:message key="myaccount.username"/>:</label>
+    <label class="block pt-5"><fmt:message key="myaccount.username"/>:</label>
     <input type="text" name="username" class="block formtext" value="${username}"/>
-    <label class="block "><fmt:message key="myaccount.homeca" /></label>
+    <label class="block pt-5"><fmt:message key="myaccount.homeca" /></label>
 	<select id="caselect" class="formtext" style="max-width:24em"> </select>
-    <label class="block "><fmt:message key="myaccount.email"/>:</label>
+    <label class="block pt-5"><fmt:message key="myaccount.email"/>:</label>
     <input type="text" name="email" class="block formtext" value="${email}"/>
     <div class="block infotext"><fmt:message key="myaccount.emailinfo"/></div>
-    <p><br></p>
-    <p><a class="button top-spacer" style="font-size:0.8em" href="javascript:displayDialog('passwordDialog', 'main');"><fmt:message key="myaccount.changepassword"/></a></p>
-    <p><br></p>
-    <p><input class="block button top-spacer" style="min-width: 100px" type="submit" value="<fmt:message key="myaccount.save"/>" id="submit" />
-    </p>
-    <!-- 
-    <p><br></p>
-    <p><h2>Alternate Access to Your Account:</h2><button class="button" onClick="displayDialogCenter('SharedLinksDialog');return false;">Create a Token</button>Tokens can be used for programmatic access using your account credentials, treat a token like your password and keep it secure!
-     -->
+    
+    <div style="display:flex" class="pt-5">
+    	<input class="block button top-spacer" style="min-width: 100px" type="submit" value="<fmt:message key="myaccount.save"/>" id="submit" />
+    	<a class="button top-spacer" style="margin-left:20px; white-space:nowrap; padding-left:20px; padding-right:20px" href="javascript:displayDialog('passwordDialog', 'main');"><fmt:message key="myaccount.changepassword"/></a></p>
+    </div>
   </form>
 </div>
 

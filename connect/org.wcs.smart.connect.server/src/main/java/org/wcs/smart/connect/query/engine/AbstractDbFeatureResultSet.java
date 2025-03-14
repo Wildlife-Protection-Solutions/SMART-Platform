@@ -197,17 +197,20 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 	 * @return
 	 * @throws Exception
 	 */
-	public SimpleFeature toFeature(T item, List<QueryColumn> columns, Session session, SimpleFeatureType ftype)  throws Exception {
+	public SimpleFeature toFeature(T item, List<QueryColumn> columns, Session session, SimpleFeatureType ftype, Locale l)  throws Exception {
 		List<Object> data = new ArrayList<Object>();
 		data.add(createGeometry(item));
 		data.add(createId(item));  
+		
+		DateTimeFormatter timeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).withLocale(l);
+		DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(l);
 		
 		int i = 2;
 		for (QueryColumn qc : columns){
 			if (qc.isVisible()){
 				Object x = getValue(item, qc, session);
 				if (x instanceof Boolean){
-					if ((Boolean)x){
+					if ((Boolean)x){ 
 						x = 0;
 					}else{
 						x = 1;
@@ -215,12 +218,13 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 				}
 				Class<?> bindingType = ftype.getDescriptor(i).getType().getBinding();
 				i++;
-				if (qc.getType() == QueryColumn.ColumnType.TIME &&  bindingType.equals(String.class)){
-					x = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format((Temporal)x);
-				}else if (qc.getType() == QueryColumn.ColumnType.DATETIME && bindingType.equals(String.class)){
+				
+				if (x != null && qc.getType() == QueryColumn.ColumnType.TIME &&  bindingType.equals(String.class)){
+					x = timeFormatter.format((Temporal)x);
+				}else if (x != null && qc.getType() == QueryColumn.ColumnType.DATETIME && bindingType.equals(String.class)){
 					//this is a datetime object which needs to be converted to a string
-					x = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format((Temporal)x);
-				}
+					x = dateTimeFormatter.format((Temporal)x);
+				}				
 				data.add(x);
 			}
 		}

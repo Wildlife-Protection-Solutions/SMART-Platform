@@ -173,7 +173,7 @@ public class ShpExporter extends AbstractQueryExporter{
 			IQueryResultSetIterator<IResultItem> itemiterator = results.iterator(500, session);
 			for (Iterator<IResultItem> iterator = itemiterator; iterator.hasNext();) {
 				IResultItem resultItem = (IResultItem) iterator.next();	
-				SimpleFeature sf = results.toFeature(resultItem, columns, session, type);
+				SimpleFeature sf = results.toFeature(resultItem, columns, session, type, this.locale);
 				features.add(sf);
 			}
 						

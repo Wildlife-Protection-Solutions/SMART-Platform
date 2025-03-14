@@ -48,11 +48,19 @@ function getReportParametersForUi(num){
 }
 
 function showParamaterSelection1(){
+	if (this.status != 200){
+		alert("error occured loading report parameters");
+		return;
+	}
 	var json = JSON.parse(this.responseText);
 	showParamaterSelection("customparameters1", json, 1);
 }
 
 function showParamaterSelection2(){
+	if (this.status != 200){
+		alert("error occured loading report parameters");
+		return;
+	}
 	var json = JSON.parse(this.responseText);
 	showParamaterSelection("customparameters2", json,2);
 }
