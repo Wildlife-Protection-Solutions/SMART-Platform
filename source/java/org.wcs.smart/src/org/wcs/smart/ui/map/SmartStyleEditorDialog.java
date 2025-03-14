@@ -58,6 +58,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -323,6 +325,21 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			SmartPlugIn.log(ex.getMessage(), ex);
 		}
 				
+		menu.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuShown(MenuEvent e) {
+				boolean isCustom = lstSmart.getStructuredSelection().getFirstElement() == NOT_SELECTED;
+				
+				miDelete.setEnabled(!isCustom);
+				miRename.setEnabled(!isCustom);
+				miDefault.setEnabled(!isCustom);
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {
+			}
+		});
 			
 				
 				

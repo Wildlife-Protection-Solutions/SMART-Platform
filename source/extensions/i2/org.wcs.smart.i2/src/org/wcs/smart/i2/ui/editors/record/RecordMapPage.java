@@ -158,8 +158,8 @@ public class RecordMapPage extends SmartMapEditorPart {
 				
 				attributeLayers.sort((a,b)->-Collator.getInstance().compare(a.getTitle(), b.getTitle()));
 				recordLayers.addAll(0,attributeLayers);
-				
-				AddLayersCommand command = new AddLayersCommand(recordLayers, getMap().getLayersInternal().size()) {
+								
+				AddLayersCommand command = new AddLayersCommand(recordLayers, getMap().getLayersInternal().size()-1) {
 	    			public void run( IProgressMonitor monitor ) throws Exception {
 	    				
 	    				((RenderManagerImpl)getMap().getRenderManagerInternal()).disableRendering();
@@ -245,7 +245,9 @@ public class RecordMapPage extends SmartMapEditorPart {
 	
 	public synchronized void initPage(){
 		locationPanel.init();
-		localMapLayerJob.schedule();
+		if (recordService == null) {
+			localMapLayerJob.schedule();
+		}
 		
 		if (attributeLayer != null){
 			attributeLayer.dispose();

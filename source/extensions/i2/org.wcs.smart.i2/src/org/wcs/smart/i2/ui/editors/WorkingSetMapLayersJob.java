@@ -512,7 +512,7 @@ public class WorkingSetMapLayersJob extends Job {
 				if (dates != null) {
 					f = IntelEntityDataSource.createDateTimeFilter(dates[0] == null ? null : dates[0].atStartOfDay(), dates[1] == null ? null : dates[1].atTime(LocalTime.MAX));
 				}
-				AddContentFilterLayersCommand addCmd = new AddContentFilterLayersCommand(filterResources, 1, f){
+				AddContentFilterLayersCommand addCmd = new AddContentFilterLayersCommand(filterResources, -1, f){
 					 public void run( IProgressMonitor monitor ) throws Exception {
 						 super.run(monitor);
 						 
@@ -549,7 +549,7 @@ public class WorkingSetMapLayersJob extends Job {
 				map.sendCommandSync(addCmd);
 			}
 			if (!noFilterResources.isEmpty()){
-				AddLayersCommand addCmd = new AddLayersCommand(noFilterResources, 1) {
+				AddLayersCommand addCmd = new AddLayersCommand(noFilterResources, -1) {
 					public void run(IProgressMonitor monitor) throws Exception {
 						super.run(monitor);
 						for (Layer layer : getLayers()) {

@@ -74,18 +74,19 @@ public class RelationshipGraphEditor extends EditorPart {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			final List<IntelEntity> activeEntries = new ArrayList<>();
 			if (WorkingSetManager.INSTANCE.isSet()) {
 				try(Session s = HibernateManager.openSession()) {
 					IntelWorkingSet workingset = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
-					final List<IntelEntity> activeEntries = workingset.getEntities().stream().filter(e -> e.getIsVisible()).map(e -> e.getEntity()).collect(Collectors.toList());
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							graphComposite.setInput(activeEntries.toArray(new IntelEntity[] {}));
-						}
-					});
+					activeEntries.addAll(workingset.getEntities().stream().filter(e -> e.getIsVisible()).map(e -> e.getEntity()).collect(Collectors.toList()));
 				}
 			}
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					graphComposite.setInput(activeEntries.toArray(new IntelEntity[] {}));
+				}
+			});
 			return Status.OK_STATUS;
 		}};
 

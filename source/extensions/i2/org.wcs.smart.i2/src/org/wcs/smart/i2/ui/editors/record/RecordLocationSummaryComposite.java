@@ -82,6 +82,7 @@ public class RecordLocationSummaryComposite extends Composite{
 			}
 		});
 		
+		
 		if (IntelSecurityManager.INSTANCE.canEditRecord( editor.getInputInternal().getRecordProfileUuid() )){
 			MenuItem editItem = new MenuItem(mnu, SWT.PUSH);
 			editItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
@@ -108,7 +109,9 @@ public class RecordLocationSummaryComposite extends Composite{
 			mnu.addMenuListener(new MenuListener() {
 				@Override
 				public void menuShown(MenuEvent e) {
-					editItem.setEnabled( editor.getEditMode() ); 
+					Object element = observationViewer.getViewer().getStructuredSelection().getFirstElement();
+					boolean canEdit = ((element instanceof IntelObservation) || (element instanceof IntelObservationAttribute));
+					editItem.setEnabled( canEdit && editor.getEditMode()); 
 				}
 				
 				@Override
@@ -125,6 +128,19 @@ public class RecordLocationSummaryComposite extends Composite{
 		MenuItem miCollapseAll = new MenuItem(mnu, SWT.PUSH);
 		miCollapseAll.setText(Messages.RecordLocationSummaryComposite_CollapseAll);
 		miCollapseAll.addListener(SWT.Selection, e->observationViewer.getViewer().collapseAll());
+		
+		
+		mnu.addMenuListener(new MenuListener() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				Object element = observationViewer.getViewer().getStructuredSelection().getFirstElement();
+				boolean canEdit = ((element instanceof IntelObservation) || (element instanceof IntelObservationAttribute));
+				showMap.setEnabled( canEdit );
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {}
+		});
 		
 		observationViewer.getViewer().getControl().setMenu(mnu);
 		

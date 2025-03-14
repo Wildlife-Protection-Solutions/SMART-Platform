@@ -755,9 +755,11 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			 }
 			
 			//refresh attribute geometries
-			for (IntelEntityAttributeValue v : editor.getEntity().getAttributes()){
-				if (v.getAttribute().getType() == AttributeType.POSITION){
-					locationLayer.refreshLayerValue(v);
+			if (locationLayer != null) {
+				for (IntelEntityAttributeValue v : editor.getEntity().getAttributes()){
+					if (v.getAttribute().getType() == AttributeType.POSITION){
+						locationLayer.refreshLayerValue(v);
+					}
 				}
 			}
 		}
@@ -765,7 +767,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 	}
 	
 	public void refreshLayerValue(IntelValueItem value) {
-		locationLayer.refreshLayerValue(value);
+		if (locationLayer != null) locationLayer.refreshLayerValue(value);
 	}
 	
     @Override

@@ -189,7 +189,7 @@ public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetR
         		
         		IntelEntityDataSource ds = ((IntelEntityService)service).getDataStore(monitor);
         		Attribute a = ds.getAttribute(typeName);
-        		if (a.getType().isGeometry()) {
+        		if (a != null && a.getType().isGeometry()) {
         			return adaptee.cast(new AttributeGeometryStyle(a.getType(),a.getRegex()).toStyle());
         		}
 

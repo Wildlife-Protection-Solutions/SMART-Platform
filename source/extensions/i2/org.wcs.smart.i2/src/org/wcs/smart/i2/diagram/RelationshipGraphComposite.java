@@ -306,16 +306,7 @@ public class RelationshipGraphComposite extends Composite {
 		cmbLayout.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection selection = (IStructuredSelection) cmbLayout.getStructuredSelection();
-				if (selection != null && !selection.isEmpty()) {
-					LayoutAlgorithm layoutAlgorithm = (LayoutAlgorithm) selection.getFirstElement();
-					graphViewer.setLayoutAlgorithm(layoutAlgorithm);
-					String id = getPreferencesId();
-					if (id != null && !id.isEmpty()) {
-						Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(PREFERENCE_LAYOUT_ALGORITHM_KEY + id, layoutAlgorithm.getClass().getCanonicalName());
-					}
-					graphViewer.applyLayout();
-				}
+				applyLayout();
 			}
 		});
 		
@@ -386,6 +377,7 @@ public class RelationshipGraphComposite extends Composite {
 			graphDelayedRefresh = false;
 			if (input != null) {
 				graphViewer.setInput(input);
+				applyLayout();
 			} 
 			if (refresh) {
 				graphViewer.getControl().setBackground(graphViewer.getControl().getDisplay().getSystemColor(SWT.COLOR_WHITE));
@@ -436,6 +428,19 @@ public class RelationshipGraphComposite extends Composite {
 				}
 			}
 		}
+	}
+	
+	private void applyLayout() {
+		IStructuredSelection selection = (IStructuredSelection) cmbLayout.getStructuredSelection();
+		if (selection == null || selection.isEmpty()) return;
+		
+		LayoutAlgorithm layoutAlgorithm = (LayoutAlgorithm) selection.getFirstElement();
+		graphViewer.setLayoutAlgorithm(layoutAlgorithm);
+		String id = getPreferencesId();
+		if (id != null && !id.isEmpty()) {
+			Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(PREFERENCE_LAYOUT_ALGORITHM_KEY + id, layoutAlgorithm.getClass().getCanonicalName());
+		}
+		graphViewer.applyLayout();
 	}
 
 	private void applyPreferenceStyle(String id) {

@@ -184,7 +184,7 @@ public class SpatialEntitySearch implements IIntelEntitySearch {
 	private void processPoint(HashMap<UUID, Double> results, Point geometry,  List<Tuple> valuesToSearch, Double maxDistance) throws TransformException {
 		
 		Coordinate locationc = ((Point)geometry).getCoordinate();
-		if (locationc.getX() < -90 || locationc.getX() > 90 || locationc.getY() < -180 || locationc.getY() > 180) return;
+		if (locationc.getX() < -180 || locationc.getX() > 180 || locationc.getY() < -90 || locationc.getY() > 90) return;
 		
 		for (Tuple data : valuesToSearch) {
 			
@@ -221,19 +221,18 @@ public class SpatialEntitySearch implements IIntelEntitySearch {
 			if (d1 == null || d2 == null) continue;
 			if (d2 < -90 || d2 > 90 || d1 < -180 || d2 > 180) continue;
 			
+			UUID euuid = (UUID)value.get(0);
 			
 			Point vPnt = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(d1, d2));
-			Double distance = null;
 			if (geometry.intersects(vPnt)) {
-				distance = 0.0;
+				results.put(euuid, 0.0);
 			}else {
 				//potentially not accurate but should be close
 				//find the closest points in lat/long then computes the ortho distance between them
 				try {
 					Coordinate[] closest = DistanceOp.nearestPoints(vPnt,  geometry);
-					distance = JTS.orthodromicDistance(closest[0], closest[1], GeometryUtils.SMART_CRS);
+					double distance = JTS.orthodromicDistance(closest[0], closest[1], GeometryUtils.SMART_CRS);
 					
-					UUID euuid = (UUID)value.get(0);
 					Double d = results.get(euuid);
 					if (distance <= maxDistance) {
 						if (d == null) {

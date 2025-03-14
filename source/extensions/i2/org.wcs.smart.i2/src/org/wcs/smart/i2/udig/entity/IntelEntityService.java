@@ -32,6 +32,7 @@ import java.util.concurrent.locks.Lock;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.swt.widgets.Display;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
@@ -88,15 +89,21 @@ public class IntelEntityService extends IService {
 			
 			source.updateEntityId(ie.getIdAttributeAsText());
 			
+			
 			resources(new NullProgressMonitor()).forEach(gr->{
-				IntelEntityGeoResource igr = (IntelEntityGeoResource) gr;
+				final IntelEntityGeoResource igr = (IntelEntityGeoResource) gr;
 				String typeName = igr.getTypeName();
 				String newTitle = source.getName(typeName);
-				try {
-					((IntelEntityGeoResourceInfo)igr.getInfo(new NullProgressMonitor())).setTitle(newTitle);
-				} catch (IOException e) {
-					Intelligence2PlugIn.log(e.getMessage(), e);
-				}
+				
+				Display.getDefault().asyncExec(()->{
+					try {
+						((IntelEntityGeoResourceInfo)igr.getInfo(new NullProgressMonitor())).setTitle(newTitle);
+					} catch (IOException e) {
+						Intelligence2PlugIn.log(e.getMessage(), e);
+					}
+				});
+					
+				
 			});
 		}catch (IOException ex) {
 			Intelligence2PlugIn.log(ex.getMessage(), ex);
