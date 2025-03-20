@@ -317,7 +317,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		if (labelProvider != null) table.setLabelProvider(labelProvider);
 		if (contentProvider != null) table.setContentProvider(contentProvider);
 		if (input != null) table.setInput(input);
-		popup.pack();
+		popup.pack();		
 		
 		return popup;
 	}
@@ -325,6 +325,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	private void createPopupInternal(){
 		this.popup = createPopup(); 
 		popup.addListener(SWT.Paint, event->{
+			if (isDisposed()) return;
 			Rectangle bounds = popup.getBounds();
             event.gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
             event.gc.setLineWidth(1);
