@@ -635,6 +635,8 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		Image i = imgr.get(key);
 		if (i != null) return i;
 		byte[] data = IconManager.INSTANCE.getThumbnailFile(ff, IconManager.Size.MEDIUM);
+		if (data == null) return null;
+		
 		try(InputStream ins = new ByteArrayInputStream(data)){
 			Image img2 = new Image(Display.getDefault(), ins);
 			imgr.put(key, img2);
@@ -1131,8 +1133,6 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 			sets.addAll(QueryFactory.buildQuery(session, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 			caicons.addAll(QueryFactory.buildQuery(session, Icon.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 			
-			caicons.forEach(icn->icn.getFiles().forEach(iconfile->iconfile.computeFileLocation(session)));
-						
 			sortIcons();
 			
 			List<Icon> libraryIcons = IconManager.INSTANCE.getSystemIcons(session);

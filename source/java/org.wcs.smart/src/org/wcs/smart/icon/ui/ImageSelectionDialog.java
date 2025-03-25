@@ -126,28 +126,30 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 			}
 		}else {
 			SmartPlugIn.getDefault().getPreferenceStore().setValue(OP_PREF_KEY, 1);
-			for (Control c : core.getChildren()) {
-				if ((boolean)c.getData(SELECTED_KEY)) {
-					URL url = (URL) c.getData(PATH_KEY);
-					if (url.getProtocol().equalsIgnoreCase("file")) { //$NON-NLS-1$
-						try {
-							selectedFile = Paths.get(url.toURI()).toString();
-						} catch (URISyntaxException ex) {
-							SmartPlugIn.log(ex.getMessage(),  ex);
-						}
-					}else {
-						try {
-							Path temp = Files.createTempFile("smart", "." + SharedUtils.getFilenameExtension(url.toExternalForm())); //$NON-NLS-1$ //$NON-NLS-2$
-							try(InputStream inputStream = url.openConnection().getInputStream()){
-								Files.copy(inputStream, temp, StandardCopyOption.REPLACE_EXISTING);
+			if (core != null) {
+				for (Control c : core.getChildren()) {
+					if ((boolean)c.getData(SELECTED_KEY)) {
+						URL url = (URL) c.getData(PATH_KEY);
+						if (url.getProtocol().equalsIgnoreCase("file")) { //$NON-NLS-1$
+							try {
+								selectedFile = Paths.get(url.toURI()).toString();
+							} catch (URISyntaxException ex) {
+								SmartPlugIn.log(ex.getMessage(),  ex);
 							}
-							selectedFile = temp.toString();
-							temp.toFile().deleteOnExit();
-						}catch (Exception ex) {
-							SmartPlugIn.log(ex.getMessage(),  ex);
+						}else {
+							try {
+								Path temp = Files.createTempFile("smart", "." + SharedUtils.getFilenameExtension(url.toExternalForm())); //$NON-NLS-1$ //$NON-NLS-2$
+								try(InputStream inputStream = url.openConnection().getInputStream()){
+									Files.copy(inputStream, temp, StandardCopyOption.REPLACE_EXISTING);
+								}
+								selectedFile = temp.toString();
+								temp.toFile().deleteOnExit();
+							}catch (Exception ex) {
+								SmartPlugIn.log(ex.getMessage(),  ex);
+							}
 						}
+						break;
 					}
-					break;
 				}
 			}
 		}

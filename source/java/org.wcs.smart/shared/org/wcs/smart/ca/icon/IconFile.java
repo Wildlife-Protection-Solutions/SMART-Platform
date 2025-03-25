@@ -167,7 +167,10 @@ public class IconFile extends ISmartAttachment{
 			}
 		}
 		if (attachmentFile == null){
-			throw new IllegalStateException("Attachment file not set.  You must first call computeFileLocaion."); //$NON-NLS-1$
+			this.computeFileLocation( (Session)null);
+			if (attachmentFile == null) {
+				throw new IllegalStateException("Attachment file not set.  You must first call computeFileLocaion."); //$NON-NLS-1$
+			}
 		}
 		return attachmentFile;
 	}
