@@ -73,6 +73,7 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 		CA_PROJECTION_UUID, //added in SMART8 - link to uuid of ca projection (may no exist if projection remoted)
 		DISABLE_EDITING,
 		TEST_TIME,
+		SIMPLE_CAMERA,
 		USE_GPS_TIME,
 		MANUAL_GPS,
 		ALLOW_SKIP_MANUAL_GPS,

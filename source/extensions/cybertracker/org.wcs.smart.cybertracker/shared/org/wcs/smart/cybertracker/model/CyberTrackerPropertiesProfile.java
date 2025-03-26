@@ -123,6 +123,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	private static final int skipButtonTimeout = 3;
     private static final boolean disableEditing = false;
 	private static final boolean testTime = false;
+	private static final boolean simpleCamera = false;
 	private static final boolean useGpsTime = true;
 	private static final boolean manualGps = false;
 	private static final boolean allowSkipManualGps = true;
@@ -318,7 +319,14 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	public void setTestTime(boolean testTime) {
 		getOption(ProfileOptionID.TEST_TIME).setBooleanValue(testTime);
 	}
-
+	
+	@Transient
+	public boolean isSimpleCamera() {
+		return getBooleanValue(ProfileOptionID.SIMPLE_CAMERA);
+	}
+	public void setSimpleCamera(boolean simpleCamera) {
+		getOption(ProfileOptionID.SIMPLE_CAMERA).setBooleanValue(simpleCamera);
+	}
 	
 	@Transient
 	public boolean isUseGpsTime() {
@@ -452,6 +460,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 		case SIGHTING_FIX_COUNT: return sightingFixCount;
 		case SKIP_BUTTON_TIMEOUT: return skipButtonTimeout;
 		case TEST_TIME: return testTime;
+		case SIMPLE_CAMERA: return simpleCamera;
 		case USE_GPS_TIME: return useGpsTime;
 		case USE_MAP_ON_SKIP: return useMapOnSkip;
 		case WAYPOINT_TIMER: return waypointTimer;

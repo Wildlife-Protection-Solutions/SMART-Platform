@@ -103,6 +103,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	private Button btnDisableEditing;
 	
 	private Button btnTestTime;
+	private Button btnSimpleCamera;
 	
 	private Button btnKioskMode;
 	private Button btnUseIncidentGroup;
@@ -363,6 +364,23 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		});
 		controls.add(btnTestTime);
 		
+		Label lblSimpleCamera = new Label(generalContainer, SWT.NONE);
+		lblSimpleCamera.setText(Messages.CyberTrackerPropertiesComposite_SimpleCameraOp);
+		lblSimpleCamera.setToolTipText(Messages.CyberTrackerPropertiesComposite_SimpleCameraOpTooltip);
+
+		btnSimpleCamera = new Button(generalContainer, SWT.CHECK);
+		btnSimpleCamera.setToolTipText(lblSimpleCamera.getToolTipText());
+		btnSimpleCamera.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				changesMade();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+		controls.add(btnSimpleCamera);
 		
 		Label lblUnits= new Label(generalContainer, SWT.NONE);
 		lblUnits.setText(Messages.CyberTrackerPropertiesComposite_UnitOption);
@@ -926,6 +944,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		btnCanPause.setSelection(ctProperties.isCanPause());
 		btnDisableEditing.setSelection(ctProperties.isDisableEditing());
 		btnTestTime.setSelection(ctProperties.isTestTime());
+		btnSimpleCamera.setSelection(ctProperties.isSimpleCamera());
 		txtExitPin.setText(String.valueOf(ctProperties.getExitPin()));
 		txtMaxPhotoCount.setText(String.valueOf(ctProperties.getMaxPhotoCount()));
 		txtSightingFixCount.setText(String.valueOf(ctProperties.getSightingFixCount()));
@@ -1017,6 +1036,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		ctProperties.setMaxPhotoCount(Integer.valueOf(txtMaxPhotoCount.getText()));
 		ctProperties.setDisableEditing(btnDisableEditing.getSelection());
 		ctProperties.setTestTime(btnTestTime.getSelection());
+		ctProperties.setSimpleCamera(btnSimpleCamera.getSelection());
 		ctProperties.setUseGpsTime(btnUseGpsTime.getSelection());
 		ctProperties.setManualGps(btnManualGPS.getSelection());
 		ctProperties.setAllowSkipManualGps(btnAllowSkipManual.getSelection());		

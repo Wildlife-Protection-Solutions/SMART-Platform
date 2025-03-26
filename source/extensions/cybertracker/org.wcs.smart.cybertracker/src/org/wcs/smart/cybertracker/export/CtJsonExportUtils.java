@@ -453,6 +453,7 @@ public class CtJsonExportUtils {
 		case CAN_PAUSE:
 		case DISABLE_EDITING:
 		case TEST_TIME:
+		case SIMPLE_CAMERA:
 		case USE_MAP_ON_SKIP:
 		case USE_GPS_TIME:
 		case MANUAL_GPS:

@@ -158,6 +158,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesComposite_pixel;
 	public static String CyberTrackerPropertiesComposite_ResizeMsg;
 	public static String CyberTrackerPropertiesComposite_ResizeOp;
+	public static String CyberTrackerPropertiesComposite_SimpleCameraOp;
+	public static String CyberTrackerPropertiesComposite_SimpleCameraOpTooltip;
 	public static String CyberTrackerPropertiesComposite_ThemeHeader;
 	public static String CyberTrackerPropertiesComposite_ThemeTabName;
 	public static String CyberTrackerPropertiesComposite_TrackColorOp;
