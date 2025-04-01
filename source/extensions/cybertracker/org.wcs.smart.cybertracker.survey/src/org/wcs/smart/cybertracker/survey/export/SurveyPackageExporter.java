@@ -348,8 +348,9 @@ public class SurveyPackageExporter {
 		//add sampling units
 		JSONArray sus = new JSONArray();	
 		List<SamplingUnit> units = QueryFactory.buildQuery(session, SamplingUnit.class, 
-				new Object[] {"surveyDesign", surveyDesign}).list(); //$NON-NLS-1$
-		
+				new Object[] {"surveyDesign", surveyDesign}, //$NON-NLS-1$
+				new Object[] {"state", SamplingUnit.State.ACTIVE}) //$NON-NLS-1$
+				.list(); 
 		
 		GeometryJSON util = new GeometryJSON();
 		
