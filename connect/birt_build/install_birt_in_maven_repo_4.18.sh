@@ -121,7 +121,7 @@ addToPom "xerces" "xercesImpl" "2.12.2"
 #deploy "${LIB_PATH}/org.apache.xmlgraphics_2.9.0.v20230916-1600.jar" "${GROUP_ID_BASE}" "org.apache.xmlgraphics" "2.9.0"
 addToPom "org.apache.xmlgraphics" "xmlgraphics-commons" "2.10"
 #deploy "${LIB_PATH}/com.ibm.icu_74.2.0.jar" "${GROUP_ID_BASE}" "com.ibm.icu" "74.2.0"
-addToPom "com.ibm.icu" "icu4j" "76.1.0"
+addToPom "com.ibm.icu" "icu4j" "76.1"
 #higher rhino version will break some reports.
 #deploy "${LIB_PATH}/org.mozilla.rhino_1.7.15.jar" "${GROUP_ID_BASE}" "org.mozilla.javascript" "1.7.14"
 addToPom "org.mozilla" "rhino" "1.7.15"

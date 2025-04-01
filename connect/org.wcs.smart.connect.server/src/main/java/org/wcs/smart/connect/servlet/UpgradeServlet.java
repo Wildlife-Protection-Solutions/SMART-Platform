@@ -2317,6 +2317,17 @@ public class UpgradeServlet extends HttpServlet {
 							"update smart.i_entity set primary_attachment_uuid = null where primary_attachment_uuid is not null and primary_attachment_uuid not in (select uuid from smart.i_attachment)", //$NON-NLS-1$
 							"alter table smart.i_entity add constraint i_entity_pattachment_fk  foreign key(primary_attachment_uuid) references smart.i_attachment(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY deferred", //$NON-NLS-1$
 							
+							//remove paws plugins
+							"drop table if exists smart.paws_classification", //$NON-NLS-1$
+							"drop table if exists smart.paws_configuration", //$NON-NLS-1$
+							"drop table if exists smart.paws_parameter", //$NON-NLS-1$
+							"drop table if exists smart.paws_query_class", //$NON-NLS-1$
+							"drop table if exists smart.paws_run", //$NON-NLS-1$
+							"drop table if exists smart.paws_service", //$NON-NLS-1$
+							"drop table if exists smart.paws_simple_class", //$NON-NLS-1$
+							"delete from connect.connect_plugin_version where plugin_id = 'org.wcs.smart.paws'", //$NON-NLS-1$
+							"delete from connect.ca_plugin_version where plugin_id = 'org.wcs.smart.paws'", //$NON-NLS-1$
+							
 							//versions
 							"update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$
 							"update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$

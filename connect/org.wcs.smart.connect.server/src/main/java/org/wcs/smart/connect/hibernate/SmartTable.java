@@ -216,12 +216,6 @@ import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
-import org.wcs.smart.paws.model.PawsConfiguration;
-import org.wcs.smart.paws.model.PawsParameter;
-import org.wcs.smart.paws.model.PawsQueryClass;
-import org.wcs.smart.paws.model.PawsRun;
-import org.wcs.smart.paws.model.PawsService;
-import org.wcs.smart.paws.model.PawsSimpleClass;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.PatrolPlan;
@@ -488,14 +482,7 @@ public enum SmartTable {
 	
 	EMPLOYEE_TEAM(EmployeeTeam.class, null),
 	EMPLOYEE_TEAM_MEMBER(EmployeeTeamMember.class, ".id.team.conservationArea"),
-	
-	PAWS_CONFIG(PawsConfiguration.class, null),
-	PAWS_PARAM(PawsParameter.class, ".configuration.conservationArea"),
-	PAWS_QUERYCLASS(PawsQueryClass.class, ".configuration.conservationArea"),
-	PAWS_SIMPLECLASS(PawsSimpleClass.class, ".configuration.conservationArea"),
-	PAWS_SERVICE(PawsService.class, null),
-	PAWS_RUN(PawsRun.class, null),
-	
+			
 	COMMUNITY_WAYPOINT(SmartCollectWaypoint.class, ".waypoint.conservationArea"),
 	COMMUNITY_PACKAGE(SmartCollectPackage.class, null),
 	
