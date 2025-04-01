@@ -151,11 +151,6 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelAttachment")); //$NON-NLS-1$
-		q = session.createMutationQuery("delete from IntelAttachment where conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
-		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelAttributeListItem")); //$NON-NLS-1$
 		q = session.createMutationQuery("delete from IntelAttributeListItem ii where ii.attribute in (from IntelAttribute where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
@@ -236,6 +231,10 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
+		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelAttachment")); //$NON-NLS-1$
+		q = session.createMutationQuery("delete from IntelAttachment where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelConfigurationOption")); //$NON-NLS-1$
 		q = session.createMutationQuery("delete from IntelConfigurationOption where conservationArea = :ca"); //$NON-NLS-1$
