@@ -2313,6 +2313,10 @@ public class UpgradeServlet extends HttpServlet {
 							""",  //$NON-NLS-1$
 							"ALTER TABLE connect.announcement ADD FOREIGN KEY (ca_uuid) REFERENCES connect.ca_info(ca_uuid) on delete cascade on update restrict deferrable initially deferred",  //$NON-NLS-1$
 							
+							//fix i_entity primary attachment references
+							"update smart.i_entity set primary_attachment_uuid = null where primary_attachment_uuid is not null and primary_attachment_uuid not in (select uuid from smart.i_attachment)", //$NON-NLS-1$
+							"alter table smart.i_entity add constraint i_entity_pattachment_fk  foreign key(primary_attachment_uuid) references smart.i_attachment(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY deferred", //$NON-NLS-1$
+							
 							//versions
 							"update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$
 							"update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.smartcollect'", //$NON-NLS-1$
@@ -2324,6 +2328,9 @@ public class UpgradeServlet extends HttpServlet {
 							"update connect.ca_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol'", //$NON-NLS-1$
 							"update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.independentincident'", //$NON-NLS-1$
 							"update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.independentincident'", //$NON-NLS-1$
+							
+							"update connect.connect_plugin_version set version = '7.0' where plugin_id = 'org.wcs.smart.i2'", //$NON-NLS-1$
+							"update connect.ca_plugin_version set version = '7.0' where plugin_id = 'org.wcs.smart.i2'", //$NON-NLS-1$
 														
 							"update connect.connect_plugin_version set version = '8.1.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
 							"update connect.ca_plugin_version set version = '8.1.0' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$

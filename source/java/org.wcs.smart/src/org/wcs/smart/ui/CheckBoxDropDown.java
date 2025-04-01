@@ -286,6 +286,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 			});
 		
 		popup.addListener(SWT.Paint, event->{
+			if (isDisposed() || getDisplay().isDisposed()) return;
 			Rectangle bounds = popup.getBounds();
             event.gc.setForeground(getDisplay().getSystemColor(SWT.COLOR_LIST_SELECTION));
             event.gc.setLineWidth(1);

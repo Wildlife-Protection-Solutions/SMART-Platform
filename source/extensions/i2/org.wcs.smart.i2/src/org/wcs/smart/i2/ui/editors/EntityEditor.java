@@ -2080,6 +2080,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 				if (imgMain != null) imgMain.dispose();
 				imgMain = thum.getImage();
 				lblMainImage.redraw();
+			}else if (imgMain != null) {
+				imgMain.dispose();
+				imgMain = null;
+			}
+		}else {
+			if (imgMain != null) {
+				imgMain.dispose();
+				imgMain = null;
 			}
 		}
 			
