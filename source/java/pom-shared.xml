@@ -107,8 +107,9 @@
 		<module>../extensions/event/org.wcs.smart.event.i2/pom-shared.xml</module>
 		<module>../extensions/r/org.wcs.smart.r/pom-shared.xml</module>
 		
+		<!-- removed in smart8.1 
 		<module>../extensions/paws/org.wcs.smart.paws/pom-shared.xml</module>
-		
+		-->
 		
 		<!-- remove smart7
 		<module>./org.wcs.smart.intelligence/pom-shared.xml</module>

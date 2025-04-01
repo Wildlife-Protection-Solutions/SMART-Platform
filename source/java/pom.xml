@@ -508,19 +508,7 @@
 				 
 			</modules>
 		</profile>
-		<profile>
-			<id>paws</id>
-			<modules>
-				<module>org.wcs.smart.license.feature</module>
-				<module>org.wcs.smart.updatesite</module>
-				
-				<module>../extensions/paws/org.wcs.smart.paws</module>
-				<module>../extensions/paws/org.wcs.smart.paws.feature</module> 
-				
-				<module>../extensions/paws/translations/org.wcs.smart.paws.nl</module>
-				<module>../extensions/paws/translations/org.wcs.smart.paws.feature.nl</module>
-			</modules>
-		</profile>
+		
 		<profile>
 			<id>plugins</id>
 			
@@ -599,8 +587,7 @@
 				<module>../extensions/r/org.wcs.smart.r</module>
 				<module>../extensions/r/org.wcs.smart.r.feature</module>
 				
-				<module>../extensions/paws/org.wcs.smart.paws</module>
-				<module>../extensions/paws/org.wcs.smart.paws.feature</module>
+				
 			</modules>
 		</profile>
 		<profile>
@@ -610,11 +597,12 @@
 				<module>org.wcs.smart.license.feature</module>
 				<module>org.wcs.smart.utils.updatesite</module>
 
+				<!-- removed smart 8.1 
 				<module>../extensions/paws/org.wcs.smart.paws</module>
 				<module>../extensions/paws/org.wcs.smart.paws.feature</module>
-				
 				<module>../extensions/paws/translations/org.wcs.smart.paws.feature.nl</module>
 				<module>../extensions/paws/translations/org.wcs.smart.paws.nl</module>
+				-->
 				
 				<module>../extensions/i2/org.wcs.smart.i2.migrate</module>
 				<module>../extensions/i2/org.wcs.smart.i2.migrate.feature</module>
