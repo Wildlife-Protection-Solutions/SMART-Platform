@@ -30,8 +30,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -64,11 +62,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconUtils;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -107,8 +103,15 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 	private Color selectionColor, highlightColor;
 	private Button btnOpFile, btnOpIcon;
 	
+	private Session session;
+	
 	public ImageSelectionDialog(Shell parentShell) {
 		super(parentShell);
+	}
+
+	public ImageSelectionDialog(Shell parentShell, Session session) {
+		this(parentShell);
+		this.session = session;
 	}
 	
 	public String getImageFile() {
@@ -427,8 +430,13 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			SortedMap<String, Set<String>> files;
 			
-			SortedMap<String, Set<String>> files = new TreeMap<>();
+			if(session == null) {
+				files = SmartUtils.doInSessionAndRollback(s->getIconFiles(s));
+			}else {
+				files = getIconFiles(session);
+			}
 			
 			for (String[] s : IconUtils.INSTANCE.SMART_ICON_MAPPING) {
 				Set<String> items = files.get(s[1]);
@@ -440,46 +448,41 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 				items.add(s[3]);
 				items.add(s[4]);
 			}
-			
-			try(Session session = HibernateManager.openSession()){
-				session.doWork(new Work() {
-					@Override
-					public void execute(Connection c) throws SQLException {
-						c.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-						session.beginTransaction();
-						List<IconFile> icons = QueryFactory.buildQuery(session, IconFile.class, 
-								new Object[] {"iconSet.conservationArea", SmartDB.getCurrentConservationArea()}) //$NON-NLS-1$
-								.list(); 
-						
-						for (IconFile file : icons) {
-							String name = file.getIcon().getName();
-							Set<String> items = files.get(name);
-							if (items == null) {
-								items = new HashSet<>();
-								files.put(name, items);
-							}
-							
-							if (file.isSystemIcon()) {
-								items.add(file.getFilename());
-							}else {
-								file.computeFileLocation(session);
-								try {
-									items.add(file.getAttachmentFile().normalize().toAbsolutePath().toUri().toURL().toString()); 
-								} catch (MalformedURLException e) {
-									e.printStackTrace();
-								}
-							}
-						}
-						session.getTransaction().commit();
-					}
-				});
-			}
-			
+
 			Display.getDefault().syncExec(()->{
 				createIconTable(files);
 			});
 			
 			return Status.OK_STATUS;
+		}
+
+		private SortedMap<String, Set<String>> getIconFiles(Session session) {
+			SortedMap<String, Set<String>> files = new TreeMap<>();
+
+			List<IconFile> icons = QueryFactory.buildQuery(session, IconFile.class, 
+					new Object[] {"iconSet.conservationArea", SmartDB.getCurrentConservationArea()}) //$NON-NLS-1$
+					.list(); 
+			
+			for (IconFile file : icons) {
+				String name = file.getIcon().getName();
+				Set<String> items = files.get(name);
+				if (items == null) {
+					items = new HashSet<>();
+					files.put(name, items);
+				}
+				
+				if (file.isSystemIcon()) {
+					items.add(file.getFilename());
+				}else {
+					file.computeFileLocation(session);
+					try {
+						items.add(file.getAttachmentFile().normalize().toAbsolutePath().toUri().toURL().toString()); 
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			return files;
 		}
 		
 	};

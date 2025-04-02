@@ -23,8 +23,6 @@ package org.wcs.smart.ui;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,7 +63,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.icon.Icon;
@@ -135,6 +132,8 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 	
 	private String txtFilterText = null;
 	
+	private Session session;
+	
 	private ViewerFilter iconFilter = new ViewerFilter() {
 		
 		@Override
@@ -167,6 +166,9 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		this(parentShell, toUpdate, null);
 	}
 
+	public void setSession(Session session) {
+		this.session = session;
+	}
 	public IconFile getSelectedIconFile() {
 		if (currentSet != null && selectedIcon != null) return this.selectedIcon.getIconFile(currentSet);
 		return null;
@@ -270,22 +272,27 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		return icon;
 	}
 	
+	private List <IconSet> loadActiveSets(Session session){
+		List <IconSet> activeSets = new ArrayList<>();
+		activeSets.addAll(QueryFactory.buildQuery(session, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
+		activeSets.forEach(set->{
+			set.getName();
+			set.getUuid().equals(null);
+		});
+		return activeSets;
+	}
+	
 	@Override
 	public Control createDialogArea(Composite parent){
 		parent = (Composite)super.createDialogArea(parent);
 		
 		if (activeSets == null) {
-			activeSets = new ArrayList<>();
-			try(Session s = HibernateManager.openSession()){
-				doInTransactionReadUncommitted(s, ()->{
-					activeSets.addAll(QueryFactory.buildQuery(s, IconSet.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
-					activeSets.forEach(set->{
-						set.getName();
-						set.getUuid().equals(null);
-					});
-				});
+			if (session != null) {
+				activeSets = loadActiveSets(session);
+			}else {
+				activeSets = SmartUtils.doInSessionAndRollback(s->loadActiveSets(s));
 			}
-			if (!activeSets.isEmpty()) currentSet = activeSets.get(0);
+			if (activeSets != null && !activeSets.isEmpty()) currentSet = activeSets.get(0);
 		}
 		
 		Composite main = new Composite(parent, SWT.NONE);
@@ -642,7 +649,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 	}
 	
 	private Path selectFile() {
-		ImageSelectionDialog dialog = new ImageSelectionDialog(getShell());
+		ImageSelectionDialog dialog = new ImageSelectionDialog(getShell(), session);
 		if (dialog.open() != Window.OK) return null;
 		if (dialog.getImageFile() == null) return null;
 		return Paths.get(dialog.getImageFile());
@@ -660,34 +667,20 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		return true;
 	}
 
-	/*
-	 * run in isolation levels that allow it to read temporarily written data  
-	 */
-	private void doInTransactionReadUncommitted(Session session, Runnable r) {
-		session.doWork(new Work() {
-            @Override
-            public void execute(Connection connection) throws SQLException {
-            	int x = connection.getTransactionIsolation();
-            	try {
-            		connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-            		r.run();
-            	}finally {
-            		connection.setTransactionIsolation(x);
-            	}
-            }
-        });
-	}
 	private Job loadDataJob = new Job("load icons") { //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			try(Session session = HibernateManager.openSession()){
-				doInTransactionReadUncommitted(session, ()->{
+			if (session == null) {
+				try(Session session = HibernateManager.openSession()){
 					caIcons = IconManager.INSTANCE.getIcons(session, SmartDB.getCurrentConservationArea());
 					systemIcons = IconManager.INSTANCE.getSystemIcons(session, SmartDB.getCurrentConservationArea());
-				});
+				}
+			}else {
+				caIcons = IconManager.INSTANCE.getIcons(session, SmartDB.getCurrentConservationArea());
+				systemIcons = IconManager.INSTANCE.getSystemIcons(session, SmartDB.getCurrentConservationArea());
 			}
-			
+
 			Collections.sort(caIcons);
 			Collections.sort(systemIcons);
 			

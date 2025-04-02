@@ -653,6 +653,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		Icon toEdit = (Icon)x;
 		
 		IconSelectionDialog dialog = new IconSelectionDialog(getShell(), toEdit, sets);
+		dialog.setSession(session);
 		if (dialog.open() != Window.OK) return;
 		toEdit.getFiles().forEach(f->{
 			if(f.getUuid() == null) session.persist(f);
@@ -675,6 +676,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	
 	private void addIcon() {
 		IconSelectionDialog dialog = new IconSelectionDialog(getShell(), IconSelectionDialog.Type.NEW, sets);
+		dialog.setSession(session);
 		if (dialog.open() != Window.OK) return;
 		
 		Icon icon = dialog.getSelectedIcon();
