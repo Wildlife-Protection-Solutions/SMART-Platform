@@ -44,6 +44,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -1180,6 +1181,20 @@ public class SmartUtils {
 		Style style = sf.createStyle();
     	style.featureTypeStyles().add(fts);
 		return style;
+	}
+	
+	public static <T> T doInSessionAndRollback(Function<Session, T> func) {
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try{
+				return func.apply(s);
+			}catch (Exception ex) {
+				SmartPlugIn.log(ex.getMessage(), ex);
+				return null;
+			}finally{
+				s.getTransaction().rollback();
+			}
+		}
 	}
 
 }

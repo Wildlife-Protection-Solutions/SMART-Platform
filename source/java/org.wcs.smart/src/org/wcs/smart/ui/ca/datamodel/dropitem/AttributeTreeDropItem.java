@@ -46,17 +46,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.IconManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.TreeNodeLabelProvider;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Attribute tree drop item
@@ -82,6 +81,8 @@ public class AttributeTreeDropItem extends DropItem {
 	protected Object input = DialogConstants.LOADING_TEXT;
 	protected TreeDropDownViewer treeviewer;
 	
+	private Session session;
+	
 	//if true only active list items will be displayed as options
 	private boolean onlyActive = false;
 	private ControlDecoration cd;
@@ -93,38 +94,13 @@ public class AttributeTreeDropItem extends DropItem {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			try(Session s = HibernateManager.openSession()){
-				s.beginTransaction();
-				try{
-					roots = new ArrayList<>();
-					Attribute a = s.get(Attribute.class,  attribute.getUuid());
-					
-					if (onlyActive) {
-						roots.addAll(a.getTree());
-					}else {
-						roots.addAll(a.getTree());
-					}
-					List<AttributeTreeNode> toVisit = new ArrayList<>();
-					toVisit.addAll(roots);
-					while(!toVisit.isEmpty()) {
-						AttributeTreeNode n = toVisit.remove(0);
-						n.getName();
-						if (onlyActive) {
-							if (n.getActiveChildren() != null) toVisit.addAll(n.getActiveChildren());
-						}else {
-							if (n.getChildren() != null) toVisit.addAll(n.getChildren());
-						}
-					}
-					
-				}catch(Exception ex){
-					SmartPlugIn.log("Could not initialize attribute tree items", ex); //$NON-NLS-1$
-				}finally{
-					s.getTransaction().rollback();
-				}
-			}
-			
+			if (session == null) {
+				roots = SmartUtils.doInSessionAndRollback(s->loadData(s));
+			}else {
+				roots = loadData(session);
+			}			
 			input = roots;
-			if(treeviewer == null) return Status.OK_STATUS;
+			if(treeviewer == null || treeviewer.getComposite().isDisposed()) return Status.OK_STATUS;
 			Display d = treeviewer.getTreeViewer().getTree().getDisplay();
 			if (d != null && !d.isDisposed()){
 				d.asyncExec(new Runnable(){
@@ -143,6 +119,29 @@ public class AttributeTreeDropItem extends DropItem {
 				});
 			}
 			return Status.OK_STATUS;
+		}
+		
+		private List<AttributeTreeNode> loadData(Session session) {
+			List<AttributeTreeNode> roots = new ArrayList<>();
+			Attribute a = session.get(Attribute.class,  attribute.getUuid());
+			
+			if (onlyActive) {
+				roots.addAll(a.getTree());
+			}else {
+				roots.addAll(a.getTree());
+			}
+			List<AttributeTreeNode> toVisit = new ArrayList<>();
+			toVisit.addAll(roots);
+			while(!toVisit.isEmpty()) {
+				AttributeTreeNode n = toVisit.remove(0);
+				n.getName();
+				if (onlyActive) {
+					if (n.getActiveChildren() != null) toVisit.addAll(n.getActiveChildren());
+				}else {
+					if (n.getChildren() != null) toVisit.addAll(n.getChildren());
+				}
+			}
+			return roots;
 		}
 	};
 
@@ -181,6 +180,20 @@ public class AttributeTreeDropItem extends DropItem {
 	 */
 	public void setOnlyActive(boolean onlyActive) {
 		this.onlyActive = onlyActive;
+	}
+	
+	/**
+	 * Sets the active session to use for loading data. If not set 
+	 * a new session will be opened. 
+	 * This was added in 8.1.0 due to table locking issues with settings
+	 * up the visible when expressions for configurable model attributes. In some
+	 * cases derby locked the entire i18n table and there for no other session
+	 * could read for it.
+	 * 
+	 * @param session
+	 */
+	public void setSession(Session session) {
+		this.session = session;
 	}
 	
 	/**

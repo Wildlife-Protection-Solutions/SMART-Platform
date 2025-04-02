@@ -90,7 +90,7 @@ import org.wcs.smart.ui.properties.LanguageViewer;
 
 /**
  * Tab with default content for configurable model.
- * If not additional tabs provided this will be the only content displayed (without tab itself).
+ * If no additional tabs provided this will be the only content displayed (without tab itself).
  * 
  * @author elitvin
  * @since 4.0.0
@@ -132,10 +132,6 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 	private Map<AttributeType, CmAttributeInfoComposite> attributeComposites;
 	
 	private HashMap<ControlButton, Button> controlButtons = new HashMap<ControlButton, Button>();
-	
-//	private List<CmAttributeConfig> deletedConfigs = new ArrayList<>();
-//	private List<CmAttributeConfig> addedConfigs = new ArrayList<>();
-	
 	
 	private ScrolledComposite propertiesComp, helpComp;
 	private Composite  stackPanel;

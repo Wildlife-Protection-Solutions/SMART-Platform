@@ -339,7 +339,7 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 	}
 	
 	private boolean editVisibleWhenExpression() {
-		VisibleWhenDialog d = new VisibleWhenDialog(getShell(), attribute);
+		VisibleWhenDialog d = new VisibleWhenDialog(getShell(), attribute, session);
 		if (d.open() != Window.OK) return false;
 		getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_IS_VISIBLE).setVisibleWhen(VisibleWhen.CUSTOM, d.getQueryExpression());
 		fireModelChanged();

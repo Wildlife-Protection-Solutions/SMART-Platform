@@ -44,8 +44,8 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Attribute list type drop item.
@@ -68,6 +68,8 @@ public class AttributeListDropItem extends DropItem {
 
 	//if true only active list items will be displayed as options
 	private boolean onlyActive = false;
+	private Session session;
+	
 	/*
 	 * Job to load the attribute list options
 	 */
@@ -76,29 +78,13 @@ public class AttributeListDropItem extends DropItem {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
-			final ArrayList<ListItem> items = new ArrayList<>();
-			try(Session s = HibernateManager.openSession()){
-				s.beginTransaction();
-				try{
-					Attribute a = s.get(Attribute.class, attribute.getUuid());
-					if (onlyActive) {
-						a.getActiveListItems().forEach(li->items.add(new ListItem(li.getUuid(), li.getName(), li.getKeyId())));
-						items.forEach(l->l.getName());
-					}else{
-						a.getAttributeList().forEach(li->items.add(new ListItem(li.getUuid(), li.getName(), li.getKeyId())));
-						items.forEach(l->l.getName());
-					}
-					
-					//add the any item
-					items.add(0, IDropItemFactory.ANY_OPTION);				
-					if (currentSelection != null && !items.contains(currentSelection)){
-						//item is not longer active; but still in query
-						items.add(currentSelection);
-					}
-				}finally{
-					s.getTransaction().rollback();
-				}
+			ArrayList<ListItem> items;
+			if (session == null) {
+				items = SmartUtils.doInSessionAndRollback(s->loadData(s));					
+			}else {
+				items = loadData(session);
 			}
+			
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
@@ -112,6 +98,27 @@ public class AttributeListDropItem extends DropItem {
 					getTargetPanel().redraw();
 				}});
 			return Status.OK_STATUS;
+		}
+		
+		private ArrayList<ListItem> loadData(Session s) {
+			final ArrayList<ListItem> items = new ArrayList<>();
+
+			Attribute a = s.get(Attribute.class, attribute.getUuid());
+			if (onlyActive) {
+				a.getActiveListItems().forEach(li->items.add(new ListItem(li.getUuid(), li.getName(), li.getKeyId())));
+				items.forEach(l->l.getName());
+			}else{
+				a.getAttributeList().forEach(li->items.add(new ListItem(li.getUuid(), li.getName(), li.getKeyId())));
+				items.forEach(l->l.getName());
+			}
+			
+			//add the any item
+			items.add(0, IDropItemFactory.ANY_OPTION);				
+			if (currentSelection != null && !items.contains(currentSelection)){
+				//item is not longer active; but still in query
+				items.add(currentSelection);
+			}
+			return items;
 		}
 	};
 
@@ -150,6 +157,7 @@ public class AttributeListDropItem extends DropItem {
 		this.key = key;
 	}
 	
+	
 	/**
 	 * If set to true only active list items are displayed in drop
 	 * down; otherwise all items are displayed 
@@ -157,6 +165,20 @@ public class AttributeListDropItem extends DropItem {
 	 */
 	public void setOnlyActive(boolean onlyActive) {
 		this.onlyActive = onlyActive;
+	}
+
+	/**
+	 * Sets the active session to use for loading data. If not set 
+	 * a new session will be opened. 
+	 * This was added in 8.1.0 due to table locking issues with settings
+	 * up the visible when expressions for configurable model attributes. In some
+	 * cases derby locked the entire i18n table and there for no other session
+	 * could read for it.
+	 * 
+	 * @param session
+	 */
+	public void setSession(Session session) {
+		this.session = session;
 	}
 	
 	/**

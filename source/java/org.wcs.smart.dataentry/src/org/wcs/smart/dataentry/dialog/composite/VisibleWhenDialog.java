@@ -63,7 +63,6 @@ import org.wcs.smart.filter.BracketFilter;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.NotFilter;
 import org.wcs.smart.filter.Operator;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.NamedItemLabelProvider;
@@ -103,11 +102,13 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 	
 	private DefinitionPanel definitionPanel;
 	
-	public String stringExpression;
+	private String stringExpression;
+	private Session session;
 	
-	public VisibleWhenDialog(Shell parent, CmAttribute attribute) {
+	public VisibleWhenDialog(Shell parent, CmAttribute attribute, Session session) {
 		super(parent);
 		this.attribute = attribute;
+		this.session = session;
 	}
 	
 	@Override
@@ -210,9 +211,9 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 		try {
 			List<DropItem> items = new ArrayList<>();
 			IFilter part = parser.ParseQuery();
-			try(Session session = HibernateManager.openSession()){
-				generateDropItem(part, items, session);
-			}
+			
+			generateDropItem(part, items, session);
+			
 			definitionPanel.addItems(items);
 		}catch (Exception ex) {
 			definitionPanel.addItem(new ErrorDropItem(Messages.VisibleWhenDialog_ParseQueryError + ex.getMessage()));
@@ -516,14 +517,17 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 		case LIST:
 			AttributeListDropItem di = new AttributeListDropItem(attribute);
 			di.setOnlyActive(true);
+			di.setSession(this.session);
 			return di;
 		case MLIST:
 			AttributeMListDropItem mdi = new AttributeMListDropItem(attribute);
 			mdi.setOnlyActive(true);
+			mdi.setSession(this.session);
 			return mdi;
 		case TREE:
 			AttributeTreeDropItem tdi = new AttributeTreeDropItem(attribute);
 			tdi.setOnlyActive(true);
+			tdi.setSession(this.session);
 			return tdi;
 		case LINE:
 		case POLYGON:

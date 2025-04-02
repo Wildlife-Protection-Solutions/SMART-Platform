@@ -51,9 +51,9 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.filter.AttributeFilter;
 import org.wcs.smart.filter.Operator;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.CheckBoxDropDown;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Attribute multi-list type drop item.
@@ -79,40 +79,20 @@ public class AttributeMListDropItem extends DropItem {
 	
 	//if true only active list items will be displayed as options
 	private boolean onlyActive = false;
+	private Session session;
 	
 	protected Job loadItemsJobs = new Job("loading datamodel list items"){ //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
-			final ArrayList<ListItem> items = new ArrayList<>();
-			try(Session s = HibernateManager.openSession()){
-				s.beginTransaction();
-				try{
-					Attribute a = s.get(Attribute.class, attribute.getUuid());
-					
-					if (onlyActive) {
-						for (AttributeListItem item : a.getActiveListItems()){
-							items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId(), item.getIsActive()));
-						}
-					}else {
-						for (AttributeListItem item : a.getAttributeList()){
-							items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId(), item.getIsActive()));
-						}
-					}
-					
-					if (currentSelection != null) {
-						for (ListItem i : currentSelection) {
-							if (!items.contains(i)){
-								//item is not longer active; but still in query
-								items.add(i);
-							}
-						}
-					}
-				}finally{
-					s.getTransaction().rollback();
-				}
+			ArrayList<ListItem> items;
+			if (session == null) {
+				items = SmartUtils.doInSessionAndRollback(s->loadData(s));
+			}else {
+				items = loadData(session);
 			}
+			
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
@@ -129,6 +109,31 @@ public class AttributeMListDropItem extends DropItem {
 					getTargetPanel().redraw();
 				}});
 			return Status.OK_STATUS;
+		}
+		
+		private ArrayList<ListItem> loadData(Session s) {
+			final ArrayList<ListItem> items = new ArrayList<>();
+			Attribute a = s.get(Attribute.class, attribute.getUuid());
+			
+			if (onlyActive) {
+				for (AttributeListItem item : a.getActiveListItems()){
+					items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId(), item.getIsActive()));
+				}
+			}else {
+				for (AttributeListItem item : a.getAttributeList()){
+					items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId(), item.getIsActive()));
+				}
+			}
+			
+			if (currentSelection != null) {
+				for (ListItem i : currentSelection) {
+					if (!items.contains(i)){
+						//item is not longer active; but still in query
+						items.add(i);
+					}
+				}
+			}
+			return items;
 		}
 	};
 	/**
@@ -170,6 +175,20 @@ public class AttributeMListDropItem extends DropItem {
 	 */
 	public void setOnlyActive(boolean onlyActive) {
 		this.onlyActive = onlyActive;
+	}
+	
+	/**
+	 * Sets the active session to use for loading data. If not set 
+	 * a new session will be opened. 
+	 * This was added in 8.1.0 due to table locking issues with settings
+	 * up the visible when expressions for configurable model attributes. In some
+	 * cases derby locked the entire i18n table and there for no other session
+	 * could read for it.
+	 * 
+	 * @param session
+	 */
+	public void setSession(Session session) {
+		this.session = session;
 	}
 	
 	/**

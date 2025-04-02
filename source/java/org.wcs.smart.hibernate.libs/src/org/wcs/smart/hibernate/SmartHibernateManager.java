@@ -294,6 +294,8 @@ public class SmartHibernateManager {
 		if (interceptor != null && interceptor instanceof SessionInterceptor){
 			((SessionInterceptor)interceptor).setSession(session);
 		}
+		
+
 		return session;
 		
 	}
@@ -445,4 +447,21 @@ public class SmartHibernateManager {
 		}	
 	};
 	
+	
+//	public static void printLocks() {
+//		try(Session session = openSession()){
+//			
+//			List<Object[]> data = session.createNativeQuery("select * from syscs_diag.lock_table", Object[].class)
+//			.list();
+//			
+//			for (Object[] d : data) {
+//				for (int i = 0; i < d.length; i++) {
+//					System.out.print(d[i] == null ? "null" : d[i].toString());
+//					System.out.print(",");
+//				}
+//				System.out.println("----");
+//			}
+//			
+//		}
+//	}
 }
