@@ -2318,13 +2318,13 @@ public class UpgradeServlet extends HttpServlet {
 							"alter table smart.i_entity add constraint i_entity_pattachment_fk  foreign key(primary_attachment_uuid) references smart.i_attachment(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY deferred", //$NON-NLS-1$
 							
 							//remove paws plugins
-							"drop table if exists smart.paws_classification", //$NON-NLS-1$
-							"drop table if exists smart.paws_configuration", //$NON-NLS-1$
+							"drop table if exists smart.paws_classification", //$NON-NLS-1$							
 							"drop table if exists smart.paws_parameter", //$NON-NLS-1$
 							"drop table if exists smart.paws_query_class", //$NON-NLS-1$
 							"drop table if exists smart.paws_run", //$NON-NLS-1$
 							"drop table if exists smart.paws_service", //$NON-NLS-1$
 							"drop table if exists smart.paws_simple_class", //$NON-NLS-1$
+							"drop table if exists smart.paws_configuration", //$NON-NLS-1$
 							"delete from connect.connect_plugin_version where plugin_id = 'org.wcs.smart.paws'", //$NON-NLS-1$
 							"delete from connect.ca_plugin_version where plugin_id = 'org.wcs.smart.paws'", //$NON-NLS-1$
 							

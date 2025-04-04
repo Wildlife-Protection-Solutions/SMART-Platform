@@ -530,13 +530,13 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 		
 		//drop paws plugin tables if they exists
 		sql = new String[] {
-			"drop table smart.paws_classification", //$NON-NLS-1$
-			"drop table smart.paws_configuration", //$NON-NLS-1$
+			"drop table smart.paws_classification", //$NON-NLS-1$			
 			"drop table smart.paws_parameter", //$NON-NLS-1$
 			"drop table smart.paws_query_class", //$NON-NLS-1$
 			"drop table smart.paws_run", //$NON-NLS-1$
 			"drop table smart.paws_service", //$NON-NLS-1$
-			"drop table smart.paws_simple_class" //$NON-NLS-1$
+			"drop table smart.paws_simple_class", //$NON-NLS-1$
+			"drop table smart.paws_configuration" //$NON-NLS-1$
 		};
 		for (String s : sql) {
 			SmartPlugIn.logInfo(s);
@@ -548,7 +548,7 @@ public class Upgrader801To810 extends AbstractInteralDatabaseUpgrader {
 		}
 		
 		sql = new String[] {
-			"delete from smart.db_version where plugin_id = 'org.wcs.smart.paws" //$NON-NLS-1$
+			"delete from smart.db_version where plugin_id = 'org.wcs.smart.paws'" //$NON-NLS-1$
 		};
 		for (String s : sql) {
 			SmartPlugIn.logInfo(s);

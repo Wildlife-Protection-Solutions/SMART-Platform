@@ -700,14 +700,8 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			"alter table smart.i_entity add constraint i_entity_pattachment_fk  foreign key(primary_attachment_uuid) references smart.i_attachment(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$	
 		};
 		for (String s : sql) session.createNativeMutationQuery(s).executeUpdate();
-			
-		
 		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_7, session);
 	}
-	
-	
-	
-	
 	
 	@SuppressWarnings("nls")
 	private void createTables(Session session){
