@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.birt;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
@@ -54,6 +53,7 @@ import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -77,6 +77,7 @@ public class RecordExportJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		try{
 			final Path out = runRecord();
+			if (out == null) return Status.OK_STATUS;
 			Display.getDefault().syncExec(() ->  AttachmentUtil.launch(out));
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
@@ -104,14 +105,11 @@ public class RecordExportJob extends Job {
 		}
 		//create the pdf file output location
 		Path outputFile = IntelReportManager.INSTANCE.getTemporaryDirectory();
-		if (!Files.exists(outputFile)){
-			try {
-				Files.createDirectory(outputFile);
-			} catch (IOException e) {
-				throw new Exception(MessageFormat.format(Messages.RecordExportJob_DirectoryError, outputFile.toString()), e);
+		if (!Files.exists(outputFile)){		
+			if (!SmartUtils.createDirectory(outputFile)) {
+				return null;
 			}
 		}
-
 		
 		String fileName = record.getTitle() + "." + (DateTimeFormatter.ofPattern("MMMddyyyy")).format(LocalDate.now()); //$NON-NLS-1$ //$NON-NLS-2$
 		fileName = URLUtils.cleanFilename(fileName);

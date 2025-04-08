@@ -13,5 +13,5 @@
 	<name>SMART Advanced Intelligence Module</name>
 	<artifactId>org.wcs.smart.i2</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>8.0.4-SNAPSHOT</version>
+	<version>8.0.5-SNAPSHOT</version>
 </project>

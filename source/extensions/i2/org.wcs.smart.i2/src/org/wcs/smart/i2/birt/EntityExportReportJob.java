@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.birt;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -58,6 +57,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -127,11 +127,9 @@ public class EntityExportReportJob extends Job {
 		}
 		//create the pdf file output location
 		Path outputFile = IntelReportManager.INSTANCE.getTemporaryDirectory();
-		if (!Files.exists(outputFile)){
-			try {
-				Files.createDirectory(outputFile);
-			} catch (IOException e) {
-				throw new Exception(MessageFormat.format(Messages.EntityExportReportJob_ErrorCreatingDirectory, outputFile.toString()), e);
+		if (!Files.exists(outputFile)){		
+			if (!SmartUtils.createDirectory(outputFile)) {
+				return null;
 			}
 		}
 

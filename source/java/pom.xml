@@ -323,6 +323,17 @@
 			</modules>
 		</profile>
 		<profile>
+			<id>smart805</id>
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>				
+				<module>../extensions/i2/org.wcs.smart.i2</module>
+				<module>../extensions/i2/org.wcs.smart.i2.patrol</module>
+				<module>../extensions/i2/org.wcs.smart.i2.feature</module>
+			</modules>
+		</profile>
+
+		<profile>
 			<id>smart804</id>
 			<modules>
 				<module>org.wcs.smart.license.feature</module>

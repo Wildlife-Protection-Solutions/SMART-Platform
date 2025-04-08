@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.birt.ColumnBindingFixer;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -78,7 +79,7 @@ public enum IntelReportManager {
 
 	INSTANCE;
 
-	public static final String TEMP_DIRECTORY = IntelAttachment.INTELLIGENCE_FS_DIR + "_TEMP"; //$NON-NLS-1$
+	private static final String TEMP_DIRECTORY = IntelAttachment.INTELLIGENCE_FS_DIR + "_TEMP"; //$NON-NLS-1$
 	
 	/**
 	 * The BIRT template for intelligence records for the given conservation area.
@@ -116,9 +117,9 @@ public enum IntelReportManager {
 	 * @return
 	 */
 	public Path getTemporaryDirectory(){
-		return FileSystems.getDefault().getPath(
-				SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-				TEMP_DIRECTORY);
+		return SmartContext.INSTANCE.getTempFilestoreLocation()
+				.resolve(TEMP_DIRECTORY)
+				.resolve(UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()));
 	}
 	
 	/**

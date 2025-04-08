@@ -33,7 +33,6 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
@@ -81,13 +80,6 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 				try {
 					Path folder = Paths.get(ca.getFileDataStoreLocation())
 							.resolve(IntelAttachment.INTELLIGENCE_FS_DIR);
-					SmartUtils.deleteDirectory(folder);
-				} catch (IOException ex) {
-					Intelligence2PlugIn.log(Messages.RemoveIntelligenceJob_DeleteFolderError + ex.getMessage(), ex);
-				}
-				try {
-					Path folder = Paths.get(ca.getFileDataStoreLocation())
-							.resolve(IntelReportManager.TEMP_DIRECTORY);
 					SmartUtils.deleteDirectory(folder);
 				} catch (IOException ex) {
 					Intelligence2PlugIn.log(Messages.RemoveIntelligenceJob_DeleteFolderError + ex.getMessage(), ex);
