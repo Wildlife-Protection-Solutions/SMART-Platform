@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.birt;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -58,6 +57,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -94,12 +94,13 @@ public class EntityExportReportJob extends Job {
 			monitor.subTask(e.getIdAttributeAsText(Locale.getDefault()));
 			try{
 				final Path out = runEntityType(e, dFilter);
-				if (outputDir == null){
-					Display.getDefault().syncExec(() ->  AttachmentUtil.launch(out));
-				}else{
-					Files.move(out, outputDir.resolve(out.getFileName()), StandardCopyOption.REPLACE_EXISTING);
-				}
-				
+				if (out != null) {
+					if (outputDir == null){
+						Display.getDefault().syncExec(() ->  AttachmentUtil.launch(out));
+					}else{
+						Files.move(out, outputDir.resolve(out.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+					}
+				}				
 			}catch (Exception ex){
 				Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 			}
@@ -111,7 +112,7 @@ public class EntityExportReportJob extends Job {
 
 	
 	@SuppressWarnings("unchecked")
-	protected Path runEntityType(IntelEntity entity, LocalDate[] dateFilter) throws Exception{
+	private Path runEntityType(IntelEntity entity, LocalDate[] dateFilter) throws Exception{
 		
 		//get the template
 		IntelEntityType type = null;
@@ -127,11 +128,9 @@ public class EntityExportReportJob extends Job {
 		}
 		//create the pdf file output location
 		Path outputFile = IntelReportManager.INSTANCE.getTemporaryDirectory();
-		if (!Files.exists(outputFile)){
-			try {
-				Files.createDirectory(outputFile);
-			} catch (IOException e) {
-				throw new Exception(MessageFormat.format(Messages.EntityExportReportJob_ErrorCreatingDirectory, outputFile.toString()), e);
+		if (!Files.exists(outputFile)){		
+			if (!SmartUtils.createDirectory(outputFile)) {
+				return null;
 			}
 		}
 
