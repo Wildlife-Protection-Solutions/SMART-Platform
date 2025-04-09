@@ -77,6 +77,7 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.birt.entity.attachment.EntityAttachmentDataset;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityLocation;
@@ -426,7 +427,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					if (ea.getAttachment().getUuid() != null){
 						if (AttachmentManager.INSTANCE.canDelete(ea.getAttachment(), s)){
 							s.remove(ea);
-							s.remove(ea.getAttachment());
+							s.remove(s.get(IntelAttachment.class, ea.getAttachment().getUuid()));							
 						}
 					}
 				}
