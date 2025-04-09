@@ -406,7 +406,7 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IQuery
 	}
 	
 	public AssetAttribute getAssetAttribute(String attributeKey, Session session) throws Exception{
-		//TODO: ccaa support is currently not implemented for any asset related features
+		//ccaa support is currently not implemented for any asset related features
 		AssetAttribute att = session.createQuery("FROM AssetAttribute WHERE keyId = :keyid and conservationArea = :ca", AssetAttribute.class) //$NON-NLS-1$
 				.setParameter("keyid", attributeKey) //$NON-NLS-1$
 				.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$

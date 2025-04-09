@@ -453,8 +453,6 @@ public class SurveyDesignDataPage extends EditorPart {
 		column3.setText(Messages.SurveyDesignDataPage_EndColumnName);
 		column3.setWidth(100);
 		
-		//TODO: when implementing multi-ca analysis we probably want a ca column
-		
 		int col = 3;
 		for (MissionProperty mp : sd.getMissionProperties()){
 			TreeColumn column = new TreeColumn(dataViewer.getTree(), SWT.LEFT);

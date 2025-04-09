@@ -196,15 +196,8 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		//add attachments
 		if (item.getObservationUuid() != null){
 			IntelObservation obs = session.get(IntelObservation.class, item.getObservationUuid());
-			if (obs != null) {
-				//if obs == null then record has been deleted
-			
-				//TODO can't build another query in this session as scrollable results is using it
-				
-	//			List<IntelObservationAttribute> attributes = 
-	//					QueryFactory.buildQuery(session, IntelObservationAttribute.class, "observation.uuid", item.getObservationUuid()).getResultList(); //$NON-NLS-1$
-	//			for (IntelObservationAttribute a : attributes){
-					for (IntelObservationAttribute a : obs.getObservationAttributes()){
+			if (obs != null) {			
+				for (IntelObservationAttribute a : obs.getObservationAttributes()){
 					if (a.getAttribute().getType() == AttributeType.LIST){
 						item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeListItem().getName());	
 					}else if (a.getAttribute().getType() == AttributeType.MLIST) {

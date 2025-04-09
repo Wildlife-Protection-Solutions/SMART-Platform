@@ -435,7 +435,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 			pwp.setMissionDay(toUpdate);
 			pwp.setSamplingUnit(su);
 			
-			//TODO:  this is for reconnaissance missions where 
+			//this is for reconnaissance missions where 
 			//sampling units aren't assigned; instead we want to link the 
 			//waypoint to a mission track
 			pwp.setMissionTrack(null);

@@ -122,7 +122,6 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 		}
 	}
 	
-	//TODO: don't cache everything?
 	private HashMap<UUID,String> membersCache = new HashMap<>();
 	protected String getMissionMembersAsString(Session session, UUID missionUuid) {
 		if (membersCache.containsKey(missionUuid)) return membersCache.get(missionUuid);

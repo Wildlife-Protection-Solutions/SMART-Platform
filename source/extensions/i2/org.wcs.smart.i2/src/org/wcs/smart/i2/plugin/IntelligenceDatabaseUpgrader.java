@@ -651,7 +651,6 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		//upgrade last modified/created dates
 		if (SmartContext.INSTANCE.getClass(Upgrader757To800.class) != null) {
 			//if we are installing we don't have timezome mappings and we won't have anything to do
-			//TODO: verify this
 			HashMap<ConservationArea, String> caTimeZoneMapping = 
 					SmartContext.INSTANCE.getClass(Upgrader757To800.class).getCaTimeZoneMapping();
 	

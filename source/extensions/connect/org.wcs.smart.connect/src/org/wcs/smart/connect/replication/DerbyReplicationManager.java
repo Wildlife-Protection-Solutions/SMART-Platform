@@ -299,7 +299,7 @@ public enum DerbyReplicationManager {
 		@Override
 		public IStatus run(IProgressMonitor monitor) {
 			if (!SmartHibernateManager.isSessionFactorySet()){
-				ConnectPlugIn.log("getting replication status - no session factory set.", null);
+				ConnectPlugIn.log("getting replication status - no session factory set.", null); //$NON-NLS-1$
 				//for performance in particular for connect; 
 				//skip this check if we don't have a session factory
 				cachedReplicationEnabled = false;

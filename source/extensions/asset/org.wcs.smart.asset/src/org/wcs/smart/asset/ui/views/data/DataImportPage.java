@@ -404,8 +404,6 @@ public class DataImportPage {
 							
 							for (Entry<Asset, AssetStationLocation> entry : assets.entrySet()) {
 								Asset asset = entry.getKey();
-								//TODO: this is wrong p.getStationLocation is not the station/location for
-								//this asset
 								AssetDeployment d = FileProcessor.findAssetDeployment(wp, asset, 
 										entry.getValue(), session, Locale.getDefault());
 								
