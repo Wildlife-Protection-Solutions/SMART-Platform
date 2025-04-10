@@ -271,6 +271,10 @@ public class DerbyRestoreEngine {
 					//these get remove in version 8.0 and up so we don't care if they exist
 					continue;
 				}
+				if (pluginId.equalsIgnoreCase("org.wcs.smart.paws")){ //$NON-NLS-1$
+					//removed in 8.1.0
+					continue;
+				}
 				if (!installedVersions.keySet().contains(pluginId)){
 					missingPlugins.append(pluginId);
 					missingPlugins.append("\n"); //$NON-NLS-1$
