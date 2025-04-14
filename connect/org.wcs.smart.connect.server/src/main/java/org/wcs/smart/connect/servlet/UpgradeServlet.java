@@ -153,14 +153,15 @@ public class UpgradeServlet extends HttpServlet {
 						upgradeDb802to810(s, warnings);
 						updated = true;
 					}else if (version.equals("8.0.0")) { //$NON-NLS-1$ 
-						//7.5.5/6 shouldn't exist as we didn't upgrade version number
 						upgradeDb800to801(s, warnings);
 						upgradeDb801to802(s, warnings);
 						upgradeDb802to810(s, warnings);
 						updated = true;
 					}else if (version.equals("8.0.1")) { //$NON-NLS-1$ 
-						//7.5.5/6 shouldn't exist as we didn't upgrade version number
 						upgradeDb801to802(s, warnings);
+						upgradeDb802to810(s, warnings);
+						updated = true;
+					}else if (version.equals("8.0.2")) { //$NON-NLS-1$ 
 						upgradeDb802to810(s, warnings);
 						updated = true;
 					}else {
@@ -2279,7 +2280,7 @@ public class UpgradeServlet extends HttpServlet {
 							$$ LANGUAGE plpgsql;
 							""",  //$NON-NLS-1$
 
-							"drop trigger trg_work_item on connect.work_item", //$NON-NLS-1$
+							"drop trigger if exists trg_work_item on connect.work_item", //$NON-NLS-1$
 							"create trigger trg_work_item after update of status on connect.work_item for each row execute function connect.update_workitem_summary()", //$NON-NLS-1$
 							"create table connect.ip_alias(ip varchar, alias varchar, primary key(ip))", //$NON-NLS-1$
 							
