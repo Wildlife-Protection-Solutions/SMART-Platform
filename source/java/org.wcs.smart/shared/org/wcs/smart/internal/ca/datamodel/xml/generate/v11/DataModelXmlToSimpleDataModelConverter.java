@@ -146,7 +146,7 @@ public class DataModelXmlToSimpleDataModelConverter implements IXmlToDataModelCo
 					//insert before first root category
 					int index = -1;
 					for (int i = 0; i < kid.getAllAttributes().size(); i ++) {
-						if (kid.getAllActiveAttributes().get(i).getIsRoot()) {
+						if (kid.getAllAttributes().get(i).getIsRoot()) {
 							index = i;
 							break;
 						}
