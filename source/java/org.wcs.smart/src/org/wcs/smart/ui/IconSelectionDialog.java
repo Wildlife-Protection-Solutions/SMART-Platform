@@ -147,6 +147,13 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		}
 	};
 	
+	public IconSelectionDialog(Shell parentShell, Type type, List<IconSet> activeSets, List<Icon> currentIcons) {
+		super(parentShell);
+		this.type = type;
+		this.activeSets = activeSets;
+		this.caIcons = currentIcons;
+	}
+	
 	public IconSelectionDialog(Shell parentShell, Type type, List<IconSet> activeSets) {
 		super(parentShell);
 		this.type = type;

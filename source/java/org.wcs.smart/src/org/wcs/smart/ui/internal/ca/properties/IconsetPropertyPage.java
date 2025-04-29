@@ -675,7 +675,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	}
 	
 	private void addIcon() {
-		IconSelectionDialog dialog = new IconSelectionDialog(getShell(), IconSelectionDialog.Type.NEW, sets);
+		IconSelectionDialog dialog = new IconSelectionDialog(getShell(), IconSelectionDialog.Type.NEW, sets, caicons);
 		dialog.setSession(session);
 		if (dialog.open() != Window.OK) return;
 		

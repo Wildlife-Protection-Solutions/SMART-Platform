@@ -205,6 +205,7 @@ public class NewIconSetDialog extends SmartStyledTitleDialog {
 
 		keyComp = new NameKeyComposite();
 		keyComp.createControls(compCustom, true, true, ()->{keyComp.validate();});
+		keyComp.initFields(newSet, sets, SmartDB.getCurrentLanguage());
 		
 		l = new Label(compCustom, SWT.NONE);
 		l.setText(Messages.IconPreferencePage_TemplateIconLabel);
