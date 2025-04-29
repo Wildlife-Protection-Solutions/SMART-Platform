@@ -38,7 +38,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -51,7 +50,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
-import org.wcs.smart.QrCodeManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -64,6 +62,7 @@ import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.QrCodeLabel;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -79,9 +78,6 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	private Runnable onInitilized;
 
 	private Button btnUploadData;
-	private Button btnUploadPeriod;
-	private Label lblUp1, lblUp2;
-	private Text txtDataPeriod;
 	private Button btnPositionUpdates;
 	private Label lblPos1, lblPos2;
 	private Text txtPositionPeriod;
@@ -95,7 +91,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	private boolean canDisableUpload = true;
 	
 	private Text txtUrl;
-	private Label lblQr;
+	private QrCodeLabel lblQr;
 	private Button btnPublic;
 	
 	public ConnectDataUiController() {
@@ -143,23 +139,20 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		
 		Label msg = new Label(core, SWT.WRAP);
 		msg.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
-		msg.setText(Messages.ConnectDataUiController_dataUploadMsg);
+		
 		((GridData)msg.getLayoutData()).widthHint = 600;
 		
 		if (canDisableUpload) {
-			
+			msg.setText(Messages.ConnectDataUiController_dataUploadMsg);	
 			btnUploadData = new Button(core, SWT.CHECK);
 			btnUploadData.setSelection(false);
 			btnUploadData.setText(Messages.ConnectDataUiController_UploadOp);
 			
 			btnUploadData.addListener(SWT.Selection, e->{
-				boolean ok = btnUploadData.getSelection();
-				btnUploadPeriod.setEnabled(ok);
-				lblUp1.setEnabled(ok);
-				lblUp2.setEnabled(ok);
-				txtDataPeriod.setEnabled(ok);
 				validate();
 			});
+		}else {
+			msg.setText(Messages.ConnectDataUiController_MobileExportsAutomaticUpload);
 		}
 		
 		Composite part = new Composite(core, SWT.NONE);
@@ -168,42 +161,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		if (canDisableUpload) ((GridData)part.getLayoutData()).horizontalIndent = 20;
 		((GridLayout)part.getLayout()).marginWidth = 0;
 		((GridLayout)part.getLayout()).marginHeight = 0;
-		
-		btnUploadPeriod = new Button(part, SWT.CHECK);
-		btnUploadPeriod.setSelection(true);
-		btnUploadPeriod.setEnabled(canDisableUpload);
-		btnUploadPeriod.addListener(SWT.Selection, e->{
-		txtDataPeriod.setEnabled(btnUploadPeriod.getSelection());
-			//lblUp1.setEnabled(btnUploadData.getSelection());
-			//lblUp2.setEnabled(btnUploadData.getSelection());
-			validate();
-		});
-		btnUploadPeriod.setToolTipText(Messages.ConnectDataUiController_AutoUploadTooltip);
-		
-		lblUp1 = new Label(part, SWT.NONE);
-		lblUp1.setText(Messages.ConnectDataUiController_Upload1a);
-		lblUp1.setToolTipText(btnUploadPeriod.getToolTipText());
-		if (canDisableUpload) {
-			lblUp1.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseUp(MouseEvent e) {
-					btnUploadPeriod.setSelection(!btnUploadPeriod.getSelection());
-					btnUploadPeriod.notifyListeners(SWT.Selection, new Event());
-				}
-			});
-		}
-		
-		txtDataPeriod = new Text(part, SWT.BORDER);
-		txtDataPeriod.setText("20"); //$NON-NLS-1$
-		txtDataPeriod.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		txtDataPeriod.setEnabled(true);
-		((GridData)txtDataPeriod.getLayoutData()).widthHint = 30;
-		txtDataPeriod.addListener(SWT.Modify, e->validate());
-		
-		lblUp2 = new Label(part, SWT.NONE);
-		lblUp2.setText(Messages.ConnectDataUiController_Upload2);
-		lblUp2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
+
 		Composite posComp = new Composite(main, SWT.FLAT);
 		posComp.setLayout(new GridLayout());
 		posComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -244,7 +202,6 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		txtPositionPeriod = new Text(core, SWT.BORDER);
 		txtPositionPeriod.setText("10"); //$NON-NLS-1$
 		txtPositionPeriod.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)txtDataPeriod.getLayoutData()).widthHint = 30;
 		txtPositionPeriod.addListener(SWT.Modify, e->validate());
 		txtPositionPeriod.setEnabled(false);
 		
@@ -334,11 +291,8 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			((GridLayout)temp.getLayout()).marginHeight = 0;
 			temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
-			lblQr = new Label(temp, SWT.NONE);
+			lblQr = new QrCodeLabel(temp, SWT.NONE);
 			lblQr.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-			lblQr.addListener(SWT.Dispose,e->{
-				if (lblQr.getImage() != null && !lblQr.getImage().isDisposed()) lblQr.getImage().dispose();
-			});
 			
 			txtUrl = new Text(temp, SWT.WRAP | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL);
 			txtUrl.setEditable(false);
@@ -392,18 +346,6 @@ public class ConnectDataUiController implements IPackageUiContribution{
 					if (btnUploadData != null) btnUploadData.setSelection(false);
 				}
 				
-				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name(), (AbstractCtPackage)ctpackage, null);
-				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
-					btnUploadPeriod.setSelection(true);
-					if (data.getStringValue() != null) txtDataPeriod.setText(data.getStringValue());
-				}else {
-					if (canDisableUpload) {
-						btnUploadPeriod.setSelection(false);
-					}else {
-						btnUploadPeriod.setSelection(true);	
-					}
-				}
-				
 				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage, null);
 				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
 					btnPositionUpdates.setSelection(true);
@@ -421,7 +363,6 @@ public class ConnectDataUiController implements IPackageUiContribution{
 					}
 				}
 				if (btnUploadData != null) btnUploadData.notifyListeners(SWT.Selection,new Event());
-				btnUploadPeriod.notifyListeners(SWT.Selection, new Event());
 				btnPositionUpdates.notifyListeners(SWT.Selection, new Event());
 				
 				
@@ -435,12 +376,10 @@ public class ConnectDataUiController implements IPackageUiContribution{
 				}
 			}finally {
 				fireEvents = true;
-			}
-			
+			}			
 		}
+		
 		refreshAlertTypes(false);		
-		
-		
 		return main;
 	}
 
@@ -491,19 +430,6 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	
 	@Override
 	public String isValid() {
-		
-		if (btnUploadPeriod.getSelection()) {
-			String min = txtDataPeriod.getText();
-			
-			try {
-				int imin = Integer.parseInt(min);
-				if (imin <= 0) {
-					throw new Exception();
-				}
-			}catch (Exception ex) {
-				return Messages.ConnectDataUiController_InvalidUploadPeriod;
-			}
-		}
 		if (btnPositionUpdates.getSelection()) {
 			String time = txtPositionPeriod.getText();
 			try {
@@ -542,22 +468,13 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	public void updatePackage(ICtPackage ctpackage, Session session) {
 		if (!(ctpackage instanceof AbstractCtPackage)) return;
 		
-		MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name(), (AbstractCtPackage)ctpackage, session);
-		if (btnUploadPeriod.getSelection()) {
-			data.setBooleanValue(true);
-			data.setStringValue(txtDataPeriod.getText());
-		}else {
-			data.setBooleanValue(false);
-			data.setStringValue(null);
-		}
-		
 		boolean useconnect = true;
 		if (btnUploadData != null) {
 			if (!btnUploadData.getSelection()) {
 				useconnect = false;
 			}
 		}
-		data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage, session);
+		MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage, session);
 		data.setBooleanValue(useconnect);
 		
 		data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage, session);
@@ -634,9 +551,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		if (ctpackage.getUuid() == null) {
 			txtUrl.setText(Messages.ConnectDataUiController_PackageMustBeSaved);	
 		}else {
-			Image x = lblQr.getImage();
-			if (x != null && !x.isDisposed()) x.dispose();
-			lblQr.setImage(null);
+			lblQr.setUrl(null);
 			
 			URL url = null;
 			
@@ -653,7 +568,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 					if (privatemd.getBooleanValue() != null) isprivate = privatemd.getBooleanValue();
 					String link = ICtPackage.generateSmartMobileAppLink(url, isprivate);
 					txtUrl.setText(link);					
-					lblQr.setImage(QrCodeManager.INSTANCE.generateQRCode(link));
+					lblQr.setUrl(link);
 				}catch (Exception ex) {
 					ConnectPlugIn.log(ex.getMessage(), ex);
 					txtUrl.setText(Messages.ConnectDataUiController_PackageConfigError +ex.getMessage());

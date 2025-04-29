@@ -281,6 +281,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 			getButton(IDialogConstants.OK_ID).setEnabled(canEdit);
 			updateDetails();
 		});
+		tblViewer.addDoubleClickListener(e->editPackage());
 		tblViewer.setInput(DialogConstants.LOADING_TEXT);
 		tblViewer.getTable().setFocus();
 		

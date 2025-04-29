@@ -53,6 +53,7 @@ public class Messages extends NLS {
 	public static String ConnectDataUiController_LinkInfo;
 	public static String ConnectDataUiController_MakePublic;
 	public static String ConnectDataUiController_Message;
+	public static String ConnectDataUiController_MobileExportsAutomaticUpload;
 	public static String ConnectDataUiController_NoConnectServer;
 	public static String ConnectDataUiController_NotLoaded;
 	public static String ConnectDataUiController_PackageConfigError;

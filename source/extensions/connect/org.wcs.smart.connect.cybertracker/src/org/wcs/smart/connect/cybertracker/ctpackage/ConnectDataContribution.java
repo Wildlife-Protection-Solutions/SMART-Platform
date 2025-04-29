@@ -135,11 +135,6 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 				if (mv.getBooleanValue()) {
 					cc.addProfileMetadata(SmartMobilePackageFields.DATA_SERVER_JSONKEY, dataserver);
 				}
-				
-			}else if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
-				if (mv.getBooleanValue()) {
-					dataserver.put(SmartMobilePackageFields.FREQUENCY_MIN_JSONKEY, Integer.valueOf( mv.getStringValue() ) );
-				}
 			}else if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name())) {
 				if (mv.getBooleanValue()) {
 					JSONObject pingalert = new JSONObject();

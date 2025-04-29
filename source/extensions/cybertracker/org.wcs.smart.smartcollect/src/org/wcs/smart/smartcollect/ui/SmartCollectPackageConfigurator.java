@@ -55,7 +55,6 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -67,7 +66,6 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
-import org.wcs.smart.QrCodeManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
@@ -92,10 +90,10 @@ import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.smartcollect.SmartCollectPlugIn;
 import org.wcs.smart.smartcollect.connect.SmartCollectConnectDataContribution;
 import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
+import org.wcs.smart.ui.QrCodeLabel;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -115,7 +113,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 	private List<Text> txtNames;
 	private Button btnPrivate;
 	private Text txtUrl;
-	private Label lblQr;
+	private QrCodeLabel lblQr;
 
 	private Label lblWarn;
 	private ToolBar privateTb;
@@ -319,11 +317,8 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		((GridLayout)urlpart.getLayout()).marginWidth = 0;
 		((GridLayout)urlpart.getLayout()).marginHeight = 0;
 		
-		lblQr = new Label(urlpart, SWT.NONE);
+		lblQr = new QrCodeLabel(urlpart, SWT.NONE);
 		lblQr.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		lblQr.addListener(SWT.Dispose,e->{
-			if (lblQr.getImage() != null && !lblQr.getImage().isDisposed()) lblQr.getImage().dispose();
-		});
 		
 		txtUrl = new Text(urlpart, SWT.WRAP | SWT.READ_ONLY | SWT.BORDER);
 		txtUrl.setEditable(false);
@@ -399,9 +394,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		if (ctpackage.getUuid() == null) {
 			txtUrl.setText(Messages.SmartCollectPackageConfigurator_saverequired);	
 		}else {
-			Image x = lblQr.getImage();
-			if (x != null && !x.isDisposed()) x.dispose();
-			lblQr.setImage(null);
+			lblQr.setUrl(null);
 			
 			URL url = null;
 			try(Session s = HibernateManager.openSession()){
@@ -410,16 +403,9 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			if (url == null) {
 				txtUrl.setText(Messages.SmartCollectPackageConfigurator_connectnotconfigured);
 			}else {
-				
-					
 				String link = ICtPackage.generateSmartMobileAppLink(url, false);
-				txtUrl.setText(link);					
-				try {
-					lblQr.setImage(QrCodeManager.INSTANCE.generateQRCode(link));
-				} catch (Exception e) {
-					SmartCollectPlugIn.log(e.getMessage(), e);
-				}
-				
+				txtUrl.setText(link);
+				lblQr.setUrl(link);				
 			}
 			
 			lblQr.getParent().layout(true);

@@ -65,23 +65,7 @@ public class SmartCollectConnectDataContribution extends AbstractConnectPackageC
 	public PackageContribution packageFiles(ICtPackage ctpackage, IEclipseContext context, IProgressMonitor monitor) throws IOException {
 		if (!(ctpackage instanceof SmartCollectPackage)) return null;
 		SmartCollectPackage apackage = (SmartCollectPackage) ctpackage;
-
-		boolean requiresConnect = false;
-		for (MetadataFieldValue mv : apackage.getMetadataValues()) {
-			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
-				if (mv.getBooleanValue()) {
-					requiresConnect=true;
-					break;
-				}
-			}else if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name())) {
-				if (mv.getBooleanValue()) {
-					requiresConnect=true;
-					break;
-				}
-			}
-		}
-		if (!requiresConnect) return null;
-		
+	
 		String[] parts = null;
 		try {
 			parts = super.getServerDetails(context, ctpackage.getConservationArea(), false, PackageType.PUBLIC);
@@ -95,17 +79,14 @@ public class SmartCollectConnectDataContribution extends AbstractConnectPackageC
 				
 		PackageContribution cc = new PackageContribution();
 		
+		JSONObject dataserver = new JSONObject();
+		dataserver.put(SmartMobilePackageFields.JSON_URLKEY, url + DATA_URL + UuidUtils.uuidToString( ctpackage.getConservationArea().getUuid()) );
+		dataserver.put(SmartMobilePackageFields.JSON_APIKEY, apikey);
+		
+		cc.addProfileMetadata(SmartMobilePackageFields.DATA_SERVER_JSONKEY, dataserver);
+		
 		for (MetadataFieldValue mv : apackage.getMetadataValues()) {
-			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
-				if (mv.getBooleanValue()) {
-					JSONObject dataserver = new JSONObject();
-					dataserver.put(SmartMobilePackageFields.FREQUENCY_MIN_JSONKEY, Integer.valueOf( mv.getStringValue() ) );
-					dataserver.put(SmartMobilePackageFields.JSON_URLKEY, url + DATA_URL + UuidUtils.uuidToString( ctpackage.getConservationArea().getUuid()) );
-					dataserver.put(SmartMobilePackageFields.JSON_APIKEY, apikey);
-					
-					cc.addProfileMetadata(SmartMobilePackageFields.DATA_SERVER_JSONKEY, dataserver);
-				}
-			}else if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name())) {
+			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name())) {
 				if (mv.getBooleanValue()) {
 					JSONObject pingalert = new JSONObject();
 					

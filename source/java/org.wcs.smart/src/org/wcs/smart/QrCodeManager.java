@@ -50,7 +50,17 @@ public enum QrCodeManager {
 	 * @throws Exception
 	 */
 	public Image generateQRCode(String url) throws Exception {
-				
+		return generateQRCode(url, -1);
+	}
+	
+	/**
+	 * Generates as scaled up QR code for URL
+	 * @param url
+	 * @return
+	 * @throws Exception
+	 */
+	public Image generateQRCode(String url, int size) throws Exception {
+		
 		// Create the ByteMatrix for the QR-Code that encodes the given String
 		Map<EncodeHintType, Object> hintMap = new HashMap<>();
 		hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
@@ -60,22 +70,37 @@ public enum QrCodeManager {
 
 	    int height = code.getMatrix().getHeight();
 	    int width = code.getMatrix().getWidth();
+	    
+	    int scalefactor = 1;
+	    if (size > 0) {
+	    	scalefactor = (int)Math.floor( ((double)size) / ((double)height) );	    	
+	    }
 
 		// Make the BufferedImage that are to hold the QRCode
 		RGB white = new RGB(255, 255, 255);
 		RGB black = new RGB(0, 0, 0);
 
 		PaletteData bw = new PaletteData(white, black);
-		ImageData data = new ImageData(width+2, height+2, 1, bw);
+		ImageData data = new ImageData(width*scalefactor+2, height*scalefactor+2, 1, bw);
 
+		int pi = 0;
+		int pj = 0;
 		for (int i = 0; i < width; i++) {
+			pj = 0;
 			for (int j = 0; j < height; j++) {
+				int value = 0;
 				if (code.getMatrix().get(i, j) == 1) {
-					data.setPixel(i+1, j+1, 1);
-				} else {
-					data.setPixel(i+1, j+1, 0);
+					value = 1;
 				}
+				for (int x = 0; x < scalefactor; x ++) {
+					for (int y = 0; y < scalefactor; y ++) {	
+						data.setPixel(pi+1+x, pj+1+y, value);
+					}
+				}
+				
+				pj += scalefactor;
 			}
+			pi += scalefactor;
 		}
 
 		return new Image(Display.getDefault(), data);

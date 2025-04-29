@@ -1723,6 +1723,7 @@ public class Messages extends NLS {
 	public static String BrowserView_previoustooltip;
 	public static String BrowserView_refreshtooltip;
 	public static String NumericAttributeField_InvalidNumericAttribute;
+	public static String QrCodeLabel_viewlargeversion;
 	public static String QuickLinkPreferencePage_Message;
 	public static String QuickLinkPreferencePage_MoveDown;
 	public static String QuickLinkPreferencePage_MoveUp;

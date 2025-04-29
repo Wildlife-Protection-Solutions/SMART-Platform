@@ -118,9 +118,9 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	private static final boolean kioskMode = true;
 	private static final boolean canPause = true;
 	private static final int exitPin = 1234;
-	private static final int sightingFixCount = 10;
-	private static final int waypointTimer = 300; //aka Track Timer 
-	private static final int skipButtonTimeout = 3;
+	private static final int sightingFixCount = 4;
+	private static final int waypointTimer = 30; //aka Track Timer 
+	private static final int skipButtonTimeout = 2;
     private static final boolean disableEditing = false;
 	private static final boolean testTime = false;
 	private static final boolean simpleCamera = false;
