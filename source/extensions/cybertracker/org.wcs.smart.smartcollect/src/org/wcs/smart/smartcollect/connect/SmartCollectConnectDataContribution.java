@@ -82,7 +82,8 @@ public class SmartCollectConnectDataContribution extends AbstractConnectPackageC
 		JSONObject dataserver = new JSONObject();
 		dataserver.put(SmartMobilePackageFields.JSON_URLKEY, url + DATA_URL + UuidUtils.uuidToString( ctpackage.getConservationArea().getUuid()) );
 		dataserver.put(SmartMobilePackageFields.JSON_APIKEY, apikey);
-		
+		dataserver.put(SmartMobilePackageFields.FREQUENCY_MIN_JSONKEY, 1);
+
 		cc.addProfileMetadata(SmartMobilePackageFields.DATA_SERVER_JSONKEY, dataserver);
 		
 		for (MetadataFieldValue mv : apackage.getMetadataValues()) {

@@ -128,7 +128,8 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 		
 		JSONObject dataserver = new JSONObject();
 		dataserver.put(SmartMobilePackageFields.JSON_URLKEY, url + DATA_URL + UuidUtils.uuidToString( ctpackage.getConservationArea().getUuid()) );
-		dataserver.put(SmartMobilePackageFields.JSON_APIKEY, apikey);		
+		dataserver.put(SmartMobilePackageFields.JSON_APIKEY, apikey);
+		dataserver.put(SmartMobilePackageFields.FREQUENCY_MIN_JSONKEY, 1);
 		
 		for (MetadataFieldValue mv : apackage.getMetadataValues()) {
 			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.USE_CONNECT.name())) {
