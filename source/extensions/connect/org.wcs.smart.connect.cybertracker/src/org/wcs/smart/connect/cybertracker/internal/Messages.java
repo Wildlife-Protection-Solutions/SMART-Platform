@@ -45,7 +45,7 @@ public class Messages extends NLS {
 	public static String ConnectDataUiController_AlertFieldIdSection;
 	public static String ConnectDataUiController_AutoUploadTooltip;
 	public static String ConnectDataUiController_copytooltip;
-	public static String ConnectDataUiController_dataUploadMsg;
+	public static String ConnectDataUiController_dataUploadMsg1;
 	public static String ConnectDataUiController_DataUploadsLabel;
 	public static String ConnectDataUiController_InvalidPattern;
 	public static String ConnectDataUiController_InvalidPositionPeriod;

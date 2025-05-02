@@ -78,6 +78,8 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	private Runnable onInitilized;
 
 	private Button btnUploadData;
+	private Button btnAutoUpload;
+	
 	private Button btnPositionUpdates;
 	private Label lblPos1, lblPos2;
 	private Text txtPositionPeriod;
@@ -139,16 +141,17 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		
 		Label msg = new Label(core, SWT.WRAP);
 		msg.setLayoutData( new GridData(SWT.FILL, SWT.FILL, true, false));
-		
 		((GridData)msg.getLayoutData()).widthHint = 600;
 		
 		if (canDisableUpload) {
-			msg.setText(Messages.ConnectDataUiController_dataUploadMsg);	
+			msg.setText(Messages.ConnectDataUiController_dataUploadMsg1);	
 			btnUploadData = new Button(core, SWT.CHECK);
 			btnUploadData.setSelection(false);
 			btnUploadData.setText(Messages.ConnectDataUiController_UploadOp);
 			
 			btnUploadData.addListener(SWT.Selection, e->{
+				boolean ok = btnUploadData.getSelection();
+				btnAutoUpload.setEnabled(ok);
 				validate();
 			});
 		}else {
@@ -161,7 +164,14 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		if (canDisableUpload) ((GridData)part.getLayoutData()).horizontalIndent = 20;
 		((GridLayout)part.getLayout()).marginWidth = 0;
 		((GridLayout)part.getLayout()).marginHeight = 0;
-
+		
+		btnAutoUpload = new Button(part, SWT.CHECK);
+		btnAutoUpload.setSelection(true);
+		btnAutoUpload.setEnabled(canDisableUpload);
+		btnAutoUpload.addListener(SWT.Selection, e->validate());
+		btnAutoUpload.setToolTipText(Messages.ConnectDataUiController_AutoUploadTooltip);
+		btnAutoUpload.setText("Automatically Upload Data");
+		
 		Composite posComp = new Composite(main, SWT.FLAT);
 		posComp.setLayout(new GridLayout());
 		posComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -182,15 +192,12 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		btnPositionUpdates = new Button(core, SWT.CHECK);
 		btnPositionUpdates.setSelection(false);
 		btnPositionUpdates.addListener(SWT.Selection, e->{
-//			lblPos1.setEnabled(btnPositionUpdates.getSelection());
-//			lblPos2.setEnabled(btnPositionUpdates.getSelection());
 			txtPositionPeriod.setEnabled(btnPositionUpdates.getSelection());
 			cmbPositionType.getControl().setEnabled(btnPositionUpdates.getSelection());
 			validate();
 		});
 		lblPos1 = new Label(core, SWT.NONE);
 		lblPos1.setText(Messages.ConnectDataUiController_Position1);
-//		lblPos1.setEnabled(false);
 		lblPos1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -207,7 +214,6 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		
 		lblPos2 = new Label(core, SWT.NONE);
 		lblPos2.setText(Messages.ConnectDataUiController_Position2);
-//		lblPos2.setEnabled(false);
 		
 		cmbPositionType = new ComboViewer(core, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbPositionType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -259,10 +265,6 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			txtFieldIdStr = new Text(core, SWT.BORDER);
 			txtFieldIdStr.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			txtFieldIdStr.addListener(SWT.Modify, e->validate());
-//			((GridData)txtId.getLayoutData()).heightHint = 50;
-//			((GridData)txtId.getLayoutData()).widthHint = 600;
-			
-			
 		}
 		
 		
@@ -345,6 +347,16 @@ public class ConnectDataUiController implements IPackageUiContribution{
 				}else {
 					if (btnUploadData != null) btnUploadData.setSelection(false);
 				}
+				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name(), (AbstractCtPackage)ctpackage, null);
+				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
+					btnAutoUpload.setSelection(true);					
+				}else {
+					if (canDisableUpload) {
+						btnAutoUpload.setSelection(false);
+					}else {
+						btnAutoUpload.setSelection(true);	
+					}
+				}
 				
 				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage, null);
 				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {
@@ -363,6 +375,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 					}
 				}
 				if (btnUploadData != null) btnUploadData.notifyListeners(SWT.Selection,new Event());
+				btnAutoUpload.notifyListeners(SWT.Selection, new Event());
 				btnPositionUpdates.notifyListeners(SWT.Selection, new Event());
 				
 				
@@ -379,10 +392,10 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			}			
 		}
 		
-		refreshAlertTypes(false);		
+		refreshAlertTypes(false);
 		return main;
+		
 	}
-
 	private void refreshAlertTypes(boolean force) {
 		//TODO: FIX THIS
 		(new LoadAlertTypesJob(context, force) {
@@ -462,11 +475,18 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			}
 		}
 		return null;
-	}
+	}	
 
 	@Override
 	public void updatePackage(ICtPackage ctpackage, Session session) {
 		if (!(ctpackage instanceof AbstractCtPackage)) return;
+		
+		MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name(), (AbstractCtPackage)ctpackage, session);
+		if (btnAutoUpload.getSelection()) {
+			data.setBooleanValue(true);
+		}else {
+			data.setBooleanValue(false);
+		}
 		
 		boolean useconnect = true;
 		if (btnUploadData != null) {
@@ -474,7 +494,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 				useconnect = false;
 			}
 		}
-		MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage, session);
+		data = findCreateMetadataField(CtConnectPackageMetadata.Properties.USE_CONNECT.name(), (AbstractCtPackage)ctpackage, session);
 		data.setBooleanValue(useconnect);
 		
 		data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage, session);
@@ -546,7 +566,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		}
 		return v;
 	}
-
+	
 	private void updateUrl() {
 		if (ctpackage.getUuid() == null) {
 			txtUrl.setText(Messages.ConnectDataUiController_PackageMustBeSaved);	

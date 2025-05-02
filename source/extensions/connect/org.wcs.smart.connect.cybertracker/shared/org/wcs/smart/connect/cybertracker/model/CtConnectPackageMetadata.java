@@ -31,7 +31,7 @@ public class CtConnectPackageMetadata {
 
 	public enum Properties{
 		USE_CONNECT,
-		DATA_UPLOAD,  //->represents the auto upload every x minutes
+		DATA_UPLOAD,  //->represents the auto upload
 		POSITION_UPLOAD,
 		CONNECT_ALERT
 	};
