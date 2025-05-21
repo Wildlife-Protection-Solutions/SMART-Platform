@@ -104,6 +104,10 @@ public enum ChangeLogManager {
 		}
 	}
 	
+	public void addConservationArea(ConservationAreaInfo ca) throws IOException {
+		fileWatcher.register(DataStoreManager.INSTANCE.getConservationAreaFullPath(ca));
+	}
+	
 	public boolean checkStatus(ConservationAreaInfo ca, Path p, Kind<?> kind) {
 		return fileWatcher.ignoredContains(ca, p, kind);
 	}

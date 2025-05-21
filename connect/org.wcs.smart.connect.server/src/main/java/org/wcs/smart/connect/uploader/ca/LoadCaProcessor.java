@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.datastore.FileStoreWatcher;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
@@ -95,6 +96,9 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 			item = session.get(WorkItem.class, item.getUuid());
 			item.setPercentComplete(100);
 			item.setStatus(Status.COMPLETE);
+			
+			//register ca with filestore watcher
+			ChangeLogManager.INSTANCE.addConservationArea(info);
 			
 			session.getTransaction().commit();
 		}catch (Exception ex){

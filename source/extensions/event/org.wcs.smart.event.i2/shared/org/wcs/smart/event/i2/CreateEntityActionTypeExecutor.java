@@ -415,14 +415,15 @@ public class CreateEntityActionTypeExecutor implements IActionTypeExecutor {
 			}
 		}
 
+		session.beginTransaction();
 		try {
-			session.beginTransaction();
-			session.persist(newEntity);
 			for (IntelEntityAttachment a : newEntity.getEntityAttachments()) {
-				session.persist(a);
+				session.persist(a.getAttachment());
 			}
+			session.persist(newEntity);
 			session.getTransaction().commit();
 		} catch (Exception ex) {
+			session.getTransaction().rollback();
 			LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
 			return null;
 		}

@@ -269,6 +269,7 @@ public class CreateRecordActionTypeExecutor implements IActionTypeExecutor {
 				session.persist(newRecord);
 				session.getTransaction().commit();
 			}catch(Exception ex) {
+				session.getTransaction().rollback();
 				logger.log(Level.SEVERE, ex.getMessage(), ex);
 				return null;
 			}
