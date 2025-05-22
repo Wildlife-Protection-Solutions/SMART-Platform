@@ -10,10 +10,13 @@
       <category name="smart"/>
    </feature>
    <feature id="org.wcs.smart.event.i2.feature">
-      <category name="profiles"/>
+      <category name="events"/>
    </feature>
    <feature id="org.wcs.smart.i2.feature">
       <category name="profiles"/>
+   </feature>
+   <feature id="org.wcs.smart.connect.cybertracker.feature">
+      <category name="connect"/>
    </feature>
    <category-def name="planning" label="SMART Planning Plug-in">
       <description>

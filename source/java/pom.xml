@@ -508,6 +508,17 @@
 				 
 			</modules>
 		</profile>
+		<profile>
+			<id>smartcollect</id>
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
+				<module>../extensions/cybertracker/org.wcs.smart.smartcollect</module>
+				<module>../extensions/cybertracker/org.wcs.smart.smartcollect.feature</module>				 
+			</modules>
+		</profile>
+						
 		
 		<profile>
 			<id>plugins</id>
