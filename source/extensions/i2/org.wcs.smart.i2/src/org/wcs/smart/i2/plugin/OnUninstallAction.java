@@ -92,6 +92,8 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 	
 	@SuppressWarnings("nls")
 	private void uninstall(Session s){
+
+		
 		String[] sql = new String[]{
 				"DROP TABLE smart.i_entity_location",
 				"DROP TABLE smart.i_entity_search",
@@ -168,6 +170,17 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 
 			@Override
 			public void execute(Connection connection) throws SQLException {
+				
+				
+				//we can't control the uninstall order of the plugins
+				//and the patrol profile plugin is part of this feature and may get
+				//uninstalled second so we drop this constraint here to allow for uninstall to continue
+				try {
+					connection.createStatement().execute("ALTER TABLE smart.i_patrol_record_motivation DROP CONSTRAINT i_patrol_record_motivation_record_fk");
+				}catch (Exception ex) {
+					//incase it doesn't exist ignore the error
+				}
+				
 				for (String item : namedClasses) {
 					connection.createStatement().execute("DELETE FROM smart.i18n_label WHERE element_uuid in (SELECT uuid FROM " + item + ")");
 				}
