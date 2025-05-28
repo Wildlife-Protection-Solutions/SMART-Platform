@@ -65,6 +65,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.engine.grids.PatrolCntValueComputer;
@@ -99,6 +100,7 @@ import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.CombinedValueItem;
@@ -754,7 +756,14 @@ public class DerbyGridEngine extends AbstractPatrolQueryEngine{
 		sql.append(" on " + tablePrefix.get(Patrol.class) + ".uuid = " + tablePrefix.get(PatrolLeg.class) + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		if (dateFilter != null ){
-
+			if (dateFilter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE) {
+				//need to join to waypoint field
+				sql.append(" join " + tableNames.get(PatrolWaypoint.class) + " " + tablePrefix.get(PatrolWaypoint.class) ); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" on " + tablePrefix.get(PatrolLegDay.class) + ".uuid = " + tablePrefix.get(PatrolWaypoint.class) + ".leg_day_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				sql.append(" join " + tableNames.get(Waypoint.class) + " " + tablePrefix.get(Waypoint.class) ); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" on " + tablePrefix.get(PatrolWaypoint.class) + ".wp_uuid = " + tablePrefix.get(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+			
 			if (dateFilter.getDateFieldOption() == WaypointDateField.INSTANCE) {
 				//we don't have the waypoint table in this query; so we can't filter
 				//using the waypoint table; instead convert the filter to the patrol leg day

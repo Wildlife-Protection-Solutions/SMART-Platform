@@ -101,6 +101,7 @@ import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.CombinedValueItem;
@@ -609,6 +610,13 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		sql.append(" on " + tablePrefix.get(SurveyDesign.class) + ".uuid = " + tablePrefix.get(Survey.class) + ".survey_design_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		if (dateFilter != null ){
+			if (dateFilter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE) {
+				//need to join to waypoint field
+				sql.append(" join " + tableNames.get(SurveyWaypoint.class) + " " + tablePrefix.get(SurveyWaypoint.class) ); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" on " + tablePrefix.get(MissionDay.class) + ".uuid = " + tablePrefix.get(SurveyWaypoint.class) + ".mission_day_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				sql.append(" join " + tableNames.get(Waypoint.class) + " " + tablePrefix.get(Waypoint.class) ); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" on " + tablePrefix.get(SurveyWaypoint.class) + ".wp_uuid = " + tablePrefix.get(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
 			String dfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, this);
 			if (dfilter.length() > 0) {				
 				sql.append(" and "); //$NON-NLS-1$

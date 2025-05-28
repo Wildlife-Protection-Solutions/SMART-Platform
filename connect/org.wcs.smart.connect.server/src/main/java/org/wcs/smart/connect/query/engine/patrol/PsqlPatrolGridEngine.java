@@ -97,6 +97,7 @@ import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
+import org.wcs.smart.query.model.filter.date.WaypointLastModifiedDateField;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.CombinedValueItem;
@@ -726,6 +727,14 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		sql.append(" on " + tablePrefix.get(Patrol.class) + ".uuid = " + tablePrefix.get(PatrolLeg.class) + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		if (dateFilter != null ){
+			if (dateFilter.getDateFieldOption() == WaypointLastModifiedDateField.INSTANCE) {
+				//need to join to waypoint field
+				sql.append(" join " + tableNames.get(PatrolWaypoint.class) + " " + tablePrefix.get(PatrolWaypoint.class) ); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" on " + tablePrefix.get(PatrolLegDay.class) + ".uuid = " + tablePrefix.get(PatrolWaypoint.class) + ".leg_day_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				sql.append(" join " + tableNames.get(Waypoint.class) + " " + tablePrefix.get(Waypoint.class) ); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(" on " + tablePrefix.get(PatrolWaypoint.class) + ".wp_uuid = " + tablePrefix.get(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+			
 			String dfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, this);
 			if (dfilter.length() > 0) {
 				sql.append(" and "); //$NON-NLS-1$
