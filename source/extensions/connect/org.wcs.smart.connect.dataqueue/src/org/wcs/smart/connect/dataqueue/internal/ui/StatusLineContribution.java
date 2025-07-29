@@ -49,6 +49,8 @@ public class StatusLineContribution implements IConnectStatusContribution {
 
 	private Label statusLabel;
 
+	private DataQueueStatusJob statusJob = new DataQueueStatusJob();
+	
 	private AutoProcessingManager.IProcessingStatusListener listener = new AutoProcessingManager.IProcessingStatusListener() {
 		
 		@Override
@@ -63,7 +65,7 @@ public class StatusLineContribution implements IConnectStatusContribution {
 	
 	@Override
 	public void refresh(){
-		(new DataQueueStatusJob()).schedule();
+		statusJob.schedule();
 	}
 	
 	@Override

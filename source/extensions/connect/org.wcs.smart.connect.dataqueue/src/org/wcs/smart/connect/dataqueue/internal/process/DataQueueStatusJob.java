@@ -47,8 +47,6 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class DataQueueStatusJob extends Job {
 
-	private SmartConnect smartConnect;
-		
 	/**
 	 * Updates the status of the data queue.  This runs only once 
 	 */
@@ -72,6 +70,8 @@ public class DataQueueStatusJob extends Job {
 			return Status.OK_STATUS;			
 		}
 		
+		
+		SmartConnect smartConnect;
 		
 		if (user == null || user.getConnectPassword() == null || user.getConnectUsername() == null){		
 			AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.INACTIVE, null);
