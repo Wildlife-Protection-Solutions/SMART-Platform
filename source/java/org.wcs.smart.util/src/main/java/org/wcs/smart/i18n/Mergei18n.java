@@ -35,33 +35,27 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 @SuppressWarnings("nls")
 public class Mergei18n {
 
-    public static final String IN_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\java",
-    	
+    public static final String IN_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\java",    	
     	"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\asset",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\cybertracker",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\entity",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa",
-//		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
-		
-		
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",		
     };
     
     
-    public static final String TRANS_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\translations\\",
-    	
+    public static final String TRANS_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\translations\\",    	
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\asset\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\connect\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\cybertracker\\translations",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\entity\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\i2\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\event\\translations",
 		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\qa\\translations",
-//		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\r",
     };
 	
     public static final String LINE_SEP = "\n";
@@ -188,11 +182,12 @@ public class Mergei18n {
 
         HashMap<String, String> source = readFile(sourceFile);
         HashMap<String, String> target = readFile(targetFile);
+        HashMap<String, String> newitems = readFile(targetFile);
 
         for (Entry<String, String> e : source.entrySet()){
             if (!target.containsKey(e.getKey())){
                 //System.out.println("add: " + e.getKey());
-                target.put(e.getKey(), e.getValue());
+                newitems.put(e.getKey(), e.getValue());
                 //target.put(e.getKey(), "**NEW**" + e.getValue());
                 changes = true;
             }
@@ -213,7 +208,7 @@ public class Mergei18n {
         }
 
         if (changes){
-            writeFile(targetFile, target);
+            writeFile(targetFile, target, newitems);
         }
     }
 
@@ -238,16 +233,22 @@ public class Mergei18n {
     /*
      * reads i18n properties file
      */
-    private void writeFile(File f, HashMap<String, String> values) throws Exception {
+    private void writeFile(File f, HashMap<String, String> values, HashMap<String, String> newvalues) throws Exception {
         System.out.println("Writing " + f.getPath() );
-        SortedProperties properties = new SortedProperties();
+        Properties properties = new SortedProperties();
         for(String key : values.keySet()){
             properties.put(key, values.get(key));
         }
 
-        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f.toString() + ".temp"), StandardCharsets.UTF_8);
-        properties.store(writer, "Auto generated from conversion file on " + DateFormat.getDateTimeInstance().format(new Date()));
-        writer.close();
+        if (newvalues != null && !newvalues.isEmpty()) {
+        	OrderedProperties p2 = new OrderedProperties();
+        	p2.putAll(newvalues);
+        	p2.putAll(properties);        	
+        	properties = p2;
+        }
+        try(OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f.toString() + ".temp"), StandardCharsets.UTF_8)){
+        	properties.store(writer, "Auto generated from conversion file on " + DateFormat.getDateTimeInstance().format(new Date()));
+        }
 
         String cmd = "\"" + NATIVE2ASCII + "\" -encoding utf8 \"" + f.toString() + ".temp\" " + f.toString();
         System.out.println(cmd);

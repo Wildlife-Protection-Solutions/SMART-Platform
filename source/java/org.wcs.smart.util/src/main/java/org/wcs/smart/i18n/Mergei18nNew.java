@@ -43,8 +43,7 @@ public class Mergei18nNew {
 		ROOT + "svn\\source\\extensions\\entity",
 		ROOT + "svn\\source\\extensions\\er",
 		ROOT + "svn\\source\\extensions\\event",
-		ROOT + "svn\\source\\extensions\\i2",
-		ROOT + "svn\\source\\extensions\\paws",
+		ROOT + "svn\\source\\extensions\\i2",		
 		ROOT + "svn\\source\\extensions\\qa",
 		ROOT + "svn\\source\\extensions\\r",
     };
@@ -58,13 +57,13 @@ public class Mergei18nNew {
    		ROOT + "svn\\source\\extensions\\er\\translations",
    		ROOT + "svn\\source\\extensions\\event\\translations",
    		ROOT + "svn\\source\\extensions\\i2\\translations",
-   		ROOT + "svn\\source\\extensions\\paws\\translations",
    		ROOT + "svn\\source\\extensions\\qa\\translations",
    		ROOT + "svn\\source\\extensions\\r\\translations",
     };
 	
     
-    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms", "my","pt","ru","sw","th", "uk","vi","zh"};
+    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","id","ka","kar","km","lo","mn","ms", "my","pt","ru","sw","tg","th", "uk","vi","zh"};
+    
     
     public static final String LINE_SEP = "\n";
 
@@ -166,13 +165,14 @@ public class Mergei18nNew {
 
         HashMap<String, String> source = readFile(sourceFile);
         HashMap<String, String> target = readFile(targetFile);
+        HashMap<String, String> newvalues = new HashMap<>();
 
         for (Entry<String, String> e : source.entrySet()){
             if (!target.containsKey(e.getKey())){
                 System.out.println("add: " + e.getKey());
-//                target.put(e.getKey(), e.getValue());
-//                target.put(e.getKey(), "**NEW**" + e.getValue());
-//                changes = true;
+                //newvalues.put(e.getKey(), e.getValue());
+                newvalues.put(e.getKey(), "**NEW**" + e.getValue());
+                changes = true;
             }
         }
 
@@ -191,7 +191,7 @@ public class Mergei18nNew {
         }
 
         if (changes){
-            writeFile(targetFile, target);
+            writeFile(targetFile, target, newvalues);
         }
     }
 
@@ -216,15 +216,29 @@ public class Mergei18nNew {
     /*
      * reads i18n properties file
      */
-    private void writeFile(Path f, HashMap<String, String> values) throws Exception {
+    private void writeFile(Path f, HashMap<String, String> values, HashMap<String,String> newValues) throws Exception {
         System.out.println("Writing " + f.toString() );
         
-        SortedProperties properties = new SortedProperties();
+        Properties properties = new SortedProperties();
         for(String key : values.keySet()){
             properties.put(key, values.get(key));
         }
 
+		if (newValues != null && !newValues.isEmpty()) {
+			Properties pnew = new SortedProperties();
+			for (String key : newValues.keySet()) {
+				pnew.put(key, newValues.get(key));
+			}
 
+			OrderedProperties p2 = new OrderedProperties();
+			for (Object key : pnew.keySet()) {
+				p2.put(key, pnew.get(key));
+			}
+			for (Object key : properties.keySet()) {
+				p2.put(key, properties.get(key));
+			}
+			properties = p2;
+		}
         Path tempFile = f.getParent().resolve(f.getFileName().toString() + ".temp");
         
         try(OutputStreamWriter writer = new OutputStreamWriter(Files.newOutputStream(tempFile), StandardCharsets.UTF_8)){

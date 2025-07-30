@@ -48,6 +48,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.derby.iapi.services.io.FileUtil;
+import org.wcs.smart.ZipUtil;
 
 /**
  * Packages all translations files for a given language into a single
@@ -67,11 +68,8 @@ public class Packagei18nNew {
 	
 	public static final String OUT_DIR = "C:\\temp\\smarti18n\\";
 	
-//    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt"};
-//	public static final String[] LANGUAGES =  new String[] {"ar", "fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
-//	public static final String[] LANGUAGES =  new String[] {"es","pt"};
-//	public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk"};
-	public static final String[] LANGUAGES = {"my"};
+	public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","id","ka","kar","km","lo","mn","ms", "my","pt","ru","sw","tg","th", "uk","vi","zh"};
+	
 	
 	public void doWork() throws Exception {
 		Path path = Paths.get(OUT_DIR);
@@ -135,6 +133,9 @@ public class Packagei18nNew {
 				if (dir.getFileName().toString().equalsIgnoreCase("target")) {
 					return FileVisitResult.SKIP_SUBTREE;
 				}
+				if (dir.getFileName().toString().equalsIgnoreCase("archive")) {
+					return FileVisitResult.SKIP_SUBTREE;
+				}
 				return FileVisitResult.CONTINUE;
 			}
 
@@ -187,6 +188,9 @@ public class Packagei18nNew {
 		};
 		
 		Files.walkFileTree(sourceDir, visitor);
+		
+		//zip all files in outputPath
+		ZipUtil.createZip(new File[] {outputPath.toFile()}, (outputPath.getParent().resolve(outputPath.getFileName() + ".smart.8.1.1.20250729.zip")).toFile());
 	}
 	
 	private void convertasciitoutf8(Path file) throws IOException {
