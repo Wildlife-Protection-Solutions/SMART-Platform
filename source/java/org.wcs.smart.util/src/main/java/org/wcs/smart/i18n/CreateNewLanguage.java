@@ -7,6 +7,7 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +20,9 @@ public class CreateNewLanguage {
 	//CT and entity extensions don't match the file structure and this tool won't work for those 
 	
 //	public static final String ROOT_DIR = "C:\\data\\SMART\\Source\\trunk\\svn\\source";
-	public static final String ROOT_DIR = "C:\\data\\SMART\\Source\\Version7.X\\svn\\source";
+	public static final String ROOT_DIR = "C:\\data\\SMART\\Source\\Trunk\\svn\\source";
 	
-	public static final String NEW_LANG = "my";  
+	public static final String NEW_LANG = "hy";  
 	
 	public static final String FROM = "es";
 	
@@ -39,15 +40,17 @@ public class CreateNewLanguage {
 	
 			@Override
 			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				if (dir.getFileName().toString().equalsIgnoreCase("bin") || dir.getFileName().toString().equals("target")) {
+				if (dir.getFileName().toString().equalsIgnoreCase("bin") || dir.getFileName().toString().equals("target") || dir.getFileName().toString().equals("archive")) {
 					return FileVisitResult.SKIP_SUBTREE;
 				}
 				if (dir.getFileName().startsWith("org.wcs.smart") && !dir.getFileName().endsWith(".nl")) {
 					return FileVisitResult.SKIP_SUBTREE;
 				}
-				if (dir.getFileName().equals("es")) {
+				if (dir.getFileName().toString().equals(FROM)) {
 					Path toDir = dir.getParent().resolve(NEW_LANG);
-					FileUtils.copyDirectory(dir.toFile(), toDir.toFile());
+					if (!Files.exists(toDir)) {
+						FileUtils.copyDirectory(dir.toFile(), toDir.toFile());
+					}
 				}
 				return FileVisitResult.CONTINUE;
 			}
@@ -56,17 +59,27 @@ public class CreateNewLanguage {
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				
 				String fileName = file.getFileName().toString();
-				
-				if (fileName.equalsIgnoreCase("messages_es.properties")) {
-					Files.createFile(file.getParent().resolve("messages_" + NEW_LANG + ".properties"));
-				}else if (fileName.equalsIgnoreCase("bundle_es.properties")) {
-					Files.createFile(file.getParent().resolve("bundle_" + NEW_LANG + ".properties"));
-				}else if (fileName.equalsIgnoreCase("plugin_es.properties")) {
-					Files.createFile(file.getParent().resolve("bundle_" + NEW_LANG + ".properties"));
-				}else if (fileName.endsWith("_es.html")) {
-					String newfilename = fileName.substring(0, fileName.lastIndexOf("_es.html"));
-					newfilename = newfilename + "_" + NEW_LANG +".html";
-					Files.createFile(file.getParent().resolve(newfilename));
+	
+				Path toCreate = null;
+				Path copyFrom = null;
+				if (fileName.equalsIgnoreCase("messages_" + FROM + ".properties")) {
+					toCreate = file.getParent().resolve("messages_" + NEW_LANG + ".properties");					
+				}else if (fileName.equalsIgnoreCase("bundle_" + FROM + ".properties")) {
+					toCreate = file.getParent().resolve("bundle_" + NEW_LANG + ".properties");
+				}else if (fileName.equalsIgnoreCase("plugin_" + FROM + ".properties")) {
+					toCreate = file.getParent().resolve("bundle_" + NEW_LANG + ".properties");					
+				}else if (fileName.endsWith("_" + FROM + ".html")) {
+					copyFrom = file;
+					String newfilename = fileName.substring(0, fileName.lastIndexOf("_" + FROM + ".html"));
+					newfilename = newfilename + "_" + NEW_LANG +".html";					
+					toCreate = file.getParent().resolve(newfilename);					
+				}
+				if (copyFrom != null) {
+					Files.copy(copyFrom, toCreate, StandardCopyOption.REPLACE_EXISTING);
+				}else if (toCreate != null) {
+					if (!Files.exists(toCreate)) {
+						Files.createFile(toCreate);					
+					}
 				}
 				
 				return FileVisitResult.CONTINUE;

@@ -68,9 +68,12 @@ public class Packagei18nNew {
 	
 	public static final String OUT_DIR = "C:\\temp\\smarti18n\\";
 	
-	public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","id","ka","kar","km","lo","mn","ms", "my","pt","ru","sw","tg","th", "uk","vi","zh"};
+//	public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","id","ka","kar","km","lo","mn","ms", "my","pt","ru","sw","tg","th", "uk","vi","zh"};
 	
-	
+    public static final String[] LANGUAGES =  new String[] {"ur", "hr", "sr", "hy"}; 
+    
+    public static final String ZIP_EXT = ".smart.8.1.1.20250729.zip";
+
 	public void doWork() throws Exception {
 		Path path = Paths.get(OUT_DIR);
 		
@@ -190,7 +193,8 @@ public class Packagei18nNew {
 		Files.walkFileTree(sourceDir, visitor);
 		
 		//zip all files in outputPath
-		ZipUtil.createZip(new File[] {outputPath.toFile()}, (outputPath.getParent().resolve(outputPath.getFileName() + ".smart.8.1.1.20250729.zip")).toFile());
+		
+		ZipUtil.createZip(new File[] {outputPath.toFile()}, (outputPath.getParent().resolve(outputPath.getFileName() + ZIP_EXT)).toFile());
 	}
 	
 	private void convertasciitoutf8(Path file) throws IOException {
