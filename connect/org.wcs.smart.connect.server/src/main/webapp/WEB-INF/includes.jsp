@@ -15,7 +15,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/i18n/labels_en.js"></script>
 
 <!-- only include the file of the request locale -->
-<c:set var="supportedLang" value="es,fr,hi,in,km,lo,ms,ru,th,vi,zh" />
+<c:set var="supportedLang" value="es,fr,hi,id,km,lo,ms,ru,th,vi,zh" />
 <c:forEach var="item" items="${supportedLang}">
   <c:if test="${item eq pageContext.request.locale.language}">
     <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/i18n/labels_${pageContext.request.locale.language}.js"></script>

@@ -20,9 +20,9 @@ import java.util.zip.ZipOutputStream;
 
 public class Mergei18n {
 
-//	public static final String[] languages = new String[]{"ar", "es", "ka", "pt", "th"};
-	public static final String[] languages = new String[] { "ar", "es", "fr", "hi", "id", "ka", "kar", "km", "lo", "mn",
-			"ms", "my", "pt", "ru", "sw", "tg", "th", "uk", "vi", "zh" };
+	public static final String[] languages = new String[]{"ur", "hr", "sr", "hy"};
+	//public static final String[] languages = new String[] { "ar", "es", "fr", "hi", "id", "ka", "kar", "km", "lo", "mn",
+	//		"ms", "my", "pt", "ru", "sw", "tg", "th", "uk", "vi", "zh" };
 
 	public static final String ROOT = "C:\\data\\SMART\\Source\\Trunk\\svn\\connect\\org.wcs.smart.connect.server";
 
