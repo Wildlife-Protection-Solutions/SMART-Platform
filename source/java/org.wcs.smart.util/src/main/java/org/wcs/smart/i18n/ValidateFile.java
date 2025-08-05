@@ -27,11 +27,9 @@ public class ValidateFile {
 			ROOT + "svn\\source\\extensions\\asset",
 			ROOT + "svn\\source\\extensions\\connect", 
 			ROOT + "svn\\source\\extensions\\cybertracker",
-			ROOT + "svn\\source\\extensions\\entity", 
 			ROOT + "svn\\source\\extensions\\er",
 			ROOT + "svn\\source\\extensions\\event", 
 			ROOT + "svn\\source\\extensions\\i2",
-			ROOT + "svn\\source\\extensions\\paws", 
 			ROOT + "svn\\source\\extensions\\qa",
 			ROOT + "svn\\source\\extensions\\r", };
 
@@ -40,15 +38,14 @@ public class ValidateFile {
 			ROOT + "svn\\source\\extensions\\asset\\translations",
 			ROOT + "svn\\source\\extensions\\connect\\translations",
 			ROOT + "svn\\source\\extensions\\cybertracker\\translations",
-			ROOT + "svn\\source\\extensions\\entity\\translations", 
 			ROOT + "svn\\source\\extensions\\er\\translations",
 			ROOT + "svn\\source\\extensions\\event\\translations", 
 			ROOT + "svn\\source\\extensions\\i2\\translations",
-			ROOT + "svn\\source\\extensions\\paws\\translations", 
 			ROOT + "svn\\source\\extensions\\qa\\translations",
 			ROOT + "svn\\source\\extensions\\r\\translations", };
 
-    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms", "my","pt","ru","sw","th", "uk","vi","zh"};
+    //public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms", "my","pt","ru","sw","th", "uk","vi","zh"};
+	public static final String[] LANGUAGES =  new String[] {"id"};
 
 	public static final String LINE_SEP = "\n";
 
@@ -193,5 +190,15 @@ public class ValidateFile {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		
+		
+//		ValidateFile util = new ValidateFile();
+//		try {
+//			util.testFile(Paths.get("C:\\data\\SMART\\Source\\Trunk\\svn\\connect\\org.wcs.smart.connect.server\\src\\main\\java\\org\\wcs\\smart\\connect\\i18n\\web_messages_id.properties"));
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
 	}
 }
