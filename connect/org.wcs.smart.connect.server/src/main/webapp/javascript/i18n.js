@@ -23,8 +23,8 @@ function i18n(key){
 		value = labels_fr[key];
 	}else if(lang == "hi"){
 		value = labels_hi[key];
-	}else if(lang == "in"){
-		value = labels_in[key];
+	}else if(lang == "id"){
+		value = labels_id[key];
 	}else if(lang == "km"){
 		value = labels_km[key];
 	}else if(lang == "lo"){
