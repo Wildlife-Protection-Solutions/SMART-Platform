@@ -64,7 +64,7 @@ public class Mergei18nNew {
     
     //public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","id","ka","kar","km","lo","mn","ms", "my","pt","ru","sw","tg","th", "uk","vi","zh"};
     
-    public static final String[] LANGUAGES =  new String[] {"ur", "hr", "sr", "hy"}; 
+    public static final String[] LANGUAGES =  new String[] {"mn"}; 
     
     public static final String LINE_SEP = "\n";
 
@@ -171,9 +171,9 @@ public class Mergei18nNew {
         for (Entry<String, String> e : source.entrySet()){
             if (!target.containsKey(e.getKey())){
                 System.out.println("add: " + e.getKey());
-                newvalues.put(e.getKey(), e.getValue());
+                //newvalues.put(e.getKey(), e.getValue());
                 //newvalues.put(e.getKey(), "**NEW**" + e.getValue());
-                changes = true;
+               // changes = true;
             }
         }
 
@@ -182,7 +182,7 @@ public class Mergei18nNew {
             if (!source.containsKey(e.getKey())){
                 //this key no longer exists so we can remove it
                 System.out.println("Remove: " + e.getKey());
-                toRemove.add(e.getKey());
+                //toRemove.add(e.getKey());
             }
 
         }
