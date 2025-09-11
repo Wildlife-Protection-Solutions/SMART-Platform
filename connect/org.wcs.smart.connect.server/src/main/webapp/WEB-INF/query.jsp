@@ -27,7 +27,7 @@
 		
 		var datefilters = {
 				<c:forEach var="df" items="${datefilters}">
-				    '${df[0]}': '${df[1]}',
+				    '${df[0]}': "${df[1]}",
 				</c:forEach>
 				};
 		
