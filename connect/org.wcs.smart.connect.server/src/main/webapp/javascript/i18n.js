@@ -17,6 +17,8 @@ function i18n(key){
 	var value;
 	if(lang == "en"){
 		value = labels_en[key];
+	}else if(lang == "ar"){
+		value = labels_ar[key];
 	}else if(lang == "es"){
 		value = labels_es[key];
 	}else if(lang == "fr"){
@@ -29,6 +31,8 @@ function i18n(key){
 		value = labels_km[key];
 	}else if(lang == "lo"){
 		value = labels_lo[key];
+	}else if(lang == "mn"){
+		value = labels_mn[key];
 	}else if(lang == "ms"){
 		value = labels_ms[key];
 	}else if(lang == "ru"){
