@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.api.noa.CyberTrackerNoa;
+import org.wcs.smart.connect.api.noa.SmartCollectNoa;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
 import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
@@ -170,11 +171,13 @@ public class CyberTrackerPackage extends UuidItem{
 	public CyberTrackerPackageProxy asProxy(URL rootUrl) throws MalformedURLException, URISyntaxException  {	
 		
 		boolean requirespassword = getIsPrivate();
+		String endpoint = CyberTrackerNoa.PATH;
 		if (getType().equals(SmartCollectPackage.PACKAGE_TYPENAME)) {
 			requirespassword = false;
+			endpoint = SmartCollectNoa.PATH;
 		}
 		
-		String path = rootUrl.getPath() + "/noa/" + CyberTrackerNoa.PATH + "/packages/" + UuidUtils.uuidToString(getCtPackageUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+		String path = rootUrl.getPath() + "/noa/" + endpoint + "/packages/" + UuidUtils.uuidToString(getCtPackageUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		URL url = (new URI(rootUrl.getProtocol(), null, rootUrl.getHost(), rootUrl.getPort(), path, null, null)).toURL();
 		//URL url = new URL(rootUrl.getProtocol(), rootUrl.getHost(), rootUrl.getPort(), path);
 		
