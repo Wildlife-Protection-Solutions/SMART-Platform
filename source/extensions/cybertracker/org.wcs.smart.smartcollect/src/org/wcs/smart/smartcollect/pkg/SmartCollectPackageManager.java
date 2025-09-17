@@ -104,6 +104,11 @@ public class SmartCollectPackageManager implements ICtPackageManager {
 	public ICtPackageConfigurator createConfigurator() {
 		return new SmartCollectPackageConfigurator();
 	}
+	
+	@Override
+	public String getConnectEndPoint() {
+		return SmartCollectConnectUrlContribution.PACKAGE_URL;
+	}
 
 	@Override
 	public void buildPackage(ICtPackage ctpackage, IEclipseContext context, Path output) throws IOException {

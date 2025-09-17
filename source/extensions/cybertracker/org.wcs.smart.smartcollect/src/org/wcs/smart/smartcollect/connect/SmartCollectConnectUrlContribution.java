@@ -46,8 +46,8 @@ public class SmartCollectConnectUrlContribution extends AbstractConnectPackageCo
 
 	//urls for package status and package
 	private static final String STATUS_URL = "/noa/smartcollect/packages/info/"; //$NON-NLS-1$
-	private static final String PACKAGE_URL = "/noa/smartcollect/packages/"; //$NON-NLS-1$
-
+	public static final String PACKAGE_URL = "/noa/smartcollect/packages/"; //$NON-NLS-1$
+	
 	
 	public SmartCollectConnectUrlContribution() {
 	}

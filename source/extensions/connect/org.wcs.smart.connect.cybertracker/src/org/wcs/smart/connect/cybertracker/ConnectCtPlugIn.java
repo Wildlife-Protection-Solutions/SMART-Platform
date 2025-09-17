@@ -10,6 +10,7 @@ import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.cybertracker.ctpackage.ConnectUrlContribution;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.cybertracker.ctpackage.ui.CtPackageExtensionPointManager;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.util.UuidUtils;
 
@@ -63,11 +64,18 @@ public class ConnectCtPlugIn extends AbstractUIPlugin {
 	}
 
 	public static URL generagePackageConnectUrl(Session session, ICtPackage ctpackage)  {
+		
+		String endpoint = CtPackageExtensionPointManager.INSTANCE.findManager(ctpackage).getConnectEndPoint();
+		if (endpoint == null) {
+			endpoint = ConnectUrlContribution.PACKAGE_URL;
+		}
+				
+		
 		ConnectServer cs = ConnectHibernateManager.getConnectServer(session);
 		if (cs == null) return null;
 
 		String surl = cs.getServerUrl();
-		surl += ConnectUrlContribution.PACKAGE_URL + UuidUtils.uuidToString(ctpackage.getUuid());
+		surl += endpoint + UuidUtils.uuidToString(ctpackage.getUuid());
 				
 		try {
 			return URI.create(surl).toURL();

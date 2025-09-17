@@ -83,6 +83,16 @@ public interface ICtPackageManager {
 	public ICtPackage createPackage();
 	
 	/**
+	 * End point for Connect API if you want to overwrite the default.
+	 * Return null to use the default endpoint.
+	 * @return
+	 */
+	public default String getConnectEndPoint() {
+		return null;
+	}
+
+	
+	/**
 	 * Create the package configurator for managing the ui elements
 	 * associated with the package
 	 * 
