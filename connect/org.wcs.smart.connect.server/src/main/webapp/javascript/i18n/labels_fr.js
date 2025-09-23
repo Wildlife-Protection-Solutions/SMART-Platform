@@ -114,7 +114,7 @@ labels_fr = {
 "pickaday.jul": "Juillet",
 "pickaday.jun": "Juin",
 "pickaday.mar": "Mars",
-"pickaday.mai": "Mai",
+"pickaday.may": "Mai",
 "pickaday.mon": "Lun",
 "pickaday.monday": "Lundi",
 "pickaday.nov": "Novembre",
