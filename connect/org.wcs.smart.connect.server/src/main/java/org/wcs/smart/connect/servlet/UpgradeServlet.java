@@ -144,6 +144,7 @@ public class UpgradeServlet extends HttpServlet {
 						upgradeDb800to801(s, warnings);
 						upgradeDb801to802(s, warnings);
 						upgradeDb802to810(s, warnings);
+						upgradeDb810to812(s, warnings);
 						updated = true;
 					}else if (version.equals("7.5.5") || version.equals("7.5.6") || version.equals("7.5.7")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						//7.5.5/6 shouldn't exist as we didn't upgrade version number
@@ -151,18 +152,25 @@ public class UpgradeServlet extends HttpServlet {
 						upgradeDb800to801(s, warnings);
 						upgradeDb801to802(s, warnings);
 						upgradeDb802to810(s, warnings);
+						upgradeDb810to812(s, warnings);
 						updated = true;
 					}else if (version.equals("8.0.0")) { //$NON-NLS-1$ 
 						upgradeDb800to801(s, warnings);
 						upgradeDb801to802(s, warnings);
 						upgradeDb802to810(s, warnings);
+						upgradeDb810to812(s, warnings);
 						updated = true;
 					}else if (version.equals("8.0.1")) { //$NON-NLS-1$ 
 						upgradeDb801to802(s, warnings);
 						upgradeDb802to810(s, warnings);
+						upgradeDb810to812(s, warnings);
 						updated = true;
 					}else if (version.equals("8.0.2")) { //$NON-NLS-1$ 
 						upgradeDb802to810(s, warnings);
+						upgradeDb810to812(s, warnings);
+						updated = true;
+					}else if (version.equals("8.1.0")) { //$NON-NLS-1$
+						upgradeDb810to812(s, warnings);
 						updated = true;
 					}else {
 						request.setAttribute("javax.servlet.error.message", Messages.getString("UpgradeServlet.FSVersionInvalid", request.getLocale())); //$NON-NLS-1$ //$NON-NLS-2$ 
@@ -1410,7 +1418,7 @@ public class UpgradeServlet extends HttpServlet {
 						"ALTER table smart.sampling_unit_attribute_list ADD CONSTRAINT su_attribute_list_icon_uuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 					
 						//working item				
-						"alter table connect.work_item add column percent_complete smallint", //$NON-NLS-1$
+						"alter table connect.work_item add column percent_complete smallint not null default 0", //$NON-NLS-1$
 						"alter table connect.work_item add column data varchar", //$NON-NLS-1$
 						"ALTER TABLE connect.work_item drop CONSTRAINT type_chk",  //$NON-NLS-1$ 
 						"ALTER TABLE connect.work_item ADD CONSTRAINT type_chk CHECK (((type)::text = ANY (ARRAY[('UP_CA'::character varying)::text, ('UP_SYNC'::character varying)::text, ('DOWN_CA'::character varying)::text, ('DOWN_SYNC'::character varying)::text, ('UP_DATAQUEUE'::character varying)::text, ('UP_CTPACKAGE'::character varying)::text, ('UP_NAVIGATION'::character varying)::text, ('RECOVERY_CA'::character varying)::text])))", //$NON-NLS-1$
@@ -2658,6 +2666,26 @@ public class UpgradeServlet extends HttpServlet {
 		
 	}
 
+	
+	private void upgradeDb810to812(Session session, List<String> warnings) {
+		session.doWork(new Work() {
+
+			@Override
+			public void execute(Connection c) throws SQLException {
+				String[] sql = new String[] {
+						"update connect.work_item set percent_complete = 0 where percent_complete is null", //$NON-NLS-1$
+						"alter table connect.work_item alter column percent_complete set not null", //$NON-NLS-1$
+						"alter table connect.work_item alter column percent_complete set default 0", //$NON-NLS-1$
+						"update connect.connect_version set version = '8.1.2', last_updated = now()" //$NON-NLS-1$
+				};
+	
+				for (String s : sql) {				
+					c.createStatement().executeUpdate(s);
+				}
+			}
+		});
+	
+	}
 	
 	private void processCategory801to810(Category category, List<CategoryAttribute> parentAttributes, Connection c,
 			PreparedStatement attributeSelect, PreparedStatement categoryKidSelect, 
