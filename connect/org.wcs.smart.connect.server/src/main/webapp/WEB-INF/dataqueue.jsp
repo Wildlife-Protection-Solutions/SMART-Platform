@@ -90,7 +90,7 @@
 			</c:if>
 			<c:if test="${canrun}">
 				<span style="padding-left: 10px; padding-right:10px">|</span>
-				<a id="btnStartProcessing" style="padding-right:5px" href="#" title="<fmt:message key="startfileprocessingtooltip"/>"><fmt:message key="dataqueue.startfileprocessing"/></a>
+				<a id="btnStartProcessing" style="padding-right:5px" href="#" title="<fmt:message key="dataqueue.startfileprocessingtooltip"/>"><fmt:message key="dataqueue.startfileprocessing"/></a>
 			</c:if>		
 		</div>
 		

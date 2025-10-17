@@ -148,9 +148,9 @@ public class SmartMobileJsonJob implements Runnable{
 		types.add(SmartMobileJsonFileProcessor.CT_ZIP_TYPE);
 			
 		//only process cas whose setting
-		//allows it
-		List<UUID> cauuids = session.createQuery("SELECT uuid FROM ConservationAreaInfo WHERE smartMobileDqProcessor = true", UUID.class) //$NON-NLS-1$
-				.list();
+		//allows it and whose database are not locked to editing
+		String sql = "SELECT ca_uuid FROM connect.ca_info where smartmobile_dq_processing and lock_key not in (select objid from pg_locks where locktype = 'advisory' and granted)"; //$NON-NLS-1$
+		List<UUID> cauuids = session.createNativeQuery(sql, UUID.class).list();
 		
 		Query<ServerDataQueueItem> q = null;
 		if (toSkip.isEmpty()) {

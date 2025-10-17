@@ -42,6 +42,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.api.DataQueueEventService;
@@ -156,7 +157,8 @@ public class SmartMobileJsonFileProcessor {
 			updateItemStatus(session,Status.ERROR,MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.JsonParseError", locale), ex.getMessage()), null); //$NON-NLS-1$
 			return;
 		}
-
+		
+		List<JsonImportWarning> warnings = new ArrayList<>();
 		IJsonProcessor[] processors = null;
 		session.beginTransaction();
 		try {
@@ -168,7 +170,7 @@ public class SmartMobileJsonFileProcessor {
 			
 			StringBuilder statusMsg = new StringBuilder();
 			
-			List<JsonImportWarning> warnings = new ArrayList<>();
+			
 			
 			processors = SmartMobileJsonProcessorManager.INSTANCE.getProcessors(ca, session);
 			for (IJsonProcessor p : processors){
@@ -213,25 +215,36 @@ public class SmartMobileJsonFileProcessor {
 			}
 			item.setStatusMessage(statusMsg.toString());
 			item.setWarningMessages(null);
+			
 			for (JsonImportWarning warn : warnings) {
 				item.addWarningMessage(warn.getMessage(this.locale));
+				
+				if (checkLockedError(warn.getMessage(Locale.getDefault()))) { 
+					throw new RollBackAndRequeueException();
+				}
 			}
-			
+			if (session.getTransaction().getStatus() == TransactionStatus.MARKED_ROLLBACK) {
+				throw new Exception(Messages.getString("SmartMobileJsonFileProcessor.InvalidJsonError", locale)); //$NON-NLS-1$
+			}
 			session.getTransaction().commit();
 
 			DataQueueEventService.addUpdateToQueue(item);
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
-
+			
 			try {
 				session.getTransaction().rollback();
 			}catch (Throwable t) {
 				logger.log(Level.SEVERE, t.getMessage(), t);
 				return;
 			}
-
-			String message = MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.ProcessingError", locale), ex.getMessage() ); //$NON-NLS-1$
-			updateItemStatus(session,  Status.ERROR, message, null);
+			if (ex instanceof RollBackAndRequeueException || checkLockedError(ex.getMessage())) {
+				String message = Messages.getString("SmartMobileJsonFileProcessor.DbLockedItemRequeued", locale); //$NON-NLS-1$
+				updateItemStatus(session,  Status.QUEUED, message, warnings);
+			}else {
+				String message = MessageFormat.format(Messages.getString("SmartMobileJsonFileProcessor.ProcessingError", locale), ex.getMessage() ); //$NON-NLS-1$
+				updateItemStatus(session,  Status.ERROR, message, warnings);
+			}
 		}finally {
 			for (IJsonProcessor p : processors) {
 				try {
@@ -239,12 +252,12 @@ public class SmartMobileJsonFileProcessor {
 				}catch(Throwable t) {
 					logger.log(Level.SEVERE, t.getMessage(), t);
 				}
-
-			}
-			
-		}
-
-		
+			}	
+		}		
+	}
+	
+	private boolean checkLockedError(String text) {
+		return text.contains("Database Locked to Editing"); //$NON-NLS-1$
 	}
 	
 	private void updateItemStatus(Session session, Status newStatus, String message, List<JsonImportWarning> warnings) {
@@ -270,4 +283,12 @@ public class SmartMobileJsonFileProcessor {
 		}
 		DataQueueEventService.addUpdateToQueue(item);
 	}
+	
+	class RollBackAndRequeueException extends Exception{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		}
 }
