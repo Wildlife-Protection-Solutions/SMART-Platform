@@ -954,6 +954,8 @@ public abstract class MissionJsonProcessor implements IJsonProcessor {
 			}
 			if (wp.getUuid() == null) session.persist(wp);
 			if (addToD.getMission().getUuid() == null) session.persist(addToD.getMission());
+			if (addToD.getUuid() == null) session.persist(addTo);
+			
 			session.persist(pw);
 			session.flush();
 		}
