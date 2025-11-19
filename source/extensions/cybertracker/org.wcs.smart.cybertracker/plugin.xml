@@ -266,12 +266,6 @@
       </ChangeLogTracker>
    </extension>
    <extension
-         point="org.wcs.smart.caLogin">
-      <postWindowOpen
-            class="org.wcs.smart.cybertracker.CleanUpLoginHandler">
-      </postWindowOpen>
-   </extension>
-   <extension
          point="org.locationtech.udig.project.ui.tool">
       <modalTool
             categoryId="org.wcs.smart.udig.maptools"
