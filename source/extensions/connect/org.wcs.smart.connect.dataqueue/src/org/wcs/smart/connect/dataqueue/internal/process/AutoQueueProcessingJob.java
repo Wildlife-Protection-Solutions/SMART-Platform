@@ -190,6 +190,8 @@ public class AutoQueueProcessingJob extends Job {
 					}
 				}
 			}
+			//remove items that cannot be processed locally
+			serverItems.removeIf(e->!e.getCanProcessLocally());
 			
 			if (serverItems.isEmpty()){
 				AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.OK, null);
