@@ -170,10 +170,15 @@ public class CtJsonObservationParser {
 		
 		if (!properties.containsKey(LATITUDE_KEY) || !properties.containsKey(LONGITUDE_KEY)) return null;
 		
-		Double x = ((Number)properties.get(LONGITUDE_KEY)).doubleValue();
-		Double y = ((Number)properties.get(LATITUDE_KEY)).doubleValue(); 
-		
-		return new Coordinate(x,y);
+		try {
+			Double x = ((Number)properties.get(LONGITUDE_KEY)).doubleValue();
+			Double y = ((Number)properties.get(LATITUDE_KEY)).doubleValue(); 
+			
+			return new Coordinate(x,y);
+		}catch (Exception ex) {
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			return null;
+		}
 		
 	}
 	
