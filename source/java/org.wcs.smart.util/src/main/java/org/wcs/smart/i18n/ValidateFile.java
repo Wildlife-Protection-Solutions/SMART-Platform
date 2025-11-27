@@ -44,7 +44,7 @@ public class ValidateFile {
 			ROOT + "svn\\source\\extensions\\qa\\translations",
 			ROOT + "svn\\source\\extensions\\r\\translations", };
 
-    //public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms", "my","pt","ru","sw","th", "uk","vi","zh"};
+//    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms", "my","pt","ru","sw","th", "uk","vi","zh"};
 	public static final String[] LANGUAGES =  new String[] {"mn"};
 
 	public static final String LINE_SEP = "\n";
@@ -194,7 +194,7 @@ public class ValidateFile {
 		
 //		ValidateFile util = new ValidateFile();
 //		try {
-//			util.testFile(Paths.get("C:\\data\\SMART\\Source\\Trunk\\svn\\connect\\org.wcs.smart.connect.server\\src\\main\\java\\org\\wcs\\smart\\connect\\i18n\\web_messages_id.properties"));
+//			util.testFile(Paths.get("C:\\data\\SMART\\Source\\Trunk\\svn\\connect\\org.wcs.smart.connect.server\\src\\main\\java\\org\\wcs\\smart\\connect\\i18n\\messages_th.properties"));
 //		} catch (Exception e) {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();

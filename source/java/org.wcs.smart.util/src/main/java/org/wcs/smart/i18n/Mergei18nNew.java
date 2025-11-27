@@ -172,8 +172,8 @@ public class Mergei18nNew {
             if (!target.containsKey(e.getKey())){
                 System.out.println("add: " + e.getKey());
                 //newvalues.put(e.getKey(), e.getValue());
-                //newvalues.put(e.getKey(), "**NEW**" + e.getValue());
-               // changes = true;
+                newvalues.put(e.getKey(), "**NEW**" + e.getValue());
+                changes = true;
             }
         }
 
@@ -192,7 +192,7 @@ public class Mergei18nNew {
         }
 
         if (changes){
-            writeFile(targetFile, target, newvalues);
+            //writeFile(targetFile, target, newvalues);
         }
     }
 

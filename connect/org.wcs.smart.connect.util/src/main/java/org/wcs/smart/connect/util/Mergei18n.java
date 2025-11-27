@@ -20,7 +20,7 @@ import java.util.zip.ZipOutputStream;
 
 public class Mergei18n {
 
-	public static final String[] languages = new String[]{"ur", "hr", "sr", "hy"};
+	public static final String[] languages = new String[]{"th"};
 	//public static final String[] languages = new String[] { "ar", "es", "fr", "hi", "id", "ka", "kar", "km", "lo", "mn",
 	//		"ms", "my", "pt", "ru", "sw", "tg", "th", "uk", "vi", "zh" };
 
@@ -59,7 +59,6 @@ public class Mergei18n {
 		try (BufferedReader reader = Files.newBufferedReader(p, StandardCharsets.UTF_8)) {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
-				System.out.println(line);
 				if (line.trim().isEmpty())
 					continue;
 				int index = line.indexOf("=");
@@ -71,7 +70,6 @@ public class Mergei18n {
 				String key = line.substring(0, index);
 				String value = line.substring(index + 1);
 				values.put(key, value);
-				System.out.println(line);
 			}
 		}
 
@@ -115,20 +113,22 @@ public class Mergei18n {
 				}
 			}
 
+			if (false) {
 			// write file
-			ArrayList<String> keys = new ArrayList<String>();
-			keys.addAll(writevalues.keySet());
-			keys.sort((a, b) -> a.compareTo(b));
-			try (BufferedWriter writer = Files.newBufferedWriter(langpath)) {
-				for (String key : keys) {
-					String value = writevalues.get(key);
-					writer.append(key);
-					writer.append("=");
-					writer.append(value);
-					writer.append("\n");
+				ArrayList<String> keys = new ArrayList<String>();
+				keys.addAll(writevalues.keySet());
+				keys.sort((a, b) -> a.compareTo(b));
+				try (BufferedWriter writer = Files.newBufferedWriter(langpath)) {
+					for (String key : keys) {
+						String value = writevalues.get(key);
+						writer.append(key);
+						writer.append("=");
+						writer.append(value);
+						writer.append("\n");
+					}
 				}
+	
 			}
-
 		}
 
 	}
@@ -252,36 +252,38 @@ public class Mergei18n {
 			for (String key : values.keySet()) {
 				if (!newvalues.containsKey(key)) {
 					System.out.println("adding:" + key);
-					// newvalues.put(key, "**NEW**" + values.get(key));
-					newvalues.put(key, values.get(key));
+					 newvalues.put(key, "**NEW**" + values.get(key));
+					//newvalues.put(key, values.get(key));
 				}
 			}
 
-			// write file
-			ArrayList<String> keys = new ArrayList<String>();
-			keys.addAll(newvalues.keySet());
-			keys.sort((a, b) -> a.compareTo(b));
-			boolean first = true;
-			try (BufferedWriter writer = Files.newBufferedWriter(langPath)) {
-				writer.append("labels_" + languages[i] + " = {\n");
-				for (String key : keys) {
-
-					String value = newvalues.get(key);
-					if (!first) {
-						writer.append(",");
-						writer.append("\n");
+			if (false) {
+				// write file
+				ArrayList<String> keys = new ArrayList<String>();
+				keys.addAll(newvalues.keySet());
+				keys.sort((a, b) -> a.compareTo(b));
+				boolean first = true;
+				try (BufferedWriter writer = Files.newBufferedWriter(langPath)) {
+					writer.append("labels_" + languages[i] + " = {\n");
+					for (String key : keys) {
+	
+						String value = newvalues.get(key);
+						if (!first) {
+							writer.append(",");
+							writer.append("\n");
+						}
+						first = false;
+						writer.append(" \"");
+						writer.append(key);
+						writer.append("\"");
+						writer.append(": ");
+						writer.append("\"");
+						writer.append(value);
+						writer.append("\"");
 					}
-					first = false;
-					writer.append(" \"");
-					writer.append(key);
-					writer.append("\"");
-					writer.append(": ");
-					writer.append("\"");
-					writer.append(value);
-					writer.append("\"");
+					writer.append("\n");
+					writer.append("}");
 				}
-				writer.append("\n");
-				writer.append("}");
 			}
 		}
 	}
@@ -399,6 +401,6 @@ public class Mergei18n {
 		merger.processWebMessages();
 		merger.processJavascript();
 		
-		merger.convertAndZipByLanguage();
+		//merger.convertAndZipByLanguage();
 	}
 }
