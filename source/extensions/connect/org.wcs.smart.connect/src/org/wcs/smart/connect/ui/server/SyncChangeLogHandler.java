@@ -30,6 +30,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.internal.Messages;

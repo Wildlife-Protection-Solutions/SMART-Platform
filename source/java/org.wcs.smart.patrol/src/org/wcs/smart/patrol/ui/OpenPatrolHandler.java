@@ -104,6 +104,7 @@ public class OpenPatrolHandler {
 				}
 				
 				IEditorPart part = page.openEditor(pi, PatrolEditor.ID);	
+				
 				if (part instanceof PatrolEditor && waypointUuid != null){
 					((PatrolEditor)part).findAndShow(waypointUuid);
 				}else if (part instanceof PatrolEditor && patrolLegDayUuid != null){

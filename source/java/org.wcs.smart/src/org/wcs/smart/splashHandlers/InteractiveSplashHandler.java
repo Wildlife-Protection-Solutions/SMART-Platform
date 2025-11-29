@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -62,6 +63,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -74,6 +76,7 @@ import org.eclipse.ui.application.DisplayAccess;
 import org.eclipse.ui.splash.AbstractSplashHandler;
 import org.wcs.smart.SmartApp;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
@@ -542,6 +545,12 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 								enableControls(false);
 							}
 						});
+						
+						if (TelemetryManager.INSTANCE.isFirst()) {
+							Display.getDefault().syncExec(()->{
+								MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Telemetry", "SMART now collects telemetry data to help us understand how the software is used and better meet user needs. SMART does not collect personal or identifiable information. For more information or to opt-out visit the Telementry Preferences page (File->System Preferences->Telemetry).");
+							});
+						}
 
 						SmartStartUp.initializeDatabase(sub.split(9, SubMonitor.SUPPRESS_NONE));
 						SubMonitor cam = sub.split(1, SubMonitor.SUPPRESS_NONE);

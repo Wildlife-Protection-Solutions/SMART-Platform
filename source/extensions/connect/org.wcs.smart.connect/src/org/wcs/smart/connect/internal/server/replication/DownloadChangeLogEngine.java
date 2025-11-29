@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.hibernate.Session;
 import org.wcs.smart.SmartWorkbenchWindowAdvisor;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
@@ -76,7 +77,7 @@ public class DownloadChangeLogEngine {
 		if (!SmartConnect.UPLOAD_LOCK.tryAcquire()){
 			throw new Exception(Messages.DownloadChangeLogEngine_AlreadyProcessingError);		
 		}
-
+		
 		try{
 			setServerStatus(ServerStatus.CONNECTING, Messages.DownloadChangeLogEngine_statusLineValue);
 			
@@ -111,6 +112,7 @@ public class DownloadChangeLogEngine {
 				throw new Exception(Messages.DownloadChangeLogEngine_ServerNotFoundError);
 			}
 			setServerStatus(ServerStatus.DOWNLOADING, Messages.DownloadChangeLogEngine_statusLineValue);
+			TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_CONNECT_DOWNSYNC);
 			final DownloadChangeLogJob downloadJob = new DownloadChangeLogJob(connect, serverInfo, record);
 			downloadJob.addJobChangeListener(new JobChangeAdapter() {
 				@Override

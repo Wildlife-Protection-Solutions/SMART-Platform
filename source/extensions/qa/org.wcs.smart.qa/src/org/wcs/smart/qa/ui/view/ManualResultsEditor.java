@@ -80,6 +80,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
@@ -629,6 +630,9 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 	}
 
 	private void validate(){
+		
+		TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.MANUAL_QA_RUN);
+		
 		if (tblRoutines.getCheckedElements().length == 0){
 			MessageDialog.openInformation(getSite().getShell(), Messages.ManualResultsEditor_NoRoutinesTitle, Messages.ManualResultsEditor_NoRoutinesMsg);
 			return;

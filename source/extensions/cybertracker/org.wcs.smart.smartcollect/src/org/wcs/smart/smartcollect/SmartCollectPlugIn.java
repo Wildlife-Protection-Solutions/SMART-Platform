@@ -31,11 +31,14 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.ICaDeleteHandler;
+import org.wcs.smart.incident.ui.IncidentEditor;
 import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.ISmartCollectLabelProvider;
+import org.wcs.smart.smartcollect.ui.SmartCollectIncidentEditor;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -85,6 +88,9 @@ public class SmartCollectPlugIn extends AbstractUIPlugin {
 			}
 		};
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteHandler, 1);
+		
+		TelemetryManager.INSTANCE.registerPartId(SmartCollectIncidentEditor.ID, TelemetryManager.Key.SMARTCOLLECT_VIEW);
+
 	}
 
 	@Override

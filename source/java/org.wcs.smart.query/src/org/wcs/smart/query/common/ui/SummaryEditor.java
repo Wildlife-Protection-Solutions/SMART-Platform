@@ -49,6 +49,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -178,6 +179,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 			setName(Messages.SummaryEditor_RunQueryJobName + getQuery().getName());
 			try {
 				IProgressMonitor mymonitor = resultsArea.createProgressMonitor();
+				TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_QUERY, getQuery().getTypeKey());
 				IQueryResult results = QueryExecutor.INSTANCE.executeQuery(getQuery(), null, mymonitor);
 				
 				if (monitor.isCanceled() || mymonitor.isCanceled()){

@@ -1706,6 +1706,11 @@
             id="org.wcs.smart.preference.earthranger"
             name="%er.prefpage.name">
       </page>
+      <page
+            class="org.wcs.smart.ui.internal.preference.TelemetryPreferencePage"
+            id="org.wcs.smart.preference.telemetry"
+            name="Telemetry">
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.exportWizards">

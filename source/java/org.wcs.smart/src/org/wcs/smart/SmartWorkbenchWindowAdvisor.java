@@ -204,6 +204,8 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 
 			@Override
 			public void partOpened(IWorkbenchPartReference partRef) {
+				TelemetryManager.INSTANCE.trackPartOpened(partRef.getId());
+				
 			}
 
 			@Override

@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -139,6 +140,7 @@ public class RunExportWizard extends Wizard {
 						try(Session session = HibernateManager.openSession()){
 							session.beginTransaction();
 							try {
+								TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_QUERY, item.getKey().getTypeKey());
 								IQueryResult result = QueryExecutor.INSTANCE.executeQuery(item.getKey(), session, mm.split(1));
 								item.getKey().setCachedResults(result);
 								session.getTransaction().commit();

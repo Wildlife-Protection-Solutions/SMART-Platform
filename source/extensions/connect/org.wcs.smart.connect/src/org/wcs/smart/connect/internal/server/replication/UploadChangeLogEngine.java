@@ -38,6 +38,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
@@ -197,6 +198,8 @@ public class UploadChangeLogEngine {
 			progress.worked(1);
 			
 			//upload package to server
+			TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_CONNECT_UPSYNC);
+
 			UploadChangeLogJob upload = new UploadChangeLogJob(record, connect);
 			upload.addJobChangeListener(new JobChangeAdapter() {
 				@Override

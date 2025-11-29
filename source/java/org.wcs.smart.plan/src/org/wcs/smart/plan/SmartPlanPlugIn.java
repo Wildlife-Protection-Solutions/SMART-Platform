@@ -37,6 +37,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.IPatrolDeleteHandler;
@@ -44,6 +45,7 @@ import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.internal.PlanLabelProvider;
+import org.wcs.smart.plan.ui.editor.PlanEditor;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -150,6 +152,9 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 		DefaultScope.INSTANCE.getNode(getBundle().getSymbolicName()).putInt(SYSPROP_PLAN_DISTANCE_TO_COMPLETE, DISTANCE_COMPLETE_DEFAULT_VALUE);
 		
 		SmartContext.INSTANCE.setClass(IPlanLabelProvider.class, new PlanLabelProvider());
+		
+		TelemetryManager.INSTANCE.registerPartId(PlanEditor.ID, TelemetryManager.Key.PLAN_VIEW);
+
 	}
 
 	/*
