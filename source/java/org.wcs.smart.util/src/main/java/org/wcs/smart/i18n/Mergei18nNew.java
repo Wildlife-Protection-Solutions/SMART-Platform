@@ -71,11 +71,13 @@ public class Mergei18nNew {
 //    public static final String[] LANGUAGES =  new String[] {"hr"};
 //    public static final String[] LANGUAGES =  new String[] {"my"};
     //public static final String[] LANGUAGES =  new String[] {"ur"};
-    public static final String[] LANGUAGES =  new String[] {"vi", "th", "es"};
+//    public static final String[] LANGUAGES =  new String[] {"vi", "th", "es"};
     
 //    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "in","ka","km","lo","mn","ms","ru","sw","th","vi","zh","pt", "uk"};
 
 //    public static final String[] LANGUAGES =  new String[] {"hi", "kar"};
+    
+    public static final String[] LANGUAGES =  new String[] {"tg"};
     
     public static final String LINE_SEP = "\n";
 
@@ -180,9 +182,11 @@ public class Mergei18nNew {
 
         for (Entry<String, String> e : source.entrySet()){
             if (!target.containsKey(e.getKey())){
-                System.out.println("add: " + e.getKey());
-                //target.put(e.getKey(), e.getValue());
-//                target.put(e.getKey(), "**NEW**" + e.getValue());
+
+            	//System.out.println(e.getKey() + "=" + e.getValue());
+                //System.out.println("add: " + e.getKey());
+                target.put(e.getKey(), e.getValue());
+                target.put(e.getKey(), "**NEW**" + e.getValue());
                 changes = true;
             }
         }
@@ -202,7 +206,7 @@ public class Mergei18nNew {
         }
 
         if (changes){
-            writeFile(targetFile, target);
+        	writeFile(targetFile, target);
         }
     }
 

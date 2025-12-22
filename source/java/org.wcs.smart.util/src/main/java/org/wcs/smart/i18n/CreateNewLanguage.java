@@ -21,7 +21,7 @@ public class CreateNewLanguage {
 //	public static final String ROOT_DIR = "C:\\data\\SMART\\Source\\trunk\\svn\\source";
 	public static final String ROOT_DIR = "C:\\data\\SMART\\Source\\Version7.X\\svn\\source";
 	
-	public static final String NEW_LANG = "ur";  
+	public static final String NEW_LANG = "tg";  
 	
 	public static final String FROM = "es";
 	
