@@ -61,7 +61,7 @@ public class MobileDeviceUtils {
 	/**
 	 * Folder containing SMART Mobile exported data files.
 	 */
-	public static final String DATA_FOLDER = "SMARTdata"; //$NON-NLS-1$
+	public static final String DATA_FOLDER = "Download\\SMARTdata"; //$NON-NLS-1$
 	
 	/**
 	 * If exe has been extracted for this session or not
