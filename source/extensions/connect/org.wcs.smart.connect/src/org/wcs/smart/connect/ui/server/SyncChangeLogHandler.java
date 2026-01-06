@@ -30,6 +30,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.internal.Messages;
@@ -59,6 +60,8 @@ public class SyncChangeLogHandler {
 	 * download change log and apply
 	 */
 	public void syncChangeLog(final Shell activeShell, final SmartConnect connect, ConservationArea ca) {
+		TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_CONNECT_SYNC);
+
 		DownloadChangeLogHandler downhandler = new DownloadChangeLogHandler(){
 			protected void displayStatus(final ConnectSyncHistoryRecord record) {
 				if (record.getStatus() == Status.DONE ||

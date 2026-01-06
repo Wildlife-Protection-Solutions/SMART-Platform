@@ -66,6 +66,7 @@ import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -648,6 +649,13 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 			
 			//configure run query job
 			runJob = new RunQueryJob(query) {
+				
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_QUERY, getQuery().getTypeKey());
+					return super.run(monitor);
+				}
+				
 				@Override
 				protected void onError(Exception ex) {
 					Display.getDefault().syncExec(()->{

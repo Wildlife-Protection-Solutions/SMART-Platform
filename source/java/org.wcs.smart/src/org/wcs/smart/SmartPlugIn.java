@@ -485,6 +485,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 			log(ex.getMessage(), ex);
 		}
 
+		TelemetryManager.INSTANCE.shutdown();
+
 		plugin = null;
 		super.stop(context);
 	}

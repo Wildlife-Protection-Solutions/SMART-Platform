@@ -75,6 +75,7 @@ import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
@@ -761,6 +762,13 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 			
 			//configure run query job
 			runJob = new RunQueryJob(query) {
+				
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_QUERY, getQuery().getTypeKey());
+					return super.run(monitor);
+				}
+				
 				@Override
 				protected void onError(Exception ex) {
 					Display.getDefault().syncExec(()->{

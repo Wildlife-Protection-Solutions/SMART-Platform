@@ -31,12 +31,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.internal.SurveyDeleteCaHandler;
 import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.ui.ErLabelProvider;
+import org.wcs.smart.er.ui.mision.editor.MissionEditor;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
 /**
@@ -101,6 +103,7 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteCaHandler,SurveyDeleteCaHandler.EXECUTE_ORDER);
 		
 		SmartContext.INSTANCE.setClass(IErLabelProvider.class, new ErLabelProvider());
+		TelemetryManager.INSTANCE.registerPartId(MissionEditor.ID, TelemetryManager.Key.MISSION_VIEW);
 	}
 
 	/*

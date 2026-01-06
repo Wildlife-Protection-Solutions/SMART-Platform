@@ -34,6 +34,7 @@ import org.locationtech.udig.project.internal.command.navigation.SetViewportBBox
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.map.udig.QueryService;
 import org.wcs.smart.asset.query.model.AssetQueryFactory;
@@ -72,6 +73,8 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 			setName(Messages.AssetSummaryEditor_RunTaskName + page1.getQuery().getName());
 			try {
 				IProgressMonitor mymonitor = page1.getResultArea().createProgressMonitor();
+				
+				TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_QUERY, page1.getQuery().getTypeKey());
 				IQueryResult results = QueryExecutor.INSTANCE.executeQuery(page1.getQuery(), null, mymonitor);
 				
 				if (monitor.isCanceled() || mymonitor.isCanceled()){

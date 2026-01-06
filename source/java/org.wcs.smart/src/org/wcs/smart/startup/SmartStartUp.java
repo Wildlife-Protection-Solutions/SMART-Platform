@@ -49,6 +49,7 @@ import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.LoginLogEntry;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Language;
@@ -212,6 +213,8 @@ public class SmartStartUp {
 	public static boolean login(ConservationArea ca, String userName, String password ){
 		
 		List<Object> objectsToSave = new ArrayList<>();
+		
+		TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.CA_LOGIN);
 		
 		if (ca.getIsCcaa()){
 			// we are performing cross-ca analysis and need to do something

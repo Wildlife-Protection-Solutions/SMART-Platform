@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.control.WarningDialog;
@@ -79,6 +80,8 @@ public class SyncMultipleCaWizard extends Wizard {
 		errors = new ArrayList<String>();
 		
 		if (allCas.isEmpty()) return true;
+		
+		TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_CONNECT_SYNC);
 		
 		try {
 			getContainer().run(true, true, new IRunnableWithProgress() {

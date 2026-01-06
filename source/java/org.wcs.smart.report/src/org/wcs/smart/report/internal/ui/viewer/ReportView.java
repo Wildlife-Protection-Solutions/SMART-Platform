@@ -60,6 +60,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -108,6 +109,8 @@ public class ReportView implements IReportListener{
 	Job reportRunner = new Job(Messages.ReportView_PreviewReportJobName){
 		
 		protected IStatus run(IProgressMonitor monitor) {
+			TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_REPORT);
+
 			Path localReportDoc = tempReportDocument;
 			tempReportDocument = null;
 			

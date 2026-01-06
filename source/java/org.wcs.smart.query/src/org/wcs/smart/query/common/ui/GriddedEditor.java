@@ -41,6 +41,7 @@ import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -177,6 +178,8 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 				GriddedEditor.this.firstRun = false;
 				
 				try {
+					TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_QUERY, getQuery().getTypeKey());
+
 					IQueryResult results = QueryExecutor.INSTANCE.executeQuery(getQuery(), null, mymonitor);
 					if (monitor.isCanceled() || mymonitor.isCanceled()){
 						resultPage.updateAndShowTable(null);

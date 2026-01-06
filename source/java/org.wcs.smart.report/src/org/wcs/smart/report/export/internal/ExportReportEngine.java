@@ -65,6 +65,7 @@ import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -131,6 +132,8 @@ public class ExportReportEngine {
 		};
 		
 		for (int i = 0; i < reports.size(); i ++){
+			TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_REPORT);
+
 			Path outputFile = file;
 			if (outputFile == null){
 				if (outputFormat != null){

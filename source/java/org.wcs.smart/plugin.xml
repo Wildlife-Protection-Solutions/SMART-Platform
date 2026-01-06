@@ -1691,6 +1691,11 @@
             id="org.wcs.smart.preference.quicklink"
             name="Quick Link Configuration">
       </page>
+      <page
+            class="org.wcs.smart.ui.internal.preference.TelemetryPreferencePage"
+            id="org.wcs.smart.preference.telemetry"
+            name="Telemetry">
+      </page>
    </extension>
    <extension
          point="org.eclipse.ui.exportWizards">
@@ -1829,6 +1834,9 @@
          point="org.wcs.smart.dbStartUp">
       <StartUpRunner
             class="org.wcs.smart.startup.EncryptCleanUp">
+      </StartUpRunner>
+      <StartUpRunner
+            class="org.wcs.smart.startup.TelemetryDispatchStarter">
       </StartUpRunner>
    </extension>
    <extension

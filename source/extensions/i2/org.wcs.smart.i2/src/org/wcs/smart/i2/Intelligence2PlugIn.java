@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.i2.birt.datasource.DesktopConnectionFactory;
@@ -37,6 +38,8 @@ import org.wcs.smart.i2.handlers.DeleteCaHandler;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.query.engine.QueryEngineFactory;
 import org.wcs.smart.i2.ui.Resources;
+import org.wcs.smart.i2.ui.editors.EntityEditor;
+import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 
 
 /**
@@ -182,6 +185,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteCaHandler(), DeleteCaHandler.EXECUTE_ORDER);
 		
 		DataModelManager.INSTANCE.addItemChangeListener(ProfileDataModelItemListener.INSTANCE);
+		
+		TelemetryManager.INSTANCE.registerPartId(EntityEditor.ID, TelemetryManager.Key.PROFILE_ENTITY_VIEW);
+		TelemetryManager.INSTANCE.registerPartId(RecordEditor.ID, TelemetryManager.Key.PROFILE_RECORD_VIEW);
 	}
 
 	/*

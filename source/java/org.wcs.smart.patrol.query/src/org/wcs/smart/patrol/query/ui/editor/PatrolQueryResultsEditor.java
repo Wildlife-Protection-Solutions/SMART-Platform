@@ -63,6 +63,7 @@ import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.ca.Projection;
@@ -134,6 +135,8 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			setName(Messages.PatrolQueryResultsEditor_RunQueryJobName + getQuery().getName());
 			IProgressMonitor mymonitor = page1.createProgressMonitor();
 			try {
+				TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_QUERY, getQuery().getTypeKey());
+
 				MemoryQueryResult<PatrolQueryResultItem> results = (MemoryQueryResult<PatrolQueryResultItem>) QueryExecutor.INSTANCE.executeQuery(getQuery(), null, mymonitor);
 				if (monitor.isCanceled() || mymonitor.isCanceled()){
 					page1.updateAndShowTable(null);

@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IQueryEngine;
@@ -104,7 +105,9 @@ public class REngine {
 	private Job executeJob = new Job(Messages.REngine_JobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			
+
+			TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_R_QUERY);
+
 			List<Path> queryFiles = new ArrayList<>();
 			try {
 				
