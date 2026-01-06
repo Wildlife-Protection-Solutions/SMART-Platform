@@ -198,8 +198,6 @@ public class UploadChangeLogEngine {
 			progress.worked(1);
 			
 			//upload package to server
-			TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_CONNECT_UPSYNC);
-
 			UploadChangeLogJob upload = new UploadChangeLogJob(record, connect);
 			upload.addJobChangeListener(new JobChangeAdapter() {
 				@Override

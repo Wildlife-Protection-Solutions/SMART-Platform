@@ -31,6 +31,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
@@ -54,6 +55,7 @@ public class DownloadChangeLogHandler {
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
 		DownloadChangeLogDialog dialog = new DownloadChangeLogDialog(activeShell);
 		if (dialog.open() == Window.OK){
+			TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_CONNECT_DOWNSYNC);
 			downloadChangeLog(activeShell, dialog.getConnection(), SmartDB.getCurrentConservationArea());
 		}
 	}
@@ -67,6 +69,7 @@ public class DownloadChangeLogHandler {
 	 * @param events
 	 */
 	public void downloadChangeLog(final Shell activeShell, final SmartConnect connect, ConservationArea ca) {
+		
 		MessageDialog
 				.openInformation(
 						activeShell,

@@ -31,6 +31,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.internal.Messages;
@@ -54,6 +55,7 @@ public class RecoverCaHandler {
 		if (dialog.open() != Window.OK) return;
 		if (dialog.getOption() == null) return;
 
+		TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_CONNECT_RECOVER);
 
 		if (dialog.getOption() == RecoverCaDialog.Option.RECOVER) {
 			doRecover(activeShell, dialog.getApplyNew());

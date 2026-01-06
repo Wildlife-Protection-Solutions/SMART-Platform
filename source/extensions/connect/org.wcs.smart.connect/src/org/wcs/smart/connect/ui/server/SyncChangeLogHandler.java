@@ -60,6 +60,7 @@ public class SyncChangeLogHandler {
 	 * download change log and apply
 	 */
 	public void syncChangeLog(final Shell activeShell, final SmartConnect connect, ConservationArea ca) {
+		TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_CONNECT_SYNC);
 		DownloadChangeLogHandler downhandler = new DownloadChangeLogHandler(){
 			protected void displayStatus(final ConnectSyncHistoryRecord record) {
 				if (record.getStatus() == Status.DONE ||

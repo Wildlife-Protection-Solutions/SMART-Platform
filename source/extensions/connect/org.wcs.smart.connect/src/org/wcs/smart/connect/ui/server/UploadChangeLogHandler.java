@@ -35,6 +35,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
@@ -58,6 +59,7 @@ public class UploadChangeLogHandler {
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
 		UploadChangeLogDialog dialog = new UploadChangeLogDialog(activeShell);
 		if (dialog.open() == Window.OK){
+			TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_CONNECT_UPSYNC);
 			uploadChangeLog(activeShell, dialog.getConnection(), SmartDB.getCurrentConservationArea());
 		}
 	}
@@ -66,6 +68,7 @@ public class UploadChangeLogHandler {
 	 * uploads change log to server
 	 */
 	public void uploadChangeLog(Shell activeShell, final SmartConnect connect, final ConservationArea ca){
+		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {

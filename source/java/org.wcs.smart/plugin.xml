@@ -1850,6 +1850,9 @@
       <StartUpRunner
             class="org.wcs.smart.startup.EncryptCleanUp">
       </StartUpRunner>
+      <StartUpRunner
+            class="org.wcs.smart.startup.TelemetryDispatchStarter">
+      </StartUpRunner>
    </extension>
    <extension
          point="org.locationtech.udig.style.advanced.points.symbolizer">

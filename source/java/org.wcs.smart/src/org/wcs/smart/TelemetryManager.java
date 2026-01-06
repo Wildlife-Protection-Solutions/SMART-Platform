@@ -1,7 +1,29 @@
+/*
+ * Copyright (C) 2026 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringJoiner;
@@ -28,12 +50,12 @@ public enum TelemetryManager {
 
 	INSTANCE;
 
-	
 	private static final String NODE_PATH = "org.wcs.smart.telemetry"; //$NON-NLS-1$
 	private static final String TELEMETRY_PATH = "org.wcs.smart.telemetry.statistics"; //$NON-NLS-1$
 
 	private static final String INSTALL_KEY_NAME = "installKey"; //$NON-NLS-1$
 	private static final String ENABLED_KEY_NAME = "telemetry"; //$NON-NLS-1$
+	private static final String LASTUPLOADED_KEY_NAME = "lastuploaded"; //$NON-NLS-1$
 
 	public enum Key {
 
@@ -45,20 +67,25 @@ public enum TelemetryManager {
 		FIELDSENSOR_VIEW("usage.fieldsensor.view.count"), //$NON-NLS-1$
 		PLAN_VIEW("usage.plan.view.count"),  //$NON-NLS-1$
 
-		MANUAL_QA_RUN("user.qa.manual.run.count"),  //$NON-NLS-1$
-		AUTO_QA_VIEW("user.qa.auto.view.count"), //$NON-NLS-1$
+		MANUAL_QA_RUN("usage.qa.manual.run.count"),  //$NON-NLS-1$
+		AUTO_QA_VIEW("usage.qa.auto.view.count"), //$NON-NLS-1$
 
 		RUN_QUERY("usage.query.run.count"),  //$NON-NLS-1$
 		RUN_R_QUERY("usage.query.run.count.r"), //$NON-NLS-1$
 		RUN_REPORT("usage.report.run.count"), //$NON-NLS-1$
 
-		RUN_CONNECT_UPSYNC("user.connect.upsync.count"),  //$NON-NLS-1$
-		RUN_CONNECT_DOWNSYNC("user.connect.downsync.count"), //$NON-NLS-1$
-		RUN_CONNECT_DATAQUEUE_PROCESSING("user.connect.dataqueue.run.count"), //$NON-NLS-1$
-
-		PROFILE_ENTITY_VIEW("user.profile.entity.view.count"),  //$NON-NLS-1$
-		PROFILE_RECORD_VIEW("user.profile.record.view.count"), //$NON-NLS-1$
-		PROFILE_WORKING_SET_VIEW("user.profile.workingset.view.count");  //$NON-NLS-1$
+		RUN_CONNECT_SYNC("usage.connect.sync.manual.count"),  //$NON-NLS-1$
+		RUN_CONNECT_UPSYNC("usage.connect.upsync.manual.count"),  //$NON-NLS-1$
+		RUN_CONNECT_DOWNSYNC("usage.connect.downsync.manual.count"), //$NON-NLS-1$
+		RUN_CONNECT_AUTOSYNC("usage.connect.autosync.manual.count"), //$NON-NLS-1$
+		
+		RUN_CONNECT_DATAQUEUE_PROCESSING("usage.connect.dataqueue.itemprocessed.count"), //$NON-NLS-1$
+		
+		RUN_CONNECT_RECOVER("usage.connect.recover.count"), //$NON-NLS-1$
+		
+		PROFILE_ENTITY_VIEW("usage.profile.entity.view.count"),  //$NON-NLS-1$
+		PROFILE_RECORD_VIEW("usage.profile.record.view.count"), //$NON-NLS-1$
+		PROFILE_WORKING_SET_VIEW("usage.profile.workingset.view.count");  //$NON-NLS-1$
 
 		String dbKey;
 
@@ -236,6 +263,13 @@ public enum TelemetryManager {
 		}
 		
 		this.computeEnabled();
+		
+		if (this.isEnabled) {
+			this.startDispatcher();
+		}else {
+			this.stopDispatcher();
+		}
+		
 		return true;
 	}
 	
@@ -258,6 +292,24 @@ public enum TelemetryManager {
 			}
 		}
 		return key;
+	}
+	
+	public void setLastUploaded(LocalDateTime date) {
+		IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(NODE_PATH);
+		prefs.put(LASTUPLOADED_KEY_NAME, date.toString());
+		flushStore(prefs);
+	}
+	
+	public LocalDateTime getLastUploaded() {
+		IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(NODE_PATH);
+		String key = prefs.get(LASTUPLOADED_KEY_NAME, null);
+		if (key == null) return null;
+		try {
+			return LocalDateTime.parse(key);
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+			return null;
+		}
 	}
 
 	/**
@@ -441,4 +493,18 @@ public enum TelemetryManager {
 
 	}
 
+	/**
+	 * Starts the job that send statistics to the server
+	 */
+	public void startDispatcher() {
+		TelemetryDispatcherJob.INSTANCE.schedule();
+	}
+
+	/**
+	 * Stops the job that send statistics to the server
+	 */
+	public void stopDispatcher() {
+		TelemetryDispatcherJob.INSTANCE.cancel();
+	}
+	
 }

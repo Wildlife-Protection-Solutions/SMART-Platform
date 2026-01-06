@@ -143,13 +143,10 @@ public class SmartStartUp {
 		if (isok == null) return;
 		
 		//attempt an upgrade and try again
-//		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		try {
 			(new UpgradeEngine()).upgradeSystem(sub.split(3, SubMonitor.SUPPRESS_NONE));
 		}catch (Exception ex) {
 			throw ex;
-//		}finally {
-//			HibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
 		}
 		isok = UpgradeEngine.validateVersions();
 		if (isok == null) return;

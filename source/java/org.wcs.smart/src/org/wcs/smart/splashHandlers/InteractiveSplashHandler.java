@@ -142,6 +142,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	private void enableControls(boolean enabled){
 		for (Control w : widgets) {
 			w.setEnabled(enabled);
+			w.update();
 		}
 	}
 	/**

@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.wcs.smart.PermissionManager;
 import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -55,6 +56,7 @@ public class TelemetryPreferencePage extends PreferencePage implements
 
 	private Button chTelemetry;
 	private Text txtData;
+	private boolean initialValue = true;
 	
 	Job showData =new Job("loading telementry data") { //$NON-NLS-1$
 		@Override
@@ -81,11 +83,23 @@ public class TelemetryPreferencePage extends PreferencePage implements
 
 	@Override
 	public boolean performOk() {
-		if (!TelemetryManager.INSTANCE.setEnabled(chTelemetry.getSelection())) {
+		
+		boolean enabled = chTelemetry.getSelection();
+		if (enabled == initialValue) return false; //nothing to change
+		
+		if (!enabled && initialValue) {
+			boolean ok = MessageDialog.openQuestion(getShell(), "Telemetry", "Disabling telemetry will delete all local telemetry data and no longer send updates to SMART. Are you sure you want to disable telemetry?");
+			if (!ok) {
+				return true;
+			}			
+		}
+		
+		if (!TelemetryManager.INSTANCE.setEnabled(enabled)) {
 			MessageDialog.openError(getShell(), DialogConstants.ERROR_STRING, "Unable to update preferences. Please restart SMART and try again. You may also check the log file for more information" );
 			refreshStats();
 			return false;
 		}
+		this.initialValue = TelemetryManager.INSTANCE.isEnabled();
 		refreshStats();
 		return true;
 	}
@@ -107,11 +121,13 @@ public class TelemetryPreferencePage extends PreferencePage implements
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).widthHint = 300;
 		
+		initialValue = TelemetryManager.INSTANCE.isEnabled();
 		
 		chTelemetry = new Button(main, SWT.CHECK);
 		chTelemetry.setText("Collect and send telemetry details to SMART to help improve the software");
 		chTelemetry.setSelection(TelemetryManager.INSTANCE.isEnabled());
 		chTelemetry.addListener(SWT.Selection, e->setTelemetryEnabled());
+		chTelemetry.setEnabled(PermissionManager.INSTANCE.isAdmin());
 		
 		txtData = new Text(main, SWT.MULTI  | SWT.WRAP | SWT.BORDER | SWT.V_SCROLL);
 		txtData.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -135,15 +151,7 @@ public class TelemetryPreferencePage extends PreferencePage implements
 	}
 	
 	private void setTelemetryEnabled() {
-		boolean enabled = chTelemetry.getSelection();
-		if (!enabled) {
-			boolean ok = MessageDialog.openQuestion(getShell(), "Telemetry", "Disabling telemetry will delete all local telemetry data and no longer send updates to SMART. Are you sure you want to disable telemetry?");
-			if (!ok) {
-				chTelemetry.setSelection(true);
-				return;
-			
-			}			
-		}
+		
 		txtData.setEnabled(chTelemetry.getSelection());
 	}
 }
