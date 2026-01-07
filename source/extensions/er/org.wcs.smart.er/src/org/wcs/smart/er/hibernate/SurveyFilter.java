@@ -54,7 +54,11 @@ public class SurveyFilter {
 	private SurveyDesign.State state = null;
 	
 	private String surveyNameFilter = null;
-	private StringComparison stringComparator = null;
+	private StringComparison surveyStringComparator = null;
+	
+	
+	private String missionNameFilter = null;
+	private StringComparison missionStringComparator = null;
 	
 	private String[] surveyDesignKeys = null;
 	
@@ -114,7 +118,7 @@ public class SurveyFilter {
 	 * @return the current survey name string comparator
 	 */
 	public StringComparison getSurveyNameComparator(){
-		return this.stringComparator;
+		return this.surveyStringComparator;
 	}
 	/**
 	 * 
@@ -122,6 +126,20 @@ public class SurveyFilter {
 	 */
 	public String getSurveyNameFilter(){
 		return this.surveyNameFilter;
+	}
+	
+	/**
+	 * @return the current survey name string comparator
+	 */
+	public StringComparison getMissionNameComparator(){
+		return this.missionStringComparator;
+	}
+	/**
+	 * 
+	 * @return current survey name filter string
+	 */
+	public String getMissionNameFilter(){
+		return this.missionNameFilter;
 	}
 	
 	/**
@@ -153,7 +171,9 @@ public class SurveyFilter {
 	public synchronized void setDefaults(){
 		this.state = SurveyDesign.State.ACTIVE;
 		this.surveyNameFilter = null;
-		this.stringComparator = null;
+		this.surveyStringComparator = null;
+		this.missionNameFilter = null;
+		this.missionStringComparator = null;
 		this.setMissionDateFilter(DateFilter.LAST_60_DAYS, null, null);
 	}
 	
@@ -176,8 +196,20 @@ public class SurveyFilter {
 	 * @param text the text to compare or null
 	 */
 	public synchronized void setSurveyNameFilter(StringComparison stringComparitor, String text){
-		this.stringComparator = stringComparitor;
+		this.surveyStringComparator = stringComparitor;
 		this.surveyNameFilter = text;
+	}
+	
+	/**
+	 * Sets the mission name filter.  Set to null
+	 * to include all missions;
+	 * 
+	 * @param stringComparitor the types of string comparison or null
+	 * @param text the text to compare or null
+	 */
+	public synchronized void setMissionNameFilter(StringComparison stringComparitor, String text){
+		this.missionStringComparator = stringComparitor;
+		this.missionNameFilter = text;
 	}
 	
 	/**
@@ -224,10 +256,14 @@ public class SurveyFilter {
 			}
 		}
 		
-		if (stringComparator != null && surveyNameFilter != null){
+		if (surveyStringComparator != null && surveyNameFilter != null){
 			str.append(" AND "); //$NON-NLS-1$
-			str.append(" lower(s.id) like lower(:name) "); //$NON-NLS-1$
-			
+			str.append(" lower(s.id) like lower(:name) "); //$NON-NLS-1$			
+		}
+		
+		if (missionStringComparator != null && missionNameFilter != null){
+			str.append(" AND "); //$NON-NLS-1$
+			str.append(" lower(m.id) like lower(:mname) "); //$NON-NLS-1$	
 		}
 		str.append("ORDER BY  m.startDate desc, s.id asc "); //$NON-NLS-1$
 		
@@ -240,13 +276,20 @@ public class SurveyFilter {
 			query.setParameterList("keys", surveyDesignKeys); //$NON-NLS-1$
 		}
 		
-		if (stringComparator != null && surveyNameFilter != null){
-			if (stringComparator == StringComparison.CONTAINS){
+		if (surveyStringComparator != null && surveyNameFilter != null){
+			if (surveyStringComparator == StringComparison.CONTAINS){
 				query.setParameter("name", "%" + this.surveyNameFilter + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}else{
 				query.setParameter("name", this.surveyNameFilter); //$NON-NLS-1$
 			}
 		}		
+		if (missionStringComparator != null && missionNameFilter != null){
+			if (missionStringComparator == StringComparison.CONTAINS){
+				query.setParameter("mname", "%" + this.missionNameFilter + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}else{
+				query.setParameter("mname", this.surveyNameFilter); //$NON-NLS-1$
+			}
+		}	
 		if (hasDateFilter()) {
 			LocalDate start = missionDateFilter.getStartDate();
 			if (start == null){
@@ -295,7 +338,7 @@ public class SurveyFilter {
 			}
 		}
 		
-		if (stringComparator != null && surveyNameFilter != null){
+		if (surveyStringComparator != null && surveyNameFilter != null){
 			str.append(" AND "); //$NON-NLS-1$
 			str.append(" lower(s.id) like lower(:name) "); //$NON-NLS-1$
 		}
@@ -308,8 +351,8 @@ public class SurveyFilter {
 		}else if (state == null && surveyDesignKeys != null && surveyDesignKeys.length > 0){
 			query2.setParameterList("keys", surveyDesignKeys); //$NON-NLS-1$
 		}
-		if (stringComparator != null && surveyNameFilter != null){
-			if (stringComparator == StringComparison.CONTAINS){
+		if (surveyStringComparator != null && surveyNameFilter != null){
+			if (surveyStringComparator == StringComparison.CONTAINS){
 				query2.setParameter("name", "%" + this.surveyNameFilter + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}else{
 				query2.setParameter("name", this.surveyNameFilter); //$NON-NLS-1$
@@ -371,8 +414,8 @@ public class SurveyFilter {
 		}
 		sb.append(FIELD_SEP);
 		
-		if (stringComparator != null){
-			sb.append(stringComparator.name());
+		if (surveyStringComparator != null){
+			sb.append(surveyStringComparator.name());
 		}
 		sb.append(FIELD_SEP);
 		
@@ -381,6 +424,15 @@ public class SurveyFilter {
 		}
 		sb.append(FIELD_SEP);
 		
+		if (missionStringComparator != null){
+			sb.append(missionStringComparator.name());
+		}
+		sb.append(FIELD_SEP);
+		
+		if (missionNameFilter != null){
+			sb.append(missionNameFilter);
+		}
+		sb.append(FIELD_SEP);		
 		if (surveyDesignKeys != null){
 			for (String key : surveyDesignKeys){
 				sb.append(key + FIELD_SEP2);
@@ -422,17 +474,29 @@ public class SurveyFilter {
 			filter.state = null;
 		}
 		if (!parts[4].isEmpty()){
-			filter.stringComparator = StringComparison.valueOf(parts[4]);
+			filter.surveyStringComparator = StringComparison.valueOf(parts[4]);
 		}else{
-			filter.stringComparator = null;
+			filter.surveyStringComparator = null;
 		}
 		if (!parts[5].isEmpty()){
 			filter.surveyNameFilter = parts[5];
 		}else{
 			filter.surveyNameFilter = null;
 		}
-		if (parts.length > 6 && !parts[6].isEmpty()){
-			String types[] = parts[6].split(FIELD_SEP2);
+		
+		if (!parts[6].isEmpty()){
+			filter.missionStringComparator = StringComparison.valueOf(parts[6]);
+		}else{
+			filter.missionStringComparator = null;
+		}
+		if (!parts[7].isEmpty()){
+			filter.missionNameFilter = parts[7];
+		}else{
+			filter.missionNameFilter = null;
+		}
+		
+		if (parts.length > 8 && !parts[8].isEmpty()){
+			String types[] = parts[8].split(FIELD_SEP2);
 			filter.surveyDesignKeys = new String[types.length];
 			for (int i = 0; i < types.length; i ++){
 				filter.surveyDesignKeys[i] = types[i];
@@ -447,8 +511,12 @@ public class SurveyFilter {
 		SurveyFilter clone = new SurveyFilter();
 		
 		clone.state = this.state;
+		
 		clone.surveyNameFilter = this.surveyNameFilter;
-		clone.stringComparator = this.stringComparator;
+		clone.surveyStringComparator = this.surveyStringComparator;
+		
+		clone.missionNameFilter = this.missionNameFilter;
+		clone.missionStringComparator = this.missionStringComparator;
 		
 		clone.missionDateFilter = this.missionDateFilter;
 		if (this.missionStartDate != null)

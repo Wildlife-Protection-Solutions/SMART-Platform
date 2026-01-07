@@ -12,6 +12,6 @@
 	
 	<artifactId>org.wcs.smart.er.feature</artifactId>
   	<packaging>eclipse-feature</packaging>
-	<version>8.1.1-SNAPSHOT</version>
+	<version>8.1.2-SNAPSHOT</version>
 
 </project>
