@@ -97,7 +97,6 @@ public class TelemetryDispatcherJob extends Job{
 	private IStatus reschedule(IProgressMonitor monitor) {
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		long delay = RESECHEDULE_HOURS * 60L * 60L * 1000L; // hours in ms
-		delay = 60000;
         this.schedule(delay);
         return Status.OK_STATUS;
 	}
