@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -62,25 +63,28 @@ public class TelemetryDispatcherJob extends Job{
 		try {
 			SmartPlugIn.log("Uploading Telemetry Data", null); //$NON-NLS-1$
 			
-			URI enpoint = new URI("http://localhost:5000/telemetry");
+			//URI enpoint = new URI("http://localhost:5000/telemetry");
+			URI enpoint = new URI("https://us-west1-smart-desktop-481700.cloudfunctions.net/telemetry");
+			
 			HttpURLConnection connection = (HttpURLConnection)enpoint.toURL().openConnection();
 			try {
-				connection.setRequestMethod("POST");
-				connection.setRequestProperty("Content-Type", "application/json; utf-8");
+				connection.setRequestMethod("POST"); //$NON-NLS-1$
+				connection.setRequestProperty("Content-Type", "application/json"); //$NON-NLS-1$ //$NON-NLS-2$
 		        connection.setDoOutput(true);
 	
-		        try (OutputStream os = connection.getOutputStream()) {
-		            byte[] input = jsonData.getBytes(StandardCharsets.UTF_8);
-		            os.write(input, 0, input.length);
+		        byte[] input = jsonData.getBytes(StandardCharsets.UTF_8);
+		        connection.setFixedLengthStreamingMode(input.length);
+		        try (OutputStream os = connection.getOutputStream()) {		            
+		            os.write(input);
 		        }
 	
 		        int code = connection.getResponseCode();
-				//int code = 200;
 		        if (code == 200) {
 		        	TelemetryManager.INSTANCE.setLastUploaded(LocalDateTime.now());    	
 		        }else {
-		        	SmartPlugIn.log("Could not upload telemetry data. Response code: " + code + ". Message: " + connection.getResponseMessage(), null);
-		        	//SmartPlugIn.log("Could not upload telemetry data", null);
+		        	//String response = new String(connection.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
+		        	//System.out.println("Response: " + response);
+		        	SmartPlugIn.log(MessageFormat.format("Could not upload telemetry data. Response code: {0}. Message: {1}", code, connection.getResponseMessage()), null);
 		        }
 			}finally {
 				connection.disconnect();
