@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -148,7 +149,9 @@ public enum WorkingSetManager {
 				throw new Exception(Messages.WorkingSetManager_InvalidWorkingSet);
 			}
 			this.activeWorkingSet = active.getUuid();
+			TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.PROFILE_WORKING_SET_VIEW);
 		}
+		
 		fireEvent(IntelEvents.ACTIVE_WS_SET, active, context);
 	}
 	

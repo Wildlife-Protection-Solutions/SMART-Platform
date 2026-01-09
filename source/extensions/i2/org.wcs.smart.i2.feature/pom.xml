@@ -12,5 +12,5 @@
 	
 	<artifactId>org.wcs.smart.i2.feature</artifactId>
   	<packaging>eclipse-feature</packaging>
-	<version>8.1.1-SNAPSHOT</version>
+	<version>8.1.2-SNAPSHOT</version>
 </project>

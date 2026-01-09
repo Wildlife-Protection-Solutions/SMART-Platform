@@ -76,7 +76,7 @@ public class DownloadChangeLogEngine {
 		if (!SmartConnect.UPLOAD_LOCK.tryAcquire()){
 			throw new Exception(Messages.DownloadChangeLogEngine_AlreadyProcessingError);		
 		}
-
+		
 		try{
 			setServerStatus(ServerStatus.CONNECTING, Messages.DownloadChangeLogEngine_statusLineValue);
 			
@@ -111,6 +111,7 @@ public class DownloadChangeLogEngine {
 				throw new Exception(Messages.DownloadChangeLogEngine_ServerNotFoundError);
 			}
 			setServerStatus(ServerStatus.DOWNLOADING, Messages.DownloadChangeLogEngine_statusLineValue);
+
 			final DownloadChangeLogJob downloadJob = new DownloadChangeLogJob(connect, serverInfo, record);
 			downloadJob.addJobChangeListener(new JobChangeAdapter() {
 				@Override

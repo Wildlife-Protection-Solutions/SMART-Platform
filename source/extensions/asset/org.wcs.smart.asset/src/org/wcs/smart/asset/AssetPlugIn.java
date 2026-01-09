@@ -29,6 +29,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.TelemetryManager;
+import org.wcs.smart.asset.ui.views.asset.AssetEditor;
 import org.wcs.smart.ca.ConservationAreaManager;
 
 /**
@@ -85,6 +87,8 @@ public class AssetPlugIn extends AbstractUIPlugin {
 		
 		SmartContext.INSTANCE.setClass(IAssetLabelProvider.class, new AssetCoreLabelProvider());
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteCaHandler(), DeleteCaHandler.EXECUTE_ORDER);
+		
+		TelemetryManager.INSTANCE.registerPartId(AssetEditor.ID, TelemetryManager.Key.FIELDSENSOR_VIEW);
 	}
 
 	/*

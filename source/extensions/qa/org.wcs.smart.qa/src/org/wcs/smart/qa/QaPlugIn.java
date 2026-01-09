@@ -29,8 +29,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.qa.handler.CaDeleteHandler;
+import org.wcs.smart.qa.ui.view.AutomatedResultsEditor;
+import org.wcs.smart.qa.ui.view.ManualResultsEditor;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -71,6 +74,9 @@ public class QaPlugIn extends AbstractUIPlugin {
 		
 		ConservationAreaManager.getInstance().addDeleteHandler(new CaDeleteHandler(), CaDeleteHandler.EXECUTE_ORDER);
 		SmartContext.INSTANCE.setClass(ILabelProvider.class, new QaLabelProvider());
+		
+		TelemetryManager.INSTANCE.registerPartId(AutomatedResultsEditor.ID, TelemetryManager.Key.AUTO_QA_VIEW);
+
 	}
 
 	/*

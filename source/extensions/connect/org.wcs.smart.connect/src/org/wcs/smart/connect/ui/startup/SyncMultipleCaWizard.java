@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.control.WarningDialog;
@@ -82,6 +83,7 @@ public class SyncMultipleCaWizard extends Wizard {
 		
 		if (allCas.isEmpty()) return true;
 		
+		TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_CONNECT_SYNC);
 		try {
 			getContainer().run(true, true, new IRunnableWithProgress() {
 				@Override
@@ -94,11 +96,7 @@ public class SyncMultipleCaWizard extends Wizard {
 						List<CaUserDetails> details = validateCaUsers(activeShell, allCas, username, password);
 						progress.worked(1 + (allCas.size() - details.size()));
 						
-//						HibernateManager.endSessionFactory(true, false);
-//						
-//						SmartDB.DbUser currentUser = SmartDB.getCurrentUser();
 						try{
-//							HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 							for (CaUserDetails cainfo : details){
 								progress.subTask(cainfo.ca.getNameLabel());
 								if (syncCa(cainfo, progress.split(1))){
@@ -106,11 +104,7 @@ public class SyncMultipleCaWizard extends Wizard {
 								}
 							}
 						}catch (OperationCanceledException e) {
-							errors.add(Messages.SyncMultipleCaWizard_Cancelled);
-//						}finally{
-//							HibernateManager.endSessionFactory(true, true);
-//							HibernateManager.setUserName(currentUser.getUserName(), currentUser.getPassword());
-							
+							errors.add(Messages.SyncMultipleCaWizard_Cancelled);							
 						}
 					}catch (Exception ex){
 						errors.add(ex.getMessage());

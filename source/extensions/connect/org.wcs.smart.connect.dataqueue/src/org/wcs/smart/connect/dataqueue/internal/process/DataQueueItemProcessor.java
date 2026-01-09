@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.internal.Messages;
@@ -93,6 +94,9 @@ public class DataQueueItemProcessor extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		if (ProcessorManager.INSTANCE.isProcessingDisabled()) return Status.CANCEL_STATUS;
+		
+		TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_CONNECT_DATAQUEUE_PROCESSING);
+
 		
 		monitor = progressWrapper.setProgressMonitor(monitor);
 		SubMonitor progress = SubMonitor.convert(monitor,Messages.DataQueueItemProcessor_Task1, 30);

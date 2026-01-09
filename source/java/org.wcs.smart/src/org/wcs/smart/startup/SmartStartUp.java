@@ -52,6 +52,7 @@ import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.LoginLogEntry;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IconFKManager;
@@ -142,13 +143,10 @@ public class SmartStartUp {
 		if (isok == null) return;
 		
 		//attempt an upgrade and try again
-//		HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		try {
 			(new UpgradeEngine()).upgradeSystem(sub.split(3, SubMonitor.SUPPRESS_NONE));
 		}catch (Exception ex) {
 			throw ex;
-//		}finally {
-//			HibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
 		}
 		isok = UpgradeEngine.validateVersions();
 		if (isok == null) return;
@@ -281,6 +279,8 @@ public class SmartStartUp {
 	public static boolean login(ConservationArea ca, String userName, String password ){
 		
 		List<Object> objectsToSave = new ArrayList<>();
+		
+		TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.CA_LOGIN);
 		
 		if (ca.getIsCcaa()){
 			// we are performing cross-ca analysis and need to do something

@@ -107,7 +107,7 @@ public class UpgradeEngine {
 		V800("7.5.7", "8.0.0", Upgrader757To800.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V801("8.0.0", "8.0.1", Upgrader800To801.class), //$NON-NLS-1$ //$NON-NLS-2$
 		V810("8.0.1", "8.1.0", Upgrader801To810.class); //$NON-NLS-1$ //$NON-NLS-2$
-		
+
 		public String fromVersion;
 		public String toVersion;
 		public Class<? extends IDatabaseUpgrader> upgradeEngine;

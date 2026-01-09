@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.r.feature"
       label="SMART R Module"
-      version="8.1.0.qualifier"
+      version="8.1.2.qualifier"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart.r"
       license-feature="org.wcs.smart.license.feature"
@@ -18,9 +18,6 @@
 
    <plugin
          id="org.wcs.smart.r"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>

@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -194,6 +195,7 @@ public class AutoReplicationJob extends Job {
 			return Status.OK_STATUS;
 		}
 		
+		TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_CONNECT_AUTOSYNC);
 		final boolean upload = ConnectionOption.SYNC_AUTO_UPLOAD.getBooleanValue(server);
 		if (needsToDownload){
 			monitor.subTask(Messages.AutoReplicationJob_downloadSubTaskName);

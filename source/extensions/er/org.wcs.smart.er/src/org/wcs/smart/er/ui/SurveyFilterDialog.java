@@ -66,7 +66,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class SurveyFilterDialog extends SmartFilterDialog  {
 
 	private StringFilterComposite.TextField surveyField = new StringFilterComposite.TextField(Messages.SurveyFilterDialog_SurveyIdFieldLabel, "id"); //$NON-NLS-1$
-	
+	private StringFilterComposite.TextField missionField = new StringFilterComposite.TextField(Messages.ErLabelProvider_MissionMetadataId, "id"); //$NON-NLS-1$
+
 	//current filter
 	private SurveyFilter filter;
 	
@@ -77,7 +78,9 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 	
 	private CheckboxTableViewer lstDesigns ;
 	
-	private StringFilterComposite nameFilter ;
+	private StringFilterComposite surveyNameFilter ;
+	private StringFilterComposite missionNameFilter ;
+
 	
 	private DateFilterComposite dateFilterCmp;
 	
@@ -138,7 +141,9 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 			sfilter.setMissionDateFilter(dateFilterCmp.getDateFilterForModel(), dateFilterCmp.getStartDateForModel(), dateFilterCmp.getEndDateForModel());
 		}
 
-		sfilter.setSurveyNameFilter(nameFilter.getComparisonForModel(), nameFilter.getFilterValueForModel());
+		sfilter.setSurveyNameFilter(surveyNameFilter.getComparisonForModel(), surveyNameFilter.getFilterValueForModel());
+		sfilter.setMissionNameFilter(missionNameFilter.getComparisonForModel(), missionNameFilter.getFilterValueForModel());
+
 	}
 
 	/**
@@ -175,7 +180,8 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 				dateFilterCmp.applyState(filter.getMissionDateFilter(), filter.getMissionStartDate(), filter.getMissionEndDate());	
 			}
 		}
-		nameFilter.applyState(filter.getSurveyNameComparator(), filter.getSurveyNameFilter(), surveyField);
+		surveyNameFilter.applyState(filter.getSurveyNameComparator(), filter.getSurveyNameFilter(), surveyField);
+		missionNameFilter.applyState(filter.getMissionNameComparator(), filter.getMissionNameFilter(), missionField);
 		updateDesignEnabled();
 	}
 	
@@ -217,8 +223,11 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 		
 		
 		SmartUiUtils.createHeaderLabel(main, Messages.SurveyFilterDialog_IdGroup);
-		nameFilter = new StringFilterComposite(main, SWT.NONE, new StringFilterComposite.TextField[]{surveyField});
+		surveyNameFilter = new StringFilterComposite(main, SWT.NONE, new StringFilterComposite.TextField[]{surveyField});
 		
+		SmartUiUtils.createHeaderLabel(main, Messages.ErLabelProvider_MissionMetadataId);
+		missionNameFilter = new StringFilterComposite(main, SWT.NONE, new StringFilterComposite.TextField[]{missionField});
+
 		
 		SelectionListener listener = new SelectionAdapter() {
 			@Override

@@ -47,14 +47,16 @@ public class CaSizeReportPreferencePage extends PreferencePage implements IWorkb
 	private StyledText txtReport;
 	
 	public CaSizeReportPreferencePage() {
+		this(null, null);
 	}
 
 	public CaSizeReportPreferencePage(String title) {
-		super(title);
+		this(title, null);
 	}
 
 	public CaSizeReportPreferencePage(String title, ImageDescriptor image) {
 		super(title, image);
+		super.noDefaultAndApplyButton();
 	}
 
 

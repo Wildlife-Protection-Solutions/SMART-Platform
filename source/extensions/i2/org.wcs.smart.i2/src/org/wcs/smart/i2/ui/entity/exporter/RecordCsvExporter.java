@@ -91,7 +91,8 @@ public class RecordCsvExporter implements ICsvDataExporter {
 		monitor.worked(1);
 		
 		monitor.subTask(Messages.RecordCsvExporter_SubTask1);
-		String hql = "SELECT distinct atts from IntelRecordSource s join s.attributes atts WHERE s.conservationArea = :ca"; //$NON-NLS-1$
+		//String hql = "SELECT atts from IntelRecordSource s join s.attributes atts WHERE s.conservationArea = :ca"; //$NON-NLS-1$		
+		String hql = "SELECT distinct a from IntelRecordSourceAttribute a WHERE a.source.conservationArea = :ca"; //$NON-NLS-1$
 		Query<IntelRecordSourceAttribute> q = session.createQuery(hql, IntelRecordSourceAttribute.class);
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		

@@ -383,9 +383,6 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	}
 
 	
-	
-	
-	
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
@@ -402,7 +399,9 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		} catch (Exception ex) {
 			log(ex.getMessage(), ex);
 		}
-
+		
+		TelemetryManager.INSTANCE.shutdown();
+		
 		plugin = null;
 		super.stop(context);
 	}
