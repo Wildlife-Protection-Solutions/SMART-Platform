@@ -13,6 +13,6 @@
 	<name>SMART Advanced Quality Assurance</name>
 	<artifactId>org.wcs.smart.qa</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>8.1.0-SNAPSHOT</version>
+	<version>8.1.2-SNAPSHOT</version>
 	
 </project>
