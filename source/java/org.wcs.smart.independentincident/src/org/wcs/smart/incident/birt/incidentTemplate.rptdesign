@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
-    <property name="createdBy">Eclipse BIRT Designer Version 4.18.0.v202103171650</property>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.26" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 4.18.0.v202411161754</property>
     <text-property name="title">Incident Report</text-property>
     <property name="layoutPreference">auto layout</property>
     <parameters>
@@ -1331,15 +1331,15 @@
                     <text-property name="heading">Date Value</text-property>
                 </structure>
                 <structure>
-                	<property name="columnName">attribute:linegeometry</property>
-                	<property name="alias">Line Geometry</property>
+                    <property name="columnName">attribute:linegeometry</property>
+                    <property name="alias">Line Geometry</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">Line Geometry</text-property>
                     <text-property name="heading">Line Geometry</text-property>
                 </structure>
                 <structure>
                     <property name="columnName">attribute:polygongeometry</property>
-                	<property name="alias">Polygon Geometry</property>
+                    <property name="alias">Polygon Geometry</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">Polygon Geometry</text-property>
                     <text-property name="heading">Polygon Geometry</text-property>
@@ -1398,11 +1398,16 @@
                     </structure>
                     <structure>
                         <property name="position">8</property>
+                        <property name="name">Time Value</property>
+                        <property name="dataType">time</property>
+                    </structure>
+                    <structure>
+                        <property name="position">9</property>
                         <property name="name">Line Geometry</property>
                         <property name="dataType">javaObject</property>
                     </structure>
                     <structure>
-                        <property name="position">9</property>
+                        <property name="position">10</property>
                         <property name="name">Polygon Geometry</property>
                         <property name="dataType">javaObject</property>
                     </structure>
@@ -1415,65 +1420,61 @@
                     <property name="name">obs:uuid</property>
                     <property name="nativeName">obs:uuid</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">2</property>
                     <property name="name">attribute:name</property>
                     <property name="nativeName">attribute:name</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">3</property>
                     <property name="name">attribute:value</property>
                     <property name="nativeName">attribute:value</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">4</property>
                     <property name="name">attribute:stringvalue</property>
                     <property name="nativeName">attribute:stringvalue</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">12</property>
                 </structure>
                 <structure>
                     <property name="position">5</property>
                     <property name="name">attribute:numbervalue</property>
                     <property name="nativeName">attribute:numbervalue</property>
                     <property name="dataType">string</property>
-                    <property name="nativeDataType">2</property>
                 </structure>
                 <structure>
                     <property name="position">6</property>
                     <property name="name">attribute:booleanvalue</property>
                     <property name="nativeName">attribute:booleanvalue</property>
                     <property name="dataType">boolean</property>
-                    <property name="nativeDataType">16</property>
                 </structure>
                 <structure>
                     <property name="position">7</property>
                     <property name="name">attribute:datevalue</property>
                     <property name="nativeName">attribute:datevalue</property>
                     <property name="dataType">date</property>
-                    <property name="nativeDataType">91</property>
                 </structure>
-                 <structure>
+                <structure>
                     <property name="position">8</property>
-                    <property name="name">attribute:linegeometry</property>
-                    <property name="nativeName">attribute:linegeometry</property>
-                    <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">8203</property>
+                    <property name="name">attribute:timevalue</property>
+                    <property name="nativeName">attribute:timevalue</property>
+                    <property name="dataType">time</property>
                 </structure>
                 <structure>
                     <property name="position">9</property>
+                    <property name="name">attribute:linegeometry</property>
+                    <property name="nativeName">attribute:linegeometry</property>
+                    <property name="dataType">javaObject</property>
+                </structure>
+                <structure>
+                    <property name="position">10</property>
                     <property name="name">attribute:polygongeometry</property>
                     <property name="nativeName">attribute:polygongeometry</property>
                     <property name="dataType">javaObject</property>
-                    <property name="nativeDataType">8205</property>
                 </structure>
-                
             </list-property>
             <xml-property name="queryText"><![CDATA[]]></xml-property>
             <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
