@@ -172,8 +172,18 @@ public class ZipUtil {
 	        if (!Files.exists(path)) {
 	    		//assume empty directory and ignore
 	        }else if (!Files.isDirectory(path)) {
-	            ZipEntry zipEntry = new ZipEntry(entryName); 
+	        	//file
+	        	ZipEntry zipEntry = new ZipEntry(entryName);
 	            zOut.putNextEntry(zipEntry);
+	            if (Zipper.isCompressedFile(path)) {
+	    			//don't compress this entry
+	    			// You must set size, compressed size, and CRC for STORED entries
+	    			zipEntry.setMethod(ZipEntry.STORED);
+	    			long size = Files.size(path);
+	    			zipEntry.setSize(size);
+	    			zipEntry.setCompressedSize(size);
+	    			zipEntry.setCrc(Zipper.calculateCRC32(path));
+	    		}	    		
 	            try(InputStream in = Files.newInputStream(path)){
 	            	IOUtils.copy(in, zOut);
 	            }

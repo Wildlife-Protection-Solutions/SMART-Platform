@@ -23,19 +23,14 @@ package org.wcs.smart.smartcollect.xml;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.Deflater;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IIncidentXmlExporter;
@@ -49,6 +44,7 @@ import org.wcs.smart.smartcollect.model.SmartCollectWaypoint;
 import org.wcs.smart.smartcollect.xml.model.ObjectFactory;
 import org.wcs.smart.smartcollect.xml.model.WaypointType;
 import org.wcs.smart.util.ZipUtil;
+import org.wcs.smart.util.Zipper;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
@@ -153,19 +149,11 @@ public class IncidentExporter implements IIncidentXmlExporter{
 		monitor.subTask(Messages.IncidentExporter_progress4);
 		//create zip file
 		Path zipFile = f.getParent().resolve(name + ".zip"); //$NON-NLS-1$
-		try (ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(zipFile))){
-			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
+		Zipper zipper = Zipper.create(zipFile);
+		try {
 
 			/* add xml file to zip */
-			zout.putNextEntry(new ZipEntry(name	+ ".xml")); //$NON-NLS-1$
-			
-			byte[] buffer = new byte[1024];
-			int bytesRead;
-			try (InputStream inStream = Files.newInputStream(xmlFile)){
-				while ((bytesRead = inStream.read(buffer)) > 0) {
-					zout.write(buffer, 0, bytesRead);
-				}
-			}
+			zipper.addFile(xmlFile, name	+ ".xml"); //$NON-NLS-1$
 			monitor.worked(1);
 
 			//add waypoint & observation attachments
@@ -179,13 +167,10 @@ public class IncidentExporter implements IIncidentXmlExporter{
 				}
 			}
 			for (ISmartAttachment att : all) {
-				zout.putNextEntry(new ZipEntry(IncidentXmlManager.ATTACHMENT_DIR_NAME + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename()));
-				try {
-					EncryptUtils.decryptAttachment(att,zout);
-				}catch (Exception ex) {
-					//eat me
-				}
+				zipper.addFile(att, IncidentXmlManager.ATTACHMENT_DIR_NAME + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename());				
 			}
+		}finally {
+			zipper.close();
 		}
         monitor.worked(1);
         

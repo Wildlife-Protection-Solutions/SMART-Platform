@@ -22,19 +22,14 @@
 package org.wcs.smart.patrol.xml.export;
 
 import java.io.BufferedOutputStream;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.Deflater;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.ObservationHibernateManager;
@@ -53,6 +48,7 @@ import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution.PatrolXmlCont
 import org.wcs.smart.patrol.xml.model.v14.PatrolType;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
+import org.wcs.smart.util.Zipper;
 
 /**
  * Class responsible for exporting
@@ -170,25 +166,15 @@ public class PatrolExporter {
 		//create zip file
 		Path zipFile = f.getParent().resolve(name + ".zip"); //$NON-NLS-1$
 		
-		try(ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(zipFile))) {
-			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
-
-			/* add xml file to zip */
-			zout.putNextEntry(new ZipEntry(name	+ ".xml")); //$NON-NLS-1$
-			try(InputStream in = Files.newInputStream(xmlFile)){
-            	zout.write(in.readAllBytes());
-            }
-			zout.closeEntry();
+		Zipper zipper = Zipper.create(zipFile);
+		try {
 			
+			zipper.addFile(xmlFile, name + ".xml"); //$NON-NLS-1$
 			monitor.worked(1);
 
 			//add additional files
 			for (Path p : additionalFiles) {
-				zout.putNextEntry(new ZipEntry(p.getFileName().toString()));
-				try(InputStream in = Files.newInputStream(p)){
-	            	zout.write(in.readAllBytes());
-	            }
-	            zout.closeEntry();
+				zipper.addFile(p, p.getFileName().toString());				
 			}
 			
 			if (includePatrolAttachments) {
@@ -209,15 +195,11 @@ public class PatrolExporter {
 					}
 				}
 				for (ISmartAttachment att : allAttach){
-					zout.putNextEntry(new ZipEntry(PatrolXmlManager.ATTACHMENT_DIR_NAME + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename()));
-					try {
-						EncryptUtils.decryptAttachment(att, zout);
-					}catch (Exception ex) {
-						//unable to decrypt file; option to include encrypted version
-					}
-					zout.closeEntry();
+					zipper.addFile(att, PatrolXmlManager.ATTACHMENT_DIR_NAME + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename());					
 				}
 			}
+		}finally {
+			zipper.close();
 		}
         monitor.worked(1);
         

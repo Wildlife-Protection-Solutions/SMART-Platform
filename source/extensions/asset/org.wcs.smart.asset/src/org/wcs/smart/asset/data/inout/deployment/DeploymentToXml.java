@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.asset.data.inout.deployment;
 
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -29,9 +28,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.zip.Deflater;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
@@ -57,7 +53,6 @@ import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
 import org.wcs.smart.asset.model.AssetDeploymentDisruption;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointAttachment;
-import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -65,6 +60,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
+import org.wcs.smart.util.Zipper;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
@@ -116,30 +112,20 @@ public class DeploymentToXml {
 			task.subTask(Messages.DeploymentToXml_zippingTask);
 			task.setWorkRemaining(allAttach.size() + 1);
 			
-			try(ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(zipFile))) {
-				zout.setLevel(Deflater.DEFAULT_COMPRESSION);
-	
+			Zipper zip = Zipper.create(zipFile);
+			try {
 				/* add xml file to zip */
 				task.split(1);
-				ZipEntry zipEntry = new ZipEntry(XML_FILE);
-				zout.putNextEntry(zipEntry);
-				try (InputStream in = Files.newInputStream(xmlFile)) {
-					zout.write(in.readAllBytes());
-				}
-				zout.closeEntry();
-		        
+				zip.addFile(xmlFile, XML_FILE);
+					
 				/* add all attachments */
 				for (ISmartAttachment att : allAttach){
 					task.split(1);
-					zout.putNextEntry(new ZipEntry(ATTCHMENT_DIR + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename()));
-					try {
-						att.computeFileLocation(session);
-						EncryptUtils.decryptAttachment(att, zout);
-					}catch (Exception ex) {
-						//unable to decrypt file; option to include encrypted version
-						AssetPlugIn.log(ex.getMessage(), ex);
-					}
+					att.computeFileLocation(session);
+					zip.addFile(att, ATTCHMENT_DIR + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename());
 				}
+			}finally {
+				zip.close();
 			}
 		}finally{
 			try{

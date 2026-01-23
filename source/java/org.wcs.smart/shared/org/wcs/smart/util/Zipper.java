@@ -35,10 +35,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.CRC32;
+import java.util.zip.Checksum;
+import java.util.zip.ZipEntry;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.wcs.smart.cipher.EncryptUtils;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 
 
 /**
@@ -48,7 +53,20 @@ import org.apache.commons.io.IOUtils;
  */
 public class Zipper {
 
-	
+	private static final Set<String> ALREADY_COMPRESSED_EXTENSIONS = Set.of(
+	        // Images
+	        "jpg", "jpeg", "png", "gif", "webp", "heic", "heif", "tif", "tiff", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
+	        // Audio
+	        "mp3", "aac", "m4a", "ogg", "opus", "wma", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+	        // Video
+	        "mp4", "mkv", "mov", "avi", "wmv", "webm", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+	        // Archives / packages
+	        "zip", "gz", "tgz", "bz2", "xz", "7z", "rar", "jar", "war", "apk", "nupkg", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$
+	        // Documents (ZIP-based)
+	        "docx", "xlsx", "pptx", "odt", "ods", "odp", "epub", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
+	        // Fonts
+	        "woff", "woff2", "otf", "ttf" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	);
 	
 	private FileOutputStream fOut = null;
 	private BufferedOutputStream bOut = null;
@@ -180,12 +198,7 @@ public class Zipper {
     	if (!Files.exists(source)) {
     		//assume empty directory and ignore
     	}else if (!Files.isDirectory(source)) {
-            ZipArchiveEntry zipEntry = new ZipArchiveEntry(source.toAbsolutePath().normalize().toFile(), entryName); 
-            zOut.putArchiveEntry(zipEntry);
-            try(InputStream in = Files.newInputStream(source)){
-            	IOUtils.copy(in, zOut);
-            }
-            zOut.closeArchiveEntry();
+            addFile(source, entryName);
         } else {
         	
         	List<Path> kids = null;
@@ -214,4 +227,81 @@ public class Zipper {
 
         }
     }
+
+    /**
+     * 
+     * @param source MUST be a file
+     * @param entryName name of entry in zip file
+     * @throws IOException
+     */
+	public void addFile(Path source, String entryName) throws IOException {
+		if (Files.isDirectory(source)) {
+			throw new IOException("cannot call addfile(path, string) on a directory"); //$NON-NLS-1$
+		}
+		
+		//apparently this will sometimes lead to corrupt files due to the
+		//way the metadata and crc is calculated
+//      ZipArchiveEntry zipEntry = new ZipArchiveEntry(source.toAbsolutePath().normalize().toFile(), entryName);
+		
+		ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName);
+		
+		if (isCompressedFile(source)) {
+			//don't compress this entry
+			// You must set size, compressed size, and CRC for STORED entries
+			zipEntry.setMethod(ZipEntry.STORED);
+			long size = Files.size(source);
+			zipEntry.setSize(size);
+			zipEntry.setCompressedSize(size);
+			zipEntry.setCrc(calculateCRC32(source));
+		}
+		
+		//write entry			
+		zOut.putArchiveEntry(zipEntry);
+		try(InputStream in = Files.newInputStream(source)){
+			IOUtils.copy(in, zOut);
+		}
+		zOut.closeArchiveEntry();
+	}
+
+    /**
+     * 
+     * @param attachment - computeFileLocation MUST be called prior to this function
+     * @param entryName name of entry in zip file
+     * @throws Exception 
+     */
+	public void addFile(ISmartAttachment attachment, String entryName) throws Exception {
+		ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName);
+		//write entry
+		//we could dercypt the attachments to a file and determine the size, crc, then only encrypt is required
+		//but we aren't doing that at this time
+		zOut.putArchiveEntry(zipEntry);
+		EncryptUtils.decryptAttachment(attachment, zOut);
+		zOut.closeArchiveEntry();
+		
+
+	}
+	
+	public static boolean isCompressedFile(Path file) {
+		return isCompressedFile(file.getFileName().toString());
+	}
+	
+	public static boolean isCompressedFile(String filename) {
+		String ext = SharedUtils.getFilenameExtension(filename);
+		return (ALREADY_COMPRESSED_EXTENSIONS.contains(ext)); 
+	}
+	
+    public static long calculateCRC32(Path filePath) throws IOException {
+        Checksum checksum = new CRC32();
+		try (InputStream in = Files.newInputStream(filePath)) {
+            
+            byte[] buffer = new byte[8192];
+		    int len;
+		    while ((len = in.read(buffer)) != -1) {
+		    	checksum.update(buffer, 0, len);
+		    }
+        }
+        return checksum.getValue();
+    }
+	
+    
 }

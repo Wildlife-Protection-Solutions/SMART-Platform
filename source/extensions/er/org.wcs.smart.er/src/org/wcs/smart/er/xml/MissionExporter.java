@@ -23,18 +23,13 @@
 package org.wcs.smart.er.xml;
 
 import java.io.BufferedOutputStream;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.Deflater;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
@@ -47,6 +42,7 @@ import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
+import org.wcs.smart.util.Zipper;
 
 /**
  * Class responsible for exporting
@@ -137,46 +133,35 @@ public class MissionExporter {
 		monitor.subTask(Messages.MissionExporter_3);
 		//create zip file
 		Path zipFile = f.getParent().resolve(name + ".zip"); //$NON-NLS-1$
-		try(ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(zipFile))) {
-			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
-
+		
+		Zipper zipper = Zipper.create(zipFile);
+		try {
 			/* add xml file to zip */
-			zout.putNextEntry(new ZipEntry(name	+ ".xml")); //$NON-NLS-1$
-
-			byte[] buffer = new byte[1024];
-			int bytesRead;
-			try(InputStream inStream = Files.newInputStream(xmlFile)) {
-				while ((bytesRead = inStream.read(buffer)) > 0) {
-					zout.write(buffer, 0, bytesRead);
-				}
-			}
-			
+			zipper.addFile(xmlFile, name	+ ".xml"); //$NON-NLS-1$
 			monitor.worked(1);
-
+	
 			/* add all attachments */
 			List<ISmartAttachment> allAttach = new ArrayList<ISmartAttachment>();
-			for (MissionDay md : mission.getMissionDays()){
+			for (MissionDay md : mission.getMissionDays()) {
 				for (SurveyWaypoint wp : md.getWaypoints()) {
-					if (wp.getWaypoint().getAttachments() != null){
+					if (wp.getWaypoint().getAttachments() != null) {
 						allAttach.addAll(wp.getWaypoint().getAttachments());
 					}
-					for (WaypointObservation wo : wp.getWaypoint().getAllObservations()){
-						if (wo.getAttachments() != null){
+					for (WaypointObservation wo : wp.getWaypoint().getAllObservations()) {
+						if (wo.getAttachments() != null) {
 							allAttach.addAll(wo.getAttachments());
 						}
 					}
 				}
 			}
+			
 			for (ISmartAttachment att : allAttach){
-				zout.putNextEntry(new ZipEntry(MissionXmlManager.ATTACHMENT_DIR_NAME + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename()));
-				try {
-					EncryptUtils.decryptAttachment(att, zout);
-				}catch (Exception ex) {
-					//eat me
-				}
+				zipper.addFile(att, MissionXmlManager.ATTACHMENT_DIR_NAME + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename());				
 			}
+	        monitor.worked(1);
+		}finally {
+			zipper.close();
 		}
-        monitor.worked(1);
         
         try{
         	//delete temp file

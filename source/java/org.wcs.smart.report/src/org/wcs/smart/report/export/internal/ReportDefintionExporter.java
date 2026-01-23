@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.report.export.internal;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,9 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.zip.Deflater;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.model.api.DataSetHandle;
@@ -59,6 +55,7 @@ import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
+import org.wcs.smart.util.Zipper;
 
 /**
  * Report exporter that exports the report
@@ -89,17 +86,18 @@ public class ReportDefintionExporter implements IReportExporter {
 		
 		if (!SmartUtils.createDirectory(file.getParent())) return;
 		
-		try(ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(file))){
-			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
+		Zipper zipper = Zipper.create(file);
+		
+		try{
 			
 			//export queries
 			monitor.subTask(Messages.ReportDefintionExporter_Progress_Queries);
-			exportQueries(zout, report);
+			exportQueries(zipper, report);
 			monitor.worked(1);
 
 			//add report file
 			monitor.subTask(Messages.ReportDefintionExporter_Progress_Definition);
-			addFile(ReportPlugIn.getDefault().getReportFile(report), report.getFilename(), zout);
+			zipper.addFile(ReportPlugIn.getDefault().getReportFile(report), report.getFilename());
 			monitor.worked(1);
 			
 			//add report info file
@@ -109,12 +107,14 @@ public class ReportDefintionExporter implements IReportExporter {
 			Path reportInfo = Files.createTempFile(filename,".tmp"); //$NON-NLS-1$ 
 			try{
 				writeReportInfo(reportInfo, report);
-				addFile(reportInfo, filename, zout);
+				zipper.addFile(reportInfo, filename);
 			}finally{
 				Files.delete(reportInfo);
 			}
 			monitor.worked(1);
-		}		
+		}finally {
+			zipper.close();
+		}
 	}
 	
 	/**
@@ -154,7 +154,7 @@ public class ReportDefintionExporter implements IReportExporter {
 	 * @param report
 	 * @throws Exception
 	 */
-	private void exportQueries(ZipOutputStream zout, Report report) throws Exception{
+	private void exportQueries(Zipper zipper, Report report) throws Exception{
 		
 		Path reportFile = ReportPlugIn.getReportDirectory(report.getConservationArea()).resolve(report.getFilename());
 
@@ -183,7 +183,7 @@ public class ReportDefintionExporter implements IReportExporter {
 						}	
 					
 						if (smartQuery == null) throw new Exception(Messages.ReportDefintionExporter_Error_LoadingQueryDef);
-						exportQuery(smartQuery, zout);
+						exportQuery(smartQuery, zipper);
 					}
 				}
 			}
@@ -198,7 +198,7 @@ public class ReportDefintionExporter implements IReportExporter {
 	 * @param zipOut
 	 * @throws Exception
 	 */
-	private void exportQuery(Query query, ZipOutputStream zipOut) throws Exception{
+	private void exportQuery(Query query, Zipper zipper) throws Exception{
 		List<IQueryExporter> queryExports = QueryExportEngine.getQueryExports(query);
 		IQueryExporter definitionExporter = null;
 		for (IQueryExporter exporter : queryExports){
@@ -213,30 +213,9 @@ public class ReportDefintionExporter implements IReportExporter {
 		Path tmpFile = Files.createTempFile(UuidUtils.uuidToString(query.getUuid()), QUERYFILE_EXTENSION);
 		try{
 			definitionExporter.export(query, null, tmpFile, null, new NullProgressMonitor());
-			addFile(tmpFile, UuidUtils.uuidToString(query.getUuid()) + QUERYFILE_EXTENSION, zipOut);
+			zipper.addFile(tmpFile, UuidUtils.uuidToString(query.getUuid()) + QUERYFILE_EXTENSION);
 		}finally{
 			Files.delete(tmpFile);
-		}
-	}
-	
-	
-	/**
-	 * Adds the given file to the zip output stream
-	 * 
-	 * @param f
-	 * @param zout
-	 * @throws Exception
-	 */
-	private void addFile(Path f, String name, ZipOutputStream zout) throws Exception{
-		zout.putNextEntry(new ZipEntry(name));
-		
-
-		byte[] buffer = new byte[1024];
-		int bytesRead;
-		try (InputStream inStream = Files.newInputStream(f)){
-			while ((bytesRead = inStream.read(buffer)) > 0) {
-				zout.write(buffer, 0, bytesRead);
-			}
 		}
 	}
 	

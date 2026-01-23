@@ -163,7 +163,7 @@ public class IconExporter {
 	            mon.worked(1);
 	            for (int i = 0; i < iconFiles.size(); i ++) {
 	            	
-	            	zipEntry = new ZipArchiveEntry(iconFiles.get(i).toFile(), toFile.get(i)); 
+	            	zipEntry = new ZipArchiveEntry(toFile.get(i)); 
 		            zOut.putArchiveEntry(zipEntry);
 		            try(FileInputStream in = new FileInputStream(iconFiles.get(i).toFile())){
 		            	IOUtils.copy(in, zOut);

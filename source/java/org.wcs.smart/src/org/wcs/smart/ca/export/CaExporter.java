@@ -34,7 +34,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -50,7 +49,6 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.export.DerbyCaDataExportEngine;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
-import org.wcs.smart.util.ZipUtil;
 
 /**
  * Main process for exporting a conservation area.
@@ -150,14 +148,6 @@ public class CaExporter {
 			
 			return engine;
 		}
-	}
-	
-	protected void zipTempDirectory(Path tempDir, Path destFile, IProgressMonitor monitor) throws Exception{
-		List<Path> files = null;
-		try(Stream<Path> stream = Files.list(tempDir)){
-			files = stream.collect(Collectors.toList());
-		}
-		ZipUtil.createZip(files, destFile, monitor);		
 	}
 	
 	/**

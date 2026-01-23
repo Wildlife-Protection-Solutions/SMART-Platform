@@ -88,7 +88,7 @@ public class SharedUtils {
 	 * @return
 	 */
 	public static String getFilenameExtension(String part) {
-		int index = part.lastIndexOf('.');
+		int index = part.lastIndexOf('.');		
 		if (index < 0) return ""; //$NON-NLS-1$
 		return part.substring(index+1);
 	}

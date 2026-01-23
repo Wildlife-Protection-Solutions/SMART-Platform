@@ -32,11 +32,13 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.util.Zipper;
 
 /**
  * A collection of zip utilities.
@@ -122,12 +124,24 @@ public class ZipUtil {
     	if (!Files.exists(path)) {
     		//assume empty directory and ignore
     	}else if (!Files.isDirectory(path)) {
-            ZipArchiveEntry zipEntry = new ZipArchiveEntry(path.toAbsolutePath().normalize().toFile(), entryName); 
-            zOut.putArchiveEntry(zipEntry);
-            try(InputStream in = Files.newInputStream(path)){
-            	IOUtils.copy(in, zOut);
-            }
-            zOut.closeArchiveEntry();
+            ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName); 
+            if (Zipper.isCompressedFile(path)) {
+    			//don't compress this entry
+    			// You must set size, compressed size, and CRC for STORED entries
+    			zipEntry.setMethod(ZipEntry.STORED);
+    			long size = Files.size(path);
+    			zipEntry.setSize(size);
+    			zipEntry.setCompressedSize(size);
+    			zipEntry.setCrc(Zipper.calculateCRC32(path));
+    		}
+    		
+    		//write entry			
+    		zOut.putArchiveEntry(zipEntry);
+    		try(InputStream in = Files.newInputStream(path)){
+    			IOUtils.copy(in, zOut);
+    		}
+    		zOut.closeArchiveEntry();
+    		
         } else {
         	
         	List<Path> kids = null;
