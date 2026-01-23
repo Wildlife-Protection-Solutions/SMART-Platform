@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.i2.xml;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -63,6 +63,7 @@ import org.wcs.smart.i2.xml.entity.Record;
 import org.wcs.smart.i2.xml.entity.Relationship;
 import org.wcs.smart.i2.xml.record.RecordType;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.SanitizingXmlFileWriter;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
@@ -168,12 +169,14 @@ public class EntityToXml {
 					for (IntelRecord r : recordsToExport) {
 						Path recordPath = recordsPath.resolve(UuidUtils.uuidToString(r.getUuid()) + ".xml"); //$NON-NLS-1$
 						RecordType xmlRecord = RecordXmlExporter.convertRecord(r, new ArrayList<>(), session);
-						try(OutputStream out = Files.newOutputStream(recordPath)){
+						try(BufferedWriter fw= Files.newBufferedWriter(recordPath);
+								SanitizingXmlFileWriter writer = new SanitizingXmlFileWriter(fw)){
+							
 							JAXBContext context = JAXBContext.newInstance(RecordXmlExporter.METADATA_CLASSES_PACKAGE);
 							Marshaller marshaller = context.createMarshaller();
 							marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 							org.wcs.smart.i2.xml.record.ObjectFactory factory = new org.wcs.smart.i2.xml.record.ObjectFactory();
-							marshaller.marshal(factory.createIntelRecord(xmlRecord), out);
+							marshaller.marshal(factory.createIntelRecord(xmlRecord), writer);
 						}
 						progress.split(1);		
 					}
@@ -254,13 +257,18 @@ public class EntityToXml {
 		progress.worked(1);
 	}
 	
-	private void writeToFile(InstanceData data, Path xmlFile) throws JAXBException {
+	private void writeToFile(InstanceData data, Path xmlFile) throws JAXBException, IOException {
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		ObjectFactory objFactor = new ObjectFactory();
 		JAXBElement<InstanceData> element = objFactor.createData(data);
-		marshaller.marshal(element, xmlFile.toFile());
+		
+		try(BufferedWriter fw= Files.newBufferedWriter(xmlFile.toAbsolutePath());
+				SanitizingXmlFileWriter writer = new SanitizingXmlFileWriter(fw)){
+			marshaller.marshal(element, writer);
+		}
+		
 	}
 	
 	private List<Entity> convertEntities(Set<IntelEntity> ientities, boolean includeRecords, IProgressMonitor monitor){

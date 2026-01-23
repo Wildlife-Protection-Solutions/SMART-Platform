@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.i2.xml;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
@@ -71,6 +71,7 @@ import org.wcs.smart.i2.xml.record.ObservationType;
 import org.wcs.smart.i2.xml.record.RecordAttributeType;
 import org.wcs.smart.i2.xml.record.RecordType;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.SanitizingXmlFileWriter;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
@@ -95,12 +96,15 @@ public class RecordXmlExporter {
 	
 	public static final String ATTACHMENT_DIR = "attachments"; //$NON-NLS-1$
 	
-	public static void writeRecord(RecordType record, OutputStream file) throws JAXBException, IOException{
+	private static void writeRecord(RecordType record, BufferedWriter fw) throws JAXBException, IOException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		ObjectFactory factory = new ObjectFactory();
-		marshaller.marshal(factory.createIntelRecord(record), file);
+		
+		try(SanitizingXmlFileWriter writer = new SanitizingXmlFileWriter(fw)){
+			marshaller.marshal(factory.createIntelRecord(record), writer);
+		}
 	}
 	
 	private boolean overwriteAll = false;
@@ -132,7 +136,7 @@ public class RecordXmlExporter {
 		}
 		
 		Path xmlFile = directory.resolve(fileName + ".xml"); //$NON-NLS-1$
-		try(OutputStream out = Files.newOutputStream(xmlFile)){
+		try(BufferedWriter out = Files.newBufferedWriter(xmlFile)){
 			writeRecord(xmlRecord, out);
 		}
 		Path attachDir = null;
@@ -204,7 +208,7 @@ public class RecordXmlExporter {
 		
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		Path xmlFile = tempDir.resolve(fileName + ".xml"); //$NON-NLS-1$
-		try(OutputStream out = Files.newOutputStream(xmlFile)){
+		try(BufferedWriter out = Files.newBufferedWriter(xmlFile)){
 			writeRecord(xmlRecord, out);
 		}
 		Path attachDir = null;
