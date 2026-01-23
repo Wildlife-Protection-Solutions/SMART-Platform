@@ -471,12 +471,16 @@ public class XmlToEntity {
 	}
 	
 	public IntelRecord findRecord(String title, String sourceKey, String entityId) {
-		IntelRecordSource source = QueryFactory.buildQuery(session, IntelRecordSource.class,
-				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"keyId", sourceKey}).uniqueResult(); //$NON-NLS-1$
-		if (source == null) {
-			warnings.add(MessageFormat.format(Messages.XmlToEntity_RecordSrcNotfound, sourceKey, title, entityId));
-			return null;
+		IntelRecordSource source = null;
+	
+		if (sourceKey != null) {
+			source = QueryFactory.buildQuery(session, IntelRecordSource.class,
+					new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+					new Object[] {"keyId", sourceKey}).uniqueResult(); //$NON-NLS-1$
+			if (source == null) {
+				warnings.add(MessageFormat.format(Messages.XmlToEntity_RecordSrcNotfound, sourceKey, title, entityId));
+				return null;
+			}
 		}
 		
 		List<IntelRecord> records = QueryFactory.buildQuery(session, IntelRecord.class,
@@ -486,9 +490,9 @@ public class XmlToEntity {
 		if (records.size() == 1) {
 			return records.get(0);
 		}else if (records.size() == 0) {
-			warnings.add(MessageFormat.format(Messages.XmlToEntity_RecordNotFound, title, source.getName(), entityId));
+			warnings.add(MessageFormat.format(Messages.XmlToEntity_RecordNotFound, title, source == null ? "<none>" : source.getName(), entityId));
 		}else if (records.size() > 1) {
-			warnings.add(MessageFormat.format(Messages.XmlToEntity_MultipleRecordsFound, title, source.getName(), entityId));
+			warnings.add(MessageFormat.format(Messages.XmlToEntity_MultipleRecordsFound, title, source == null ? "<none>" : source.getName(), entityId));
 		}
 		return null;
 	}
