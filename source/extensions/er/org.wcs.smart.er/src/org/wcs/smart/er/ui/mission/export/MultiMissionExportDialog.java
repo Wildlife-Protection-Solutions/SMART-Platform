@@ -51,9 +51,9 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Dialog to allow users to export multiple patrols at once.
+ * Dialog to allow users to export multiple missions at once.
  * 
- * This code performs validation to ensure at least one patrol is selected
+ * This code performs validation to ensure at least one mission is selected
  * and that the output directory is a valid directory.
  * 
  * @author Jeff
@@ -72,20 +72,23 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog {
 	}
 
 	private SurveyFilter currentFilter;
-	
+	private List<SurveyMissionProxy> currentSelection ;
 	
 	/**
 	 * Creates a new dialog.
 	 * 
 	 * @param parentShell parent shell
+	 * 
 	 */
-	public MultiMissionExportDialog(Shell parentShell, SurveyFilter defaultFilter) {
+	public MultiMissionExportDialog(Shell parentShell, SurveyFilter defaultFilter, List<SurveyMissionProxy> currentSelection ) {
 		super(parentShell, Messages.MultiMissionExportDialog_FilterLabel);
+		
 		if (defaultFilter != null) {
 			currentFilter = defaultFilter;
 		}else {
 			currentFilter =  SurveyFilter.newInstance();
-		}	
+		}
+		this.currentSelection = currentSelection;
 	}
 
 	@Override
@@ -175,6 +178,7 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog {
 						if (getTreeViewer().getTree().isDisposed()) return;
 						getTreeViewer().setInput(dataList);
 						getTreeViewer().refresh();
+						getTreeViewer().setCheckedElements(currentSelection.toArray());
 					}
 				});
 				return Status.OK_STATUS;

@@ -387,6 +387,7 @@
             locationURI="popup:org.wcs.smart.er.surveyDesignListView">
          <command
                commandId="org.wcs.smart.er.editItem"
+               id="org.wcs.smart.er.editItem"
                style="push"
                tooltip="%edit.command.tooltip">
          </command>
@@ -419,6 +420,7 @@
          </separator>
          <command
                commandId="org.wcs.smart.er.delete"
+               id="org.wcs.smart.er.delete"
                style="push"
                tooltip="%survey.delete.command.tooltip1">
          </command>

@@ -26,23 +26,31 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+
+import javax.inject.Named;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.hibernate.SurveyFilter;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.ui.SurveyDesignListView;
@@ -61,8 +69,9 @@ import org.wcs.smart.util.UuidUtils;
 public class MissionExportHandler{
 	
 	@Execute
-	public void execute(final Shell shell, EPartService partService){
-		
+	public void execute(final Shell shell, @Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection,
+			EPartService partService){
+
 		SurveyFilter filter = null;
 		try {
 			MPart pp = partService.findPart(SurveyDesignListView.ID);
@@ -73,7 +82,15 @@ public class MissionExportHandler{
 			ex.printStackTrace();
 		}
 		
-		MultiMissionExportDialog dialog = new MultiMissionExportDialog(shell, filter);
+		List<SurveyMissionProxy> currentSelection = new ArrayList<>();
+		if (thisSelection != null && (thisSelection instanceof IStructuredSelection)) {
+			for(Iterator<?> item = ((IStructuredSelection)thisSelection).iterator(); item.hasNext();) {
+				Object i = (Object)item.next();
+				if (i instanceof SurveyMissionProxy si) currentSelection.add(si);
+			}
+		}
+		
+		MultiMissionExportDialog dialog = new MultiMissionExportDialog(shell, filter, currentSelection);
 		if (dialog.open() != IDialogConstants.OK_ID) return;
 
 		final List<UUID> missions = dialog.getObjectUuids();	

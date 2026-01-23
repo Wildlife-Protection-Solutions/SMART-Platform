@@ -26,7 +26,9 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -35,6 +37,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.commands.ECommandService;
+import org.eclipse.e4.core.commands.EHandlerService;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.di.extensions.EventTopic;
@@ -45,6 +49,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.e4.ui.workbench.renderers.swt.HandledContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -79,7 +84,9 @@ import org.wcs.smart.er.hibernate.SurveyDesignProxy;
 import org.wcs.smart.er.hibernate.SurveyFilter;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.hibernate.SurveyMissionProxy;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy.Type;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.internal.MissionMerger;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
@@ -120,8 +127,14 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 	@Inject private IMenuService menuService;
 	@Inject private ESelectionService selService; 
 	@Inject private IEclipseContext context;
+	@Inject private ECommandService eCommandService;
+	@Inject private EHandlerService eHandlerService;
+	
 	
 	private MenuItem moveMissionMenu = null;
+	private MenuItem mergeMissionMenu = null;
+	private MenuItem exportMissionMenu = null;
+	private MenuItem sepMissionMenu = null;
 	
 	private ISurveyEventListener listener = new ISurveyEventListener(){
 		@Override
@@ -198,7 +211,7 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		
 		bar = new CTabFolder(parent, SWT.NONE);
 
-		lstViewer = new TreeViewer(bar, SWT.NONE);
+		lstViewer = new TreeViewer(bar, SWT.MULTI);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		lstViewer.setLabelProvider(SurveyDesignLabelProvider.getInstance());
@@ -244,37 +257,103 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		
 		menu.addListener(SWT.Show, e->{
 			//if (e.widget != lstViewer.getControl()) return;
-			if (moveMissionMenu != null) moveMissionMenu.dispose();
-			if (!lstViewer.getControl().isVisible()) return;
-			Object s = lstViewer.getStructuredSelection().getFirstElement();
-			if (s == null) return;
-			if (!(s instanceof SurveyMissionProxy)) return;
-			if (((SurveyMissionProxy)s).getParent() == null) return;
-			
-			List<Survey> options = null;
-			Mission mission = null;
-			try(Session session = HibernateManager.openSession()){
-				
-				options = session.createQuery("FROM Survey WHERE surveyDesign.uuid = :sd", Survey.class) //$NON-NLS-1$
-						.setParameter("sd", ((SurveyMissionProxy)s).getParent().getDesignUuid()) //$NON-NLS-1$
-						.list();
-				options.sort((a,b)->Collator.getInstance().compare(b.getId(), a.getId()));
-				
-				mission = session.get(Mission.class, ((SurveyMissionProxy)s).getUuid());
-				options.remove(mission.getSurvey());
+			for(MenuItem mi : new MenuItem[] {moveMissionMenu, mergeMissionMenu, exportMissionMenu, sepMissionMenu} ) {
+				if (mi != null) mi.dispose();
 			}
-			if (options == null || options.isEmpty()) return;
+			if (!lstViewer.getControl().isVisible()) return;
 			
-			moveMissionMenu = new MenuItem(menu, SWT.CASCADE, 1);
-			moveMissionMenu.setText(Messages.SurveyDesignListView_MoveToSurvey);
+			int surveycnt = 0;
+			int missioncnt = 0;
+			Set<UUID> designs = new HashSet<>();
+			for (Object x : lstViewer.getStructuredSelection()) {
+				if (x instanceof SurveyMissionProxy sp) {
+					if (sp.getType() == Type.MISSION) {
+						missioncnt++;
+						designs.add(sp.getParent().getDesignUuid());
+					}
+					if (sp.getType() == Type.SURVEY) {
+						surveycnt++;
+						designs.add(sp.getDesignUuid());
+					}
+					
+				}else {
+					return;
+				}
+			}
 			
-			Menu surveyMenu = new Menu(moveMissionMenu);
-			moveMissionMenu.setMenu(surveyMenu);
-			final Mission fmission = mission;
-			for (Survey op : options) {
-				MenuItem ni = new MenuItem(surveyMenu, SWT.PUSH);
-				ni.setText(op.getId());
-				ni.addListener(SWT.Selection, evt->updateMission(fmission, op));
+			boolean addMoveOption = false;
+			boolean addMergeOption = false;
+			boolean exportOption = missioncnt > 0;
+			boolean addSep = false;
+			boolean showEdit = (surveycnt + missioncnt) == 1;
+			
+			if (surveycnt == 0 && missioncnt == 1) {
+				addMoveOption = true;
+			}else if (surveycnt == 0 && missioncnt > 1) {
+				addMoveOption = true;
+				addMergeOption = true;
+			}else if (surveycnt > 0 && missioncnt > 0) {
+				showEdit = false;				
+			}
+			
+			for (MenuItem mi : menu.getItems()) {
+				if (mi.getData() instanceof HandledContributionItem hi) {
+					if (hi.getId().equals("org.wcs.smart.er.editItem")){ //$NON-NLS-1$
+						mi.setEnabled(showEdit);
+					}
+				}
+			}
+			
+			int mnupos = 1;
+			
+			if (addMoveOption && designs.size() == 1) {
+				//add an move option
+				List<Survey> options = null;
+				Mission mission = null;
+				SurveyMissionProxy proxy = (SurveyMissionProxy) lstViewer.getStructuredSelection().getFirstElement();
+				try(Session session = HibernateManager.openSession()){
+					
+					options = session.createQuery("FROM Survey WHERE surveyDesign.uuid = :sd", Survey.class) //$NON-NLS-1$
+							.setParameter("sd", proxy.getParent().getDesignUuid()) //$NON-NLS-1$
+							.list();
+					options.sort((a,b)->Collator.getInstance().compare(b.getId(), a.getId()));
+					
+					mission = session.get(Mission.class, proxy.getUuid());
+					options.remove(mission.getSurvey());
+				}
+				
+				if (options != null && !options.isEmpty()) {				
+					moveMissionMenu = new MenuItem(menu, SWT.CASCADE, mnupos++);
+					moveMissionMenu.setText(Messages.SurveyDesignListView_MoveToSurvey);
+					
+					Menu surveyMenu = new Menu(moveMissionMenu);
+					moveMissionMenu.setMenu(surveyMenu);
+					final Mission fmission = mission;
+					for (Survey op : options) {
+						MenuItem ni = new MenuItem(surveyMenu, SWT.PUSH);
+						ni.setText(op.getId());
+						ni.addListener(SWT.Selection, evt->updateMission(fmission, op));
+					}
+					
+					addSep=true;
+				}
+			}
+			
+			if (addMergeOption  && designs.size() == 1) {
+				mergeMissionMenu = new MenuItem(menu, SWT.PUSH, mnupos++);
+				mergeMissionMenu.setText(Messages.SurveyDesignListView_MergeMissions);
+				mergeMissionMenu.addListener(SWT.Selection, evt->mergeMissions());	
+				addSep=true;
+			}
+			
+			if (exportOption) {
+				exportMissionMenu = new MenuItem(menu, SWT.PUSH, mnupos++);
+				exportMissionMenu.setText(MessageFormat.format("{0}...", Messages.MultiMissionExportDialog_Title)); //$NON-NLS-1$
+				exportMissionMenu.addListener(SWT.Selection, evt->exportMissions());
+				addSep=true;
+			}
+			if (addSep) {
+				sepMissionMenu = new MenuItem(menu, SWT.SEPARATOR, 1);
 			}
 		});
 		
@@ -289,7 +368,6 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 				Viewer active = null;
 				if (bar.getSelectionIndex() == 0){
 					active = lstViewer;
-					
 				}else{
 					active = designViewer;
 				}
@@ -299,6 +377,22 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		bar.setSelection(0);
 	}
 
+	private void exportMissions() {
+		eHandlerService.executeHandler(eCommandService.createCommand("org.wcs.smart.er.missionExportHandler")); //$NON-NLS-1$
+	}
+	
+	private void mergeMissions() {
+		Set<UUID> uuids = new HashSet<>();
+		for (Object item : lstViewer.getStructuredSelection()) {
+			if (item instanceof SurveyMissionProxy proxy ) {
+				if (proxy.getType() == Type.MISSION) {
+					uuids.add(proxy.getUuid());
+				}
+			}
+		}
+		(new MissionMerger()).doMergeMissions(getShell(), uuids);
+	}
+	
 	private void updateMission(Mission mission, Survey survey) {
 		try(Session session = HibernateManager.openSession()){
 			mission = session.get(Mission.class, mission.getUuid());
@@ -364,15 +458,9 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 
 				@Override
 				public void run() {
-//					Object[] path = lstViewer.getExpandedElements();
 					lstViewer.setInput(ins);
 					lstViewer.refresh();
-//					if (path != null) {
-//						lstViewer.setExpandedElements(path);
-//					}else {
-						lstViewer.expandToLevel(2);
-//					}
-					
+					lstViewer.expandToLevel(2);				
 					designViewer.setInput(designs);
 				}});
 			return Status.OK_STATUS;

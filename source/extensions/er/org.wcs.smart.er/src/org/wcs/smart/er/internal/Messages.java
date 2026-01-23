@@ -426,6 +426,40 @@ public class Messages extends NLS {
 	public static String MissionMapWaypointDefaultStyle_MapName;
 	public static String MissionMapWaypointRawDefaultStyle_LayerName;
 	public static String MissionMapWaypointRawDefaultStyle_MapName;
+	public static String MissionMergeDialog_DialogMessage;
+
+	public static String MissionMergeDialog_DialogTitle;
+
+	public static String MissionMergeDialog_InvalidNumberValue;
+
+	public static String MissionMergeDialog_LeaderRequired;
+
+	public static String MissionMergeDialog_MergeMessage;
+
+	public static String MissionMergeDialog_MergeMetadata;
+
+	public static String MissionMergeDialog_SurveyRequired;
+
+	public static String MissionMerger_Cancelled;
+
+	public static String MissionMerger_ConfirmTitle;
+
+	public static String MissionMerger_MaxDays;
+
+	public static String MissionMerger_MaxDays2;
+
+	public static String MissionMerger_MergeError;
+
+	public static String MissionMerger_MissingDay;
+
+	public static String MissionMerger_MissionsRequired;
+
+	public static String MissionMerger_processing;
+
+	public static String MissionMerger_SurveyDesignError;
+
+	public static String MissionMerger_TaskName;
+
 	public static String MissionMetaConfigDialog_Message;
 	public static String MissionMetaConfigDialog_Title;
 	public static String MissionPropertiesComposite_AllMissionAttributes;
@@ -658,6 +692,8 @@ public class Messages extends NLS {
 	public static String SurveyDesignListView_DesignsTabName;
 	public static String SurveyDesignListView_LoadError;
 	public static String SurveyDesignListView_LoadingJobName;
+	public static String SurveyDesignListView_MergeMissions;
+
 	public static String SurveyDesignListView_MoveError;
 	public static String SurveyDesignListView_MoveToSurvey;
 	public static String SurveyDesignListView_SurveyMissionTabName;
