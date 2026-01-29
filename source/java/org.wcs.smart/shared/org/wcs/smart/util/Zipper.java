@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.CRC32;
@@ -74,8 +75,23 @@ public class Zipper {
 	
 	private Set<Path> excludes;
 	
+	private Consumer<Path> onFileAdded;
+	
 	public static Zipper create(Path fileName) throws FileNotFoundException {
 		return new Zipper(fileName);
+	}
+	
+	/**
+	 *  
+	 * @param fileName
+	 * @param onFileAdded called each time a file is added to the zip file; I used this for managing progress in the desktop
+	 * @return
+	 * @throws FileNotFoundException
+	 */
+	public static Zipper create(Path fileName, Consumer<Path> onFileAdded) throws FileNotFoundException {
+		Zipper zip =  new Zipper(fileName);
+		zip.onFileAdded = onFileAdded;
+		return zip;
 	}
 	
 	private Zipper (Path fileName) throws FileNotFoundException {
@@ -261,6 +277,8 @@ public class Zipper {
 			IOUtils.copy(in, zOut);
 		}
 		zOut.closeArchiveEntry();
+		
+		if (this.onFileAdded != null) onFileAdded.accept(source);
 	}
 
     /**
@@ -286,7 +304,7 @@ public class Zipper {
 	}
 	
 	public static boolean isCompressedFile(String filename) {
-		String ext = SharedUtils.getFilenameExtension(filename);
+		String ext = SharedUtils.getFilenameExtension(filename).toLowerCase();
 		return (ALREADY_COMPRESSED_EXTENSIONS.contains(ext)); 
 	}
 	

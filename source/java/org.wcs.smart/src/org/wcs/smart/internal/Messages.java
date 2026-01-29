@@ -698,6 +698,7 @@ public class Messages extends NLS {
 	public static String DerbyBackupEngine_CreateDirectoryError;
 	public static String DerbyBackupEngine_DeleteOutputFileError;
 	public static String DerbyBackupEngine_ProgressMessage;
+	public static String DerbyCaDataExportEngine_CompressingTaskName;
 	public static String DerbyRestoreEngine_BackupExtractionError;
 	public static String DerbyRestoreEngine_ButtonText;
 	public static String DerbyRestoreEngine_ConfigurationError;

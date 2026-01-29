@@ -31,10 +31,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.query.MutationQuery;
 import org.hibernate.query.Query;
@@ -44,6 +47,7 @@ import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.TableInfo;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.Zipper;
@@ -262,12 +266,42 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	
 	@Override
 	public void createExportFile(Path destZipFile, IProgressMonitor progress) throws IOException {
-		Zipper zipper = Zipper.create(destZipFile)
+		
+		SubMonitor sub = SubMonitor.convert(progress);
+		progress.subTask(Messages.DerbyCaDataExportEngine_CompressingTaskName);
+		long totalfiles = 0;
+		try (Stream<Path> stream = Files.walk(this.outputLocation)){
+			totalfiles = stream.filter(p->Files.isRegularFile(p) && !this.excludefiles.contains(p)).count();
+		}
+		for (Entry<Path,Path> toAdd : this.pathsToZip.entrySet()) {
+			try (Stream<Path> stream = Files.walk(toAdd.getKey())){
+				totalfiles += stream.filter(p->Files.isRegularFile(p) && !this.excludefiles.contains(p)).count();
+			}
+		}
+		double ftotalfiles = totalfiles;
+		sub.beginTask(Messages.DerbyCaDataExportEngine_CompressingTaskName, 100);
+		Consumer<Path> updater = new Consumer<Path>() {
+			long cnt; 
+			long last = 0;
+			@Override
+			public void accept(Path t) {
+				cnt ++;
+				int next = (int)Math.round((cnt / ftotalfiles) * 100.0);				
+				if (next != last) {
+					sub.worked(1);
+					sub.checkCanceled();
+					last = next;
+				}
+			}};
+			
+		Zipper zipper = Zipper.create(destZipFile, updater)
 			.excludeFiles(this.excludefiles)
 			.addChildrenFiles(this.outputLocation);
+		
 		for (Entry<Path,Path> toAdd : this.pathsToZip.entrySet()) {
 			zipper.addMappedChildren(toAdd.getKey(), toAdd.getValue());
 		}
+		
 		zipper.close();
 	}
 

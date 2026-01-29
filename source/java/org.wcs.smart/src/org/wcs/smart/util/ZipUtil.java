@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -96,19 +97,56 @@ public class ZipUtil {
 
         SubMonitor progress = SubMonitor.convert(monitor, Messages.ZipUtil_Progress_CreatingZip, 100);
         progress.subTask(Messages.ZipUtil_Progress_CreatingZip);
-        try (OutputStream fOut =Files.newOutputStream(outputZipFile);
-        	 BufferedOutputStream bOut = new BufferedOutputStream(fOut);
-        	ZipOutputStream tOut = new ZipOutputStream(bOut);){
-            
-            progress.setWorkRemaining(directories.length);
-            for (int i = 0; i < directories.length; i ++){
-            	Path f = directories[i];
-            	if (!itemsToExclude.contains(f)) {
-            		addFileToZip(tOut, directories[i], "", itemsToExclude, progress.split(1)); //$NON-NLS-1$
-            	}
-            }
-            
+        
+        long cnt = 0;
+    	for (Path p : directories) {
+    		try(Stream<Path> stream = Files.walk(p)){
+    			cnt += stream.filter(f->  Files.isRegularFile(f) && !itemsToExclude.contains(f) ).count();
+    		}
+    	}
+    	double ftotalfiles = cnt;
+        progress.setWorkRemaining(100);
+
+    	Consumer<Path> updater = new Consumer<Path>() {
+			long cnt; 
+			long last = 0;
+			@Override
+			public void accept(Path t) {
+				cnt ++;
+				int next = (int)Math.round((cnt / ftotalfiles) * 100.0);				
+				if (next != last) {
+					progress.worked(1);
+					progress.checkCanceled();
+					last = next;
+				}
+			}};
+    	
+        Zipper zip = Zipper.create(outputZipFile, updater);
+        try {
+	        zip.excludeFiles(itemsToExclude);
+	        for(Path p : directories) {
+	        	zip.addFile(p);
+	        }
+	        
+        }finally {
+        	zip.close();
         }
+        
+//        try (OutputStream fOut =Files.newOutputStream(outputZipFile);
+//        	 BufferedOutputStream bOut = new BufferedOutputStream(fOut);
+//        	ZipOutputStream tOut = new ZipOutputStream(bOut);){
+//            
+//        	
+//        	
+//            progress.setWorkRemaining(cnt);
+//            for (int i = 0; i < directories.length; i ++){
+//            	Path f = directories[i];
+//            	if (!itemsToExclude.contains(f)) {
+//            		addFileToZip(tOut, directories[i], "", itemsToExclude, progress.split(1)); //$NON-NLS-1$
+//            	}
+//            }
+//            
+//        }
         return true;
 
 	}

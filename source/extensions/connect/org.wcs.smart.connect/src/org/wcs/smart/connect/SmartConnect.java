@@ -525,7 +525,9 @@ public class SmartConnect {
 	 * @throws Exception
 	 */
 	public Path downloadFileFromUrl(String url, Integer promptDownloadSizeMb, IProgressMonitor monitor) throws PackageToLargeException, OperationCanceledException, Exception{
+		
 		createClient();
+		
 		int tryCount = 0;
 		
 		//download file name
@@ -550,7 +552,6 @@ public class SmartConnect {
 			try{
 				progress.checkCanceled();
 				
-				createClient();
 				ResteasyWebTarget target = client.target(url);
 				try(Response r = target.request().get()){
 
