@@ -48,6 +48,9 @@ public class SmartProperties {
 	private static final String DEFAULT_DATAMODEL_FILE ="/" + PROPERTIES_DIR + "/datamodel.xml"; //$NON-NLS-1$ //$NON-NLS-2$
 	private static final String SMART_PROPERTIES ="/" + PROPERTIES_DIR + "/smart.properties"; //$NON-NLS-1$ //$NON-NLS-2$
 
+	public static final String TELEMETRY_PROPERTIES ="/" + PROPERTIES_DIR + "/telemetry.properties"; //$NON-NLS-1$ //$NON-NLS-2$
+
+	
 	/**
 	 * Database location key
 	 */
