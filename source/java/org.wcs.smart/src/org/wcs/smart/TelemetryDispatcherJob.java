@@ -21,7 +21,6 @@
  */
 package org.wcs.smart;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -39,7 +38,6 @@ public class TelemetryDispatcherJob extends Job{
 
 	public static TelemetryDispatcherJob INSTANCE = new TelemetryDispatcherJob();
 	
-	
 	private int RESECHEDULE_HOURS = 48;
 	private String SERVER = null;
 	
@@ -53,7 +51,7 @@ public class TelemetryDispatcherJob extends Job{
 		Properties prop = new Properties();
 		try {
 			prop.load(getClass().getResourceAsStream(SmartProperties.TELEMETRY_PROPERTIES));
-		} catch (IOException e) {
+		} catch (Exception e) {
 			SmartPlugIn.log("Error determining telemetry properties.", e); //$NON-NLS-1$
 			return;
 		}
@@ -67,14 +65,19 @@ public class TelemetryDispatcherJob extends Job{
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		if (!TelemetryManager.INSTANCE.isEnabled()) return Status.OK_STATUS;
 		
+		if (!TelemetryManager.INSTANCE.canUploadStats()) return Status.OK_STATUS;
+
 		LocalDateTime last = TelemetryManager.INSTANCE.getLastUploaded();
 		
 		if (last != null && LocalDateTime.now().minusHours(RESECHEDULE_HOURS).isBefore(last)) {
 			//reschedule for 48 hours from now
-	        // Reschedule this job to run again after 48 hours
 			return reschedule(monitor);
+		}
+
+		if (SERVER == null) {
+			SmartPlugIn.log("Telementry server not configured. Missing telemetry.properties file?.", null); //$NON-NLS-1$
+			return Status.OK_STATUS;
 		}
 				
 		String jsonData = TelemetryManager.INSTANCE.packageData(false);
