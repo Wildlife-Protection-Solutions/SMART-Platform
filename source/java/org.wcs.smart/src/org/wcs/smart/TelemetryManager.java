@@ -99,8 +99,9 @@ public enum TelemetryManager {
 	private BlockingQueue<String> statsToadd = new LinkedBlockingQueue<String>();
 	
 	private boolean isEnabled = false;
-	
-	private boolean isFirst = false;
+
+	//the datetime the installkey was set; if set on this launch otherwise null
+	private LocalDateTime keySet = null;
 	
 	private IEclipsePreferences telemetryStore;
 	
@@ -149,9 +150,18 @@ public enum TelemetryManager {
 	 * @return
 	 */
 	public boolean isFirst() {
-		return this.isFirst;
+		return this.keySet != null;
 	}
 	
+	/**
+	 * If stats are enabled, and we can upload 
+	 */
+	public boolean canUploadStats() {
+		if (!this.isEnabled) return false;
+		//this gives users 12 hours to opt out of telemetry sending 
+		//when first launched
+		return this.keySet == null || this.keySet.isBefore(LocalDateTime.now().minusHours(12));		
+	}
 	
 	public void shutdown() {		
 		addStatisticJob.cancel();
@@ -281,7 +291,7 @@ public enum TelemetryManager {
 		String key = prefs.get(INSTALL_KEY_NAME, null);
 
 		if (key == null) {
-			this.isFirst = true;
+			this.keySet = LocalDateTime.now(); 
 			// generate a new install key
 			key = UUID.randomUUID().toString();
 			prefs.put(INSTALL_KEY_NAME, key);
