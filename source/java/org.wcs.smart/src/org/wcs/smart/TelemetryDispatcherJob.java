@@ -21,12 +21,14 @@
  */
 package org.wcs.smart;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
+import java.util.Properties;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -37,13 +39,32 @@ public class TelemetryDispatcherJob extends Job{
 
 	public static TelemetryDispatcherJob INSTANCE = new TelemetryDispatcherJob();
 	
-	private static final int RESECHEDULE_HOURS = 48;
+	
+	private int RESECHEDULE_HOURS = 48;
+	private String SERVER = null;
 	
 	private TelemetryDispatcherJob() {
 		super("telementry data uploader"); //$NON-NLS-1$
 		super.setSystem(true);
+		init();
 	}
 
+	private void init() {
+		Properties prop = new Properties();
+		try {
+			prop.load(getClass().getResourceAsStream(SmartProperties.TELEMETRY_PROPERTIES));
+		} catch (IOException e) {
+			SmartPlugIn.log("Error determining telemetry properties.", e); //$NON-NLS-1$
+			return;
+		}
+		try {
+			RESECHEDULE_HOURS = Integer.parseInt(prop.getProperty("reschedule_hours")); //$NON-NLS-1$
+		}catch (Exception ex) {
+			SmartPlugIn.log("Error reading property from telementry file.", ex); //$NON-NLS-1$
+		}
+		SERVER = prop.getProperty("server"); //$NON-NLS-1$
+	}
+	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		if (!TelemetryManager.INSTANCE.isEnabled()) return Status.OK_STATUS;
@@ -54,7 +75,6 @@ public class TelemetryDispatcherJob extends Job{
 			//reschedule for 48 hours from now
 	        // Reschedule this job to run again after 48 hours
 			return reschedule(monitor);
-
 		}
 				
 		String jsonData = TelemetryManager.INSTANCE.packageData(false);
@@ -63,15 +83,20 @@ public class TelemetryDispatcherJob extends Job{
 		try {
 			SmartPlugIn.log("Uploading Telemetry Data", null); //$NON-NLS-1$
 			
-			//URI enpoint = new URI("http://localhost:5000/telemetry");
-			URI enpoint = new URI("https://us-west1-smart-desktop-481700.cloudfunctions.net/telemetry");
-			
+			URI enpoint = new URI(SERVER);
 			HttpURLConnection connection = (HttpURLConnection)enpoint.toURL().openConnection();
 			try {
 				connection.setRequestMethod("POST"); //$NON-NLS-1$
 				connection.setRequestProperty("Content-Type", "application/json"); //$NON-NLS-1$ //$NON-NLS-2$
 		        connection.setDoOutput(true);
-	
+		        String ua = String.format(
+		        	    "org.wcs.smart/%s (%s; Java %s; installKey=%s)", //$NON-NLS-1$
+		        	    System.getProperty("org.wcs.smart.version.simple"), //$NON-NLS-1$
+		        	    System.getProperty("os.name"), //$NON-NLS-1$
+		        	    System.getProperty("java.version"), //$NON-NLS-1$
+		        	    TelemetryManager.INSTANCE.getInstallKey());
+		        connection.setRequestProperty("User-Agent", ua); //$NON-NLS-1$
+		        
 		        byte[] input = jsonData.getBytes(StandardCharsets.UTF_8);
 		        connection.setFixedLengthStreamingMode(input.length);
 		        try (OutputStream os = connection.getOutputStream()) {		            
@@ -82,9 +107,7 @@ public class TelemetryDispatcherJob extends Job{
 		        if (code == 200) {
 		        	TelemetryManager.INSTANCE.setLastUploaded(LocalDateTime.now());    	
 		        }else {
-		        	//String response = new String(connection.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
-		        	//System.out.println("Response: " + response);
-		        	SmartPlugIn.log(MessageFormat.format("Could not upload telemetry data. Response code: {0}. Message: {1}", code, connection.getResponseMessage()), null);
+		        	SmartPlugIn.log(MessageFormat.format("Could not upload telemetry data. Response code: {0}. Message: {1}", code, connection.getResponseMessage()), null); //$NON-NLS-1$
 		        }
 			}finally {
 				connection.disconnect();

@@ -549,7 +549,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 						
 						if (TelemetryManager.INSTANCE.isFirst()) {
 							Display.getDefault().syncExec(()->{
-								MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Telemetry", "SMART now collects telemetry data to help us understand how the software is used and better meet user needs. SMART does not collect personal or identifiable information. For more information or to opt-out visit the Telementry Preferences page (File->System Preferences->Telemetry).");
+								MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.InteractiveSplashHandler_TelemetryHeader, Messages.InteractiveSplashHandler_TelemetryWarning);
 							});
 						}
 

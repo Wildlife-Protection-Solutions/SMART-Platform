@@ -1215,6 +1215,8 @@ public class Messages extends NLS {
 	public static String InteractiveSplashHandler_Password_Label;
 	public static String InteractiveSplashHandler_Progress_LoadingCa;
 	public static String InteractiveSplashHandler_Progress_ValidatingUser;
+	public static String InteractiveSplashHandler_TelemetryHeader;
+	public static String InteractiveSplashHandler_TelemetryWarning;
 	public static String InteractiveSplashHandler_Username_Label;
 	public static String InteractiveSplashHandler_VersionLabel;
 	public static String KeyInputDialog_DialogTitle;

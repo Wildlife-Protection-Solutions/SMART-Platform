@@ -277,7 +277,7 @@ public enum TelemetryManager {
 	/*
 	 * computes the install key and stores it in the preferences store
 	 */
-	private String getInstallKey() {
+	public String getInstallKey() {
 		IEclipsePreferences prefs = ConfigurationScope.INSTANCE.getNode(NODE_PATH);
 		String key = prefs.get(INSTALL_KEY_NAME, null);
 
