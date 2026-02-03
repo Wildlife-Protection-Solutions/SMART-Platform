@@ -2673,6 +2673,51 @@ public class UpgradeServlet extends HttpServlet {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				String[] sql = new String[] {
+						//restrict constraints are not deferrable
+						//this was causing a bug with syncing
+						"ALTER TABLE smart.i_entity drop CONSTRAINT i_entity_pattachment_fk", //$NON-NLS-1$
+						"ALTER TABLE smart.i_entity ADD CONSTRAINT i_entity_pattachment_fk FOREIGN KEY (primary_attachment_uuid) REFERENCES smart.i_attachment(uuid) ON DELETE NO ACTION DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+						
+						"ALTER TABLE SMART.ct_patrol_package DROP CONSTRAINT ct_patrol_package_patrol_type_uuid_fk",  //$NON-NLS-1$
+						"ALTER TABLE SMART.ct_patrol_package ADD CONSTRAINT ct_patrol_package_patrol_type_uuid_fk FOREIGN KEY (patrol_type_uuid) REFERENCES smart.patrol_type(UUID) ON DELETE NO ACTION ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+						
+						"ALTER TABLE smart.i_entity DROP CONSTRAINT i_entity_profile_uuid_fkey",  //$NON-NLS-1$
+						"ALTER TABLE smart.i_entity ADD CONSTRAINT i_entity_profile_uuid_fkey FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED", //$NON-NLS-1$
+
+						"ALTER TABLE ONLY smart.i_record DROP CONSTRAINT i_record_profile_uuid_fkey", //$NON-NLS-1$
+						"ALTER TABLE ONLY smart.i_record ADD CONSTRAINT i_record_profile_uuid_fkey FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED", //$NON-NLS-1$
+
+						"ALTER TABLE ONLY smart.i_record_query DROP CONSTRAINT i_record_query_last_modified_by_fkey", //$NON-NLS-1$
+						"ALTER TABLE ONLY smart.i_record_query ADD CONSTRAINT i_record_query_last_modified_by_fkey FOREIGN KEY (last_modified_by) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED", //$NON-NLS-1$
+						
+						"ALTER TABLE ONLY smart.i_record_query DROP CONSTRAINT i_record_query_created_by_fkey",  //$NON-NLS-1$
+						"ALTER TABLE ONLY smart.i_record_query ADD CONSTRAINT i_record_query_created_by_fkey FOREIGN KEY (created_by) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED", //$NON-NLS-1$
+
+						"ALTER TABLE ONLY smart.i_record_summary_query DROP CONSTRAINT i_record_summary_query_created_by_fkey", //$NON-NLS-1$
+						"ALTER TABLE ONLY smart.i_record_summary_query ADD CONSTRAINT i_record_summary_query_created_by_fkey FOREIGN KEY (created_by) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED", //$NON-NLS-1$
+						
+						"ALTER TABLE ONLY smart.i_record_summary_query DROP CONSTRAINT i_record_summary_query_last_modified_by_fkey", //$NON-NLS-1$
+						"ALTER TABLE ONLY smart.i_record_summary_query ADD CONSTRAINT i_record_summary_query_last_modified_by_fkey FOREIGN KEY (last_modified_by) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED", //$NON-NLS-1$
+						
+						"ALTER TABLE ONLY smart.i_relationship_type DROP CONSTRAINT i_relationship_type_target_profile_uuid_fkey", //$NON-NLS-1$
+						"ALTER TABLE ONLY smart.i_relationship_type ADD CONSTRAINT i_relationship_type_target_profile_uuid_fkey FOREIGN KEY (target_profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED", //$NON-NLS-1$
+						
+						"ALTER TABLE ONLY smart.i_relationship_type DROP CONSTRAINT i_relationship_type_src_profile_uuid_fkey",  //$NON-NLS-1$
+						"ALTER TABLE ONLY smart.i_relationship_type ADD CONSTRAINT i_relationship_type_src_profile_uuid_fkey FOREIGN KEY (src_profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED", //$NON-NLS-1$
+
+						"ALTER TABLE smart.patrol DROP CONSTRAINT patrol_patrol_type_uuid_fk",  //$NON-NLS-1$
+						"ALTER TABLE smart.patrol ADD CONSTRAINT patrol_patrol_type_uuid_fk FOREIGN KEY(patrol_type_uuid) REFERENCES smart.patrol_type (UUID) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+						"ALTER TABLE smart.patrol_attribute_value DROP CONSTRAINT patrol_att_value_tree_node_uuid_fk",  //$NON-NLS-1$
+						"ALTER TABLE smart.patrol_attribute_value ADD CONSTRAINT patrol_att_value_tree_node_uuid_fk FOREIGN KEY(tree_node_uuid) REFERENCES smart.patrol_attribute_tree (UUID) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+						"ALTER TABLE smart.patrol_leg DROP CONSTRAINT mandate_uuid_fk",  //$NON-NLS-1$
+						"ALTER TABLE smart.patrol_leg ADD CONSTRAINT mandate_uuid_fk FOREIGN KEY (mandate_uuid) REFERENCES smart.patrol_mandate(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED", //$NON-NLS-1$
+
+						"ALTER TABLE smart.patrol_transport DROP CONSTRAINT pt_patrol_type_uuid_fk", //$NON-NLS-1$
+						"ALTER TABLE smart.patrol_transport ADD CONSTRAINT pt_patrol_type_uuid_fk FOREIGN KEY(patrol_type_uuid) REFERENCES smart.patrol_type (UUID) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+						
 						"update connect.work_item set percent_complete = 0 where percent_complete is null", //$NON-NLS-1$
 						"alter table connect.work_item alter column percent_complete set not null", //$NON-NLS-1$
 						"alter table connect.work_item alter column percent_complete set default 0", //$NON-NLS-1$
