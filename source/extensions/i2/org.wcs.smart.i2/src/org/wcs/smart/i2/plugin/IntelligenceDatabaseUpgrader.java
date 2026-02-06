@@ -111,6 +111,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			upgradeV4toV5(session);
 			upgradeV5toV6(session);
 			upgradeV6toV7(session);
+			upgradeV7toV8(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_1)){
 			upgradeV1toV2(session);
 			upgradeV2toV3(session);
@@ -118,26 +119,34 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			upgradeV4toV5(session);
 			upgradeV5toV6(session);
 			upgradeV6toV7(session);
+			upgradeV7toV8(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_2)){
 			upgradeV2toV3(session);
 			upgradeV3toV4(session);
 			upgradeV4toV5(session);
 			upgradeV5toV6(session);
 			upgradeV6toV7(session);
+			upgradeV7toV8(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_3)){
 			upgradeV3toV4(session);
 			upgradeV4toV5(session);
 			upgradeV5toV6(session);
 			upgradeV6toV7(session);
+			upgradeV7toV8(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_4)){
 			upgradeV4toV5(session);
 			upgradeV5toV6(session);
 			upgradeV6toV7(session);
+			upgradeV7toV8(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_5)){
 			upgradeV5toV6(session);
 			upgradeV6toV7(session);
+			upgradeV7toV8(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_6)){
 			upgradeV6toV7(session);
+			upgradeV7toV8(session);
+		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_7)){
+			upgradeV7toV8(session);
 		}
 		
 	}
@@ -696,11 +705,24 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 	private void upgradeV6toV7(Session session) {
 		String[] sql = new String[] {
 			"update smart.i_entity set primary_attachment_uuid = null where primary_attachment_uuid is not null and primary_attachment_uuid not in (select uuid from smart.i_attachment)", //$NON-NLS-1$
-			"alter table smart.i_entity add constraint i_entity_pattachment_fk  foreign key(primary_attachment_uuid) references smart.i_attachment(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$	
+			//this is wrong and breaks sync
+			//"alter table smart.i_entity add constraint i_entity_pattachment_fk  foreign key(primary_attachment_uuid) references smart.i_attachment(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$	
+			"alter table smart.i_entity add constraint i_entity_pattachment_fk  foreign key(primary_attachment_uuid) references smart.i_attachment(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 		};
 		for (String s : sql) session.createNativeMutationQuery(s).executeUpdate();
 		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_7, session);
 	}
+	
+	
+	private void upgradeV7toV8(Session session) {
+		String[] sql = new String[] {
+			"alter table smart.i_entity drop constraint i_entity_pattachment_fk", //$NON-NLS-1$
+			"alter table smart.i_entity add constraint i_entity_pattachment_fk  foreign key(primary_attachment_uuid) references smart.i_attachment(uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$	
+		};
+		for (String s : sql) session.createNativeMutationQuery(s).executeUpdate();
+		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_8, session);
+	}
+
 	
 	@SuppressWarnings("nls")
 	private void createTables(Session session){

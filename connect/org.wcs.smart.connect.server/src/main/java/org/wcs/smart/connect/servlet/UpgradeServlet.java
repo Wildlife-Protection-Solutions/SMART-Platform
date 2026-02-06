@@ -2717,6 +2717,8 @@ public class UpgradeServlet extends HttpServlet {
 						"ALTER TABLE smart.patrol_transport DROP CONSTRAINT pt_patrol_type_uuid_fk", //$NON-NLS-1$
 						"ALTER TABLE smart.patrol_transport ADD CONSTRAINT pt_patrol_type_uuid_fk FOREIGN KEY(patrol_type_uuid) REFERENCES smart.patrol_type (UUID) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 
+						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.i2'", //$NON-NLS-1$
+						"update connect.ca_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.i2'", //$NON-NLS-1$
 						
 						"update connect.work_item set percent_complete = 0 where percent_complete is null", //$NON-NLS-1$
 						"alter table connect.work_item alter column percent_complete set not null", //$NON-NLS-1$

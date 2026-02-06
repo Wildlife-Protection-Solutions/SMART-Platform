@@ -60,7 +60,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String DB_VERSION_5 = "5.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_6 = "6.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_7 = "7.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_7; //the latest db version of tables
+	public static final String DB_VERSION_8 = "8.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_8; //the latest db version of tables
+	
 	
 	
 	public static final String ICON_ATTRIBUTE_GROUP = "org.wcs.smart.i2.icon.attribute.group"; //$NON-NLS-1$
