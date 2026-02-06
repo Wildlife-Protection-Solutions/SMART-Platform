@@ -30,6 +30,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.TelemetryManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartConnect;
@@ -50,16 +53,32 @@ public class SyncChangeLogHandler {
 
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
+		if (!checkDirty()) return;
+		
 		SyncChangeLogDialog dialog = new SyncChangeLogDialog(activeShell);
 		if (dialog.open() == Window.OK){
 			syncChangeLog(activeShell, dialog.getConnection(), SmartDB.getCurrentConservationArea());
 		}
 	}
 
+	private boolean checkDirty() {
+		// prompt to save dirty editors
+		IWorkbenchWindow[] windows = PlatformUI.getWorkbench().getWorkbenchWindows();
+		for (int i = 0; i < windows.length; i++) {
+			IWorkbenchPage[] pages = windows[i].getPages();
+			for (int j = 0; j < pages.length; j++) {
+				if (!pages[j].saveAllEditors(true)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	/*
 	 * download change log and apply
 	 */
-	public void syncChangeLog(final Shell activeShell, final SmartConnect connect, ConservationArea ca) {
+	private void syncChangeLog(final Shell activeShell, final SmartConnect connect, ConservationArea ca) {
 		TelemetryManager.INSTANCE.incrementStatistic(TelemetryManager.Key.RUN_CONNECT_SYNC);
 		DownloadChangeLogHandler downhandler = new DownloadChangeLogHandler(){
 			protected void displayStatus(final ConnectSyncHistoryRecord record) {
