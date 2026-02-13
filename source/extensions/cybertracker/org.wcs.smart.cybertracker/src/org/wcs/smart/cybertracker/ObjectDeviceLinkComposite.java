@@ -215,7 +215,7 @@ public class ObjectDeviceLinkComposite extends Composite {
 			String deviceId = objId2DeviceId.get(0)[1];
 			SmartMobileDevice device = devices.containsKey(deviceId) ? devices.get(deviceId) : null;
 			
-			lblSingleText.setText( device != null ? device.getName() : deviceId );
+			lblSingleText.setText( device != null ? device.getName() : (deviceId != null ? deviceId : ""));
 			if (device == null || device.getIcon() == null) {
 				lblSingleIcon.setImage(null);
 			}else {
