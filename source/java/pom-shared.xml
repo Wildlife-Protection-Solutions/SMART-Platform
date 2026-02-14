@@ -9,7 +9,7 @@
 	<packaging>pom</packaging>
 
 	<properties>
-		<smart.version>8.1.0-SNAPSHOT</smart.version>
+		<smart.version>8.1.2-SNAPSHOT</smart.version>
 		<geotools.version>28.1</geotools.version>
 		<jts.version>1.19.0</jts.version>
 		

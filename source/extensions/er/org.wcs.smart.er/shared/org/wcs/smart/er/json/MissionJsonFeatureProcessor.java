@@ -968,7 +968,13 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (wp.getComment() != null) toUpdate.setComment(wp.getComment());
 		if (wp.getDirection() != null) toUpdate.setDirection(wp.getDirection());
 		if (wp.getDistance() != null) toUpdate.setDistance(wp.getDistance());
-		if (wp.getSourceConfigurableModel() != null) toUpdate.setSourceConfigurableModel(wp.getSourceConfigurableModel());
+		if (wp.getSourceConfigurableModel() != null) {
+			if (wp.getSourceConfigurableModel().getConservationArea().equals(toUpdate.getConservationArea())){
+				toUpdate.setSourceConfigurableModel(wp.getSourceConfigurableModel());
+			}else {
+				warnings.add(IJsonFeatureProcessor.Messages.CM_CA_DIFFERENCE.getMessage(l));
+			}
+		}
 
 		updateObserver(toUpdate, attributes, ca, session, l);
 	

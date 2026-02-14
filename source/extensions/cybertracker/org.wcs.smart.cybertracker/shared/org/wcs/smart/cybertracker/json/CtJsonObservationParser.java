@@ -69,6 +69,7 @@ import org.wcs.smart.cybertracker.json.JsonImportWarning.Type;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 //import org.wcs.smart.cybertracker.properties.ReSizeImageDialog;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.AttachmentTagLink;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
@@ -262,7 +263,11 @@ public class CtJsonObservationParser {
 			try {
 				cmUuid = UuidUtils.stringToUuid(cmuuid);
 				cm = session.get(ConfigurableModel.class, cmUuid);
-				if (cm == null) warnings.add(new JsonImportWarning(JsonImportWarning.Type.INVALID_CM, cmuuid));				
+				if (cm == null) warnings.add(new JsonImportWarning(JsonImportWarning.Type.INVALID_CM, cmuuid));
+				if (cm != null && !cm.getConservationArea().equals(newWaypoint.getConservationArea())) {
+					cm = null;
+					warnings.add(new JsonImportWarning(JsonImportWarning.Type.INVALID_CM_CA, cmuuid));
+				}
 			}catch (Exception ex) {
 				logException(ex);
 				warnings.add(new JsonImportWarning(JsonImportWarning.Type.INVALID_CM, cmuuid));

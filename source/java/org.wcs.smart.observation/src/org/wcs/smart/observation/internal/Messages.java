@@ -289,6 +289,8 @@ public class Messages extends NLS {
 
 	public static String ObservationLabelProvider_typemissing;
 
+	public static String ObservationLabelProvider_wpcacmcanomatch;
+
 	public static String ObservationOptionsPropertyPage_ComputationDetails;
 
 	public static String ObservationOptionsPropertyPage_DistanceBearingOpLabel;

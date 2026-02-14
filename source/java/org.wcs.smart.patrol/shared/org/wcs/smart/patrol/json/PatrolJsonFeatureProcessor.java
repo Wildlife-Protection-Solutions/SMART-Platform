@@ -467,7 +467,13 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (wp.getComment() != null) toUpdate.setComment(wp.getComment());
 		if (wp.getDirection() != null) toUpdate.setDirection(wp.getDirection());
 		if (wp.getDistance() != null) toUpdate.setDistance(wp.getDistance());
-		if (wp.getSourceConfigurableModel() != null) toUpdate.setSourceConfigurableModel(wp.getSourceConfigurableModel());
+		if (wp.getSourceConfigurableModel() != null) {
+			if (wp.getSourceConfigurableModel().getConservationArea().equals(toUpdate.getConservationArea())){
+				toUpdate.setSourceConfigurableModel(wp.getSourceConfigurableModel());
+			}else {
+				warnings.add(org.wcs.smart.observation.json.IJsonFeatureProcessor.Messages.CM_CA_DIFFERENCE.getMessage(l));
+			}
+		}
 		
 		//attachments
 		if (toUpdate.getAttachments() == null) toUpdate.setAttachments(new ArrayList<>());

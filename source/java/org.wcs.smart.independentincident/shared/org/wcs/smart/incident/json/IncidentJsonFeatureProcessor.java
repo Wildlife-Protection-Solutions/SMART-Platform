@@ -400,7 +400,13 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (wp.getRawY() != null) toUpdate.setRawY(wp.getRawY());
 		
 		if (wp.getDateTime() != null) toUpdate.setDateTime(wp.getDateTime());
-		if (wp.getSourceConfigurableModel() != null) toUpdate.setSourceConfigurableModel(wp.getSourceConfigurableModel());
+		if (wp.getSourceConfigurableModel() != null) {
+			if (wp.getSourceConfigurableModel().getConservationArea().equals(toUpdate.getConservationArea())){
+				toUpdate.setSourceConfigurableModel(wp.getSourceConfigurableModel());
+			}else {
+				warnings.add(IJsonFeatureProcessor.Messages.CM_CA_DIFFERENCE.getMessage(l));
+			}
+		}
 
 		//update observer
 		updateObserver(toUpdate, attributes, ca, session, l);

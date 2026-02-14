@@ -124,6 +124,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerLabelProvider_ObservationParseError8;
 	public static String CyberTrackerLabelProvider_ObservationParseError9;
 	public static String CyberTrackerLabelProvider_ObservationTimeParseError;
+	public static String CyberTrackerLabelProvider_wpcmnotmatch;
 	public static String CyberTrackerPlugIn_InitJob_Title;
 	public static String CyberTrackerProfileFactory_CloneProfile_TaskName;
 	public static String CyberTrackerProperties_ProjectonFormat_DecemalDegree;

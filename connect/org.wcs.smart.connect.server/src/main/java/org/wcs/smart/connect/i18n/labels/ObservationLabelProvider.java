@@ -70,6 +70,7 @@ public class ObservationLabelProvider implements IObservationLabelProvider {
 		case ATTACHMENT_TAG_NOT_FOUND: return Messages.getString("ObservationLabelProvider.TagNotFound", l); //$NON-NLS-1$
 		case INVALID_CM_UUID: return Messages.getString("ObservationLabelProvider.InvalidCmUuid", l); //$NON-NLS-1$
 		case CM_MISSING: return Messages.getString("ObservationLabelProvider.CmNotFound", l);	 //$NON-NLS-1$
+		case CM_CA_DIFFERENCE: return Messages.getString("ObservationLabelProvider.wpcacmcanomatch",l);  //$NON-NLS-1$
 		case INVALID_GEOMETRY_ATTRIBUTE: return Messages.getString("ObservationLabelProvider.InvalidGeoJson", l);  //$NON-NLS-1$
 		case INVALID_GEOMETRY_SRC_ATTRIBUTE: return Messages.getString("ObservationLabelProvider.InvalidGeomSource", l);  //$NON-NLS-1$
 		case INVALID_LINE_ATTRIBUTE: return Messages.getString("ObservationLabelProvider.InvalidLineGeom", l);  //$NON-NLS-1$

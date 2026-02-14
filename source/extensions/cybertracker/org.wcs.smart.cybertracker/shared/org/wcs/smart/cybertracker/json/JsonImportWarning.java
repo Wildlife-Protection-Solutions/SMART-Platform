@@ -44,6 +44,7 @@ public class JsonImportWarning {
 		ATTRIBUTE_NOT_FOUND, //1 parameter - attribute uuid as string
 		ATT_CAT_NOT_ASSOCIATED,//2 parameter - attribute name, category name
 		INVALID_CM, // 1 parameter - cm uuid as string
+		INVALID_CM_CA, //0 parameters
 		INVALID_SIGNATURE, //1 parameter - key
 		TAG_NOT_FOUND, //1 parameter - key
 		INVALID_OBSERVER, //1 parameter - employee uuid as string

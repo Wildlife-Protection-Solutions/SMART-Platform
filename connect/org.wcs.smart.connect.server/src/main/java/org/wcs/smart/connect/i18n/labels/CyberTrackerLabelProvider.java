@@ -47,6 +47,9 @@ public class CyberTrackerLabelProvider implements ICyberTrackerLabelProvider{
 		if (item ==  JsonImportWarning.Type.ATT_CAT_NOT_ASSOCIATED) return Messages.getString("CyberTrackerLabelProvider_ParseWarn5", l);  //$NON-NLS-1$
 		if (item ==  JsonImportWarning.Type.DEFAULT_ATTRIBUTE_NOT_FOUND) return Messages.getString("CyberTrackerLabelProvider_ParseWarn6", l);  //$NON-NLS-1$
 		if (item ==  JsonImportWarning.Type.INVALID_CM) return Messages.getString("CyberTrackerLabelProvider_ParseWarn7", l);  //$NON-NLS-1$
+		if (item ==  JsonImportWarning.Type.INVALID_CM_CA) return Messages.getString("CyberTrackerLabelProvider.cmcawpcanomatch", l); //$NON-NLS-1$
+
+		
 		if (item ==  JsonImportWarning.Type.INVALID_SIGNATURE) return Messages.getString("CyberTrackerLabelProvider_ParseWarn8", l);  //$NON-NLS-1$
 		if (item ==  JsonImportWarning.Type.INVALID_OBSERVER) return Messages.getString("CyberTrackerLabelProvider_ParseWarn9", l);  //$NON-NLS-1$
 		if (item ==  JsonImportWarning.Type.INVALID_ATTACHMENT) return Messages.getString("CyberTrackerLabelProvider_ParseWarn10", l);  //$NON-NLS-1$

@@ -170,6 +170,7 @@ public abstract class IJsonFeatureProcessor {
 		SIGNATURE_TYPE_NOT_FOUND,
 		ATTACHMENT_TAG_NOT_FOUND,
 		CM_MISSING,
+		CM_CA_DIFFERENCE,
 		INVALID_CM_UUID;
 		
 		public String getMessage(Locale l) {
@@ -434,6 +435,11 @@ public abstract class IJsonFeatureProcessor {
 			ConfigurableModel cm = session.get(ConfigurableModel.class, uuid);
 			if (cm == null) {
 				warnings.add(MessageFormat.format(Messages.CM_MISSING.getMessage(locale), (String)atts.get(WaypointMetadata.CMUUID.key)));
+			}else {
+				if (!cm.getConservationArea().equals(wp.getConservationArea())){					
+					cm = null;
+					warnings.add(Messages.CM_CA_DIFFERENCE.getMessage(locale));
+				}
 			}
 			wp.setSourceConfigurableModel(cm);
 		}
