@@ -212,16 +212,19 @@ public class ZipUtil {
 	        }else if (!Files.isDirectory(path)) {
 	        	//file
 	        	ZipEntry zipEntry = new ZipEntry(entryName);
-	            zOut.putNextEntry(zipEntry);
+	            
 	            if (Zipper.isCompressedFile(path)) {
 	    			//don't compress this entry
 	    			// You must set size, compressed size, and CRC for STORED entries
+	            	//this must be done BEFORE putNextEntry
 	    			zipEntry.setMethod(ZipEntry.STORED);
 	    			long size = Files.size(path);
 	    			zipEntry.setSize(size);
 	    			zipEntry.setCompressedSize(size);
 	    			zipEntry.setCrc(Zipper.calculateCRC32(path));
 	    		}	    		
+	            
+	            zOut.putNextEntry(zipEntry);
 	            try(InputStream in = Files.newInputStream(path)){
 	            	IOUtils.copy(in, zOut);
 	            }
