@@ -2724,6 +2724,9 @@ public class UpgradeServlet extends HttpServlet {
 						"update connect.connect_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.i2'", //$NON-NLS-1$
 						"update connect.ca_plugin_version set version = '8.0' where plugin_id = 'org.wcs.smart.i2'", //$NON-NLS-1$
 						
+						"update connect.connect_plugin_version set version = '8.1.2' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
+						"update connect.ca_plugin_version set version = '8.1.2' where plugin_id = 'org.wcs.smart'", //$NON-NLS-1$
+						
 						"update connect.work_item set percent_complete = 0 where percent_complete is null", //$NON-NLS-1$
 						"alter table connect.work_item alter column percent_complete set not null", //$NON-NLS-1$
 						"alter table connect.work_item alter column percent_complete set default 0", //$NON-NLS-1$
