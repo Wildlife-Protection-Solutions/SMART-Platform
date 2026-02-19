@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature id="org.wcs.smart.i2.migrate.feature">
-      <category name="profiles"/>
+   <feature id="org.wcs.smart.cybertracker.feature">
+      <category name="smartmobile"/>
+   </feature>
+   <feature id="org.wcs.smart.feature">
+      <category name="smart"/>
    </feature>
    <category-def name="planning" label="SMART Planning Plug-in">
       <description>
