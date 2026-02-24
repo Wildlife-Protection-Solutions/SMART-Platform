@@ -440,7 +440,14 @@ public class CmXmlToSmartImporter {
 			List<Attribute> dmAttributes = new ArrayList<>();
 			List<Attribute> cmAttributes = new ArrayList<>();
 			
-			for (CategoryAttribute ca : c.getAllAttributes()) dmAttributes.add(ca.getAttribute());
+			for (CategoryAttribute ca : c.getAllAttributes()) {
+				if (ca.getIsActive()) {
+					//only care about active attributes; non active attributes
+					//shouldn't get added
+					dmAttributes.add(ca.getAttribute());
+				}
+			}
+			
 			for (CmAttribute ca : cmNode.getCmAttributes()) {
 				cmAttributes.add(ca.getAttribute());
 			}
