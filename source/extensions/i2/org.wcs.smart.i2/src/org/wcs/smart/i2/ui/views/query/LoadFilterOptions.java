@@ -305,7 +305,7 @@ public class LoadFilterOptions extends Job {
 		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_STATUS));
 		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_SOURCE));
 		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED));
-		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED));
+		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED));
 		
 		
 		Set<UUID> profiles = ProfilesManager.INSTANCE.getActiveProfiles().stream()

@@ -42,6 +42,7 @@ import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateTimeDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.UTCDateTimeDropItem;
 
 /**
  * Tree filter item for system attributes
@@ -93,15 +94,18 @@ public class SystemAttributeFilterItem extends BasicTreeFilterItem {
 		sb.append(SystemAttributeFilter.INTERNAL_SEPERATOR);
 		sb.append(attribute.name().toLowerCase(Locale.ROOT));
 		
-		if (attribute == SystemAttribute.RECORD_DATE_CREATED ||
-				attribute == SystemAttribute.RECORD_DATE_MODIFIED ||
-				attribute == SystemAttribute.RECORD_DATE) {	
+		if (attribute == SystemAttribute.RECORD_DATE) {
 			DateTimeDropItem di = new DateTimeDropItem( DateTimeDropItem.Type.DATE, MessageFormat.format("{0} (Record)", getName()), sb.toString(), canEdit); //$NON-NLS-1$
+			return new DropItem[] {di};
+			
+		}else if (attribute == SystemAttribute.RECORD_DATE_CREATED ||
+				attribute == SystemAttribute.RECORD_DATE_MODIFIED) {	
+			UTCDateTimeDropItem di = new UTCDateTimeDropItem( MessageFormat.format("{0} (Record)", getName()), sb.toString(), canEdit); //$NON-NLS-1$
 			return new DropItem[] {di};
 		}else if (attribute == SystemAttribute.ENTITY_DATE_CREATED ||
 					attribute == SystemAttribute.ENTITY_DATE_MODIFIED) {	
-				DateTimeDropItem di = new DateTimeDropItem(DateTimeDropItem.Type.DATE, MessageFormat.format("{0} (Entity)", getName()), sb.toString(), canEdit); //$NON-NLS-1$
-				return new DropItem[] {di};
+			UTCDateTimeDropItem di = new UTCDateTimeDropItem(MessageFormat.format("{0} (Entity)", getName()), sb.toString(), canEdit); //$NON-NLS-1$
+			return new DropItem[] {di};
 		}else if (attribute == SystemAttribute.RECORD_SOURCE) {
 			try(Session session = HibernateManager.openSession()){
 				List<IntelRecordSource> srcs = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSources(ProfilesManager.INSTANCE.getActiveProfileIds(), session);

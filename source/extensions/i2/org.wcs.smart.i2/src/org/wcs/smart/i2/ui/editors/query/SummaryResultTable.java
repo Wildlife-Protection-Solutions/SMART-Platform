@@ -195,8 +195,8 @@ public class SummaryResultTable extends Composite {
 
 	
 	private void updateVerticalSlider(){
-		leftTable.getTable().setTopIndex(vSlider.getSelection());
-		mainTable.getTable().setTopIndex(vSlider.getSelection());
+		mainTable.getTable().setTopIndex(vSlider.getSelection());		
+		leftTable.getTable().setTopIndex(mainTable.getTable().getTopIndex());		
 	}
 	
 	private void updateHorizontalSlider(){

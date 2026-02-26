@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.views.entity.search;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -90,6 +91,7 @@ import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextOperatorDropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.UTCDateTimeDropItem;
 import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SharedUtils;
@@ -259,16 +261,27 @@ public abstract class EntitySearchPanel extends Composite {
 				}else {
 				
 					String[] queryParts = p.split(" "); //$NON-NLS-1$
-					DropItem di = new DateTimeDropItem(DateTimeDropItem.Type.DATE, getName(sa), queryParts[0], true);
 					Operator op = Operator.parse(queryParts[1]);
-					try {
-						LocalDate d1 = LocalDate.parse(queryParts[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR ));
-						LocalDate d2 = LocalDate.parse(queryParts[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR ));
-						((DateTimeDropItem)di).setInitialValue(op, d1, d2);
-						toAdd.add(di);
+					
+					try {					
+						if (sa.isUtcDate()) {
+							DropItem di = new UTCDateTimeDropItem(getName(sa), queryParts[0], true);						
+							LocalDateTime d1 = LocalDateTime.parse(queryParts[2], DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR ));
+							LocalDateTime d2 = LocalDateTime.parse(queryParts[4], DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR ));
+							((UTCDateTimeDropItem)di).setInitialValue(op, d1, d2);
+							toAdd.add(di);
+						}else {
+							DropItem di = new DateTimeDropItem(DateTimeDropItem.Type.DATE, getName(sa), queryParts[0], true);						
+							LocalDate d1 = LocalDate.parse(queryParts[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR ));
+							LocalDate d2 = LocalDate.parse(queryParts[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR ));
+							((DateTimeDropItem)di).setInitialValue(op, d1, d2);
+							toAdd.add(di);					
+						}
 					}catch (Exception ex) {
 						toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.EntitySearchPanel_InvalidDates, queryParts[2], queryParts[4])));
 					}
+					
+					
 				}
 				
 				
@@ -572,7 +585,7 @@ public abstract class EntitySearchPanel extends Composite {
 		return IntelligenceLabelProviderImpl.getName(attribute);
 	}
 	
-	private DropItem createAttributeDropItem(IntelAttribute a){
+	private DropItem createAttributeDropItem(IntelAttribute a){		
 		return DropItemFactory.createAttributeDropItem(a);
 	}
 	

@@ -68,6 +68,9 @@ public class SystemAttributeDateGroupByDropItem extends DropItem implements IGro
 	
 	@Override
 	public String getText() {
+		if (attribute.isUtcDate()) {
+			return MessageFormat.format("{0} UTC", IntelligenceLabelProviderImpl.getName(attribute)); //$NON-NLS-1$	
+		}
 		return MessageFormat.format("{0}", IntelligenceLabelProviderImpl.getName(attribute)); //$NON-NLS-1$
 	}
 

@@ -23,6 +23,9 @@ package org.wcs.smart.i2.query.engine;
 
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -605,6 +608,34 @@ public class EntityRecordWaypointFilterProcessor {
 			MutationQuery query = s.createNativeMutationQuery(sql.toString());
 			query.setParameter("statusKey", filter.getStringKey()); //$NON-NLS-1$
 			query.executeUpdate();
+		}else if (filter.getAttribute() == SystemAttribute.RECORD_DATE) {
+			sql = new StringBuilder();
+			sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
+			sql.append(" SELECT distinct a.entity_uuid "); //$NON-NLS-1$
+			sql.append( "FROM " + obsTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" JOIN smart.i_entity_record er on er.entity_uuid = a.entity_uuid "); //$NON-NLS-1$
+			sql.append(" JOIN smart.i_record r on r.uuid = er.record_uuid "); //$NON-NLS-1$			
+			sql.append(" WHERE r.primary_date "); //$NON-NLS-1$
+			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
+			sql.append(" :value1 and :value2"); //$NON-NLS-1$
+		
+			MutationQuery query = s.createNativeMutationQuery(sql.toString());
+			
+			LocalDate dstart = filter.getDateValues()[0];
+			LocalDate dend= filter.getDateValues()[1];
+			
+			LocalDateTime dtstart = dstart.atStartOfDay();
+			LocalDateTime dtend = dend.atTime(LocalTime.MAX);
+			
+			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dtstart));
+			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dtend));
+					
+			query.setParameter("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dtstart) ); //$NON-NLS-1$
+			query.setParameter("value2", (DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dtend) ); //$NON-NLS-1$
+			
+		
+			logString(sql.toString());
+			query.executeUpdate();
 		}else if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED || 
 				filter.getAttribute() == SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED) {
 			sql = new StringBuilder();
@@ -612,59 +643,23 @@ public class EntityRecordWaypointFilterProcessor {
 			sql.append(" SELECT distinct a.entity_uuid "); //$NON-NLS-1$
 			sql.append( "FROM " + obsTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(" JOIN smart.i_entity_record er on er.entity_uuid = a.entity_uuid "); //$NON-NLS-1$
-			sql.append(" JOIN smart.i_record r on r.uuid = er.record_uuid "); //$NON-NLS-1$
-			
+			sql.append(" JOIN smart.i_record r on r.uuid = er.record_uuid "); //$NON-NLS-1$			
 			sql.append(" WHERE "); //$NON-NLS-1$
-			
-			if (filter.getAttribute() == SystemAttribute.RECORD_DATE_CREATED) {
-				sql.append(" cast( r.date_created as date) "); //$NON-NLS-1$
-			}else if (filter.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED) {
-				sql.append(" cast( r.last_modified_date as date) "); //$NON-NLS-1$
-			}
-			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
-			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
-		
-			MutationQuery query = s.createNativeMutationQuery(sql.toString());
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
-			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
-			
-		
-			logString(sql.toString());
-			query.executeUpdate();
+			SqlGenerator.processRecordSystemDateFilter(sql, filter, s);
 			
 		}else if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED || 
 				filter.getAttribute() == SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED) {
 			
-		
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
 			sql.append(" SELECT distinct a.entity_uuid "); //$NON-NLS-1$
 			sql.append( "FROM " + obsTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
-			sql.append(" JOIN smart.i_entity l on l.uuid = a.entity_uuid "); //$NON-NLS-1$
-			
+			sql.append(" JOIN smart.i_entity e on e.uuid = a.entity_uuid "); //$NON-NLS-1$
 			sql.append(" WHERE "); //$NON-NLS-1$
 			
-			if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED) {
-				sql.append(" cast (l.date_created as date) "); //$NON-NLS-1$
-			}else if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
-				sql.append(" cast( l.date_modified as date) "); //$NON-NLS-1$
-			}
-			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
-			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
-		
-			MutationQuery query = s.createNativeMutationQuery(sql.toString());
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
-			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
-			
-		
-			logString(sql.toString());
-			query.executeUpdate();
-		
+			SqlGenerator.processEntitySystemDateFilter(sql, filter, s);
 		}
+		
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + SqlGenerator.createIndexName("entity_uuid_tmp") + " on " + t2 + " (entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		logString(sql.toString());

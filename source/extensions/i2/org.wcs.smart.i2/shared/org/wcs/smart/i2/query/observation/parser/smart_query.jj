@@ -29,6 +29,7 @@ package org.wcs.smart.i2.query.observation.parser;
 import java.util.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import org.wcs.smart.i2.query.observation.filter.*;
 import org.wcs.smart.i2.query.Operator;
@@ -134,7 +135,9 @@ TOKEN :
  | < #SPECIAL_CHARS : ("." | "_")>
  | < VALUE_KEY: ( "numentities" |  "numrecords" ) >
  | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>
- | < TIME_STRING : < DIGIT > < DIGIT > ":" < DIGIT > < DIGIT > ":" < DIGIT > < DIGIT >>  
+ | < TIME_STRING : < DIGIT > < DIGIT > ":" < DIGIT > < DIGIT > ":" < DIGIT > < DIGIT >>
+ | < DATETIME_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > " " < DIGIT > < DIGIT > ":" < DIGIT > < DIGIT > ":" < DIGIT > < DIGIT >>
+ 
  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
  | < UUID : (< DIGIT> | ["a"-"f","A"-"F","-"])+ >
  
@@ -171,7 +174,8 @@ TOKEN :
  | < RATTRIBUTE_KEY_EMPLOYEE: "r_attribute:e:"< DM_KEY >":"(< DM_KEY >)?>
  | < RATTRIBUTE_KEY_ENTITY: "r_attribute:entity:"< DM_KEY >":"(< DM_KEY >)?>
 
- | < SYSTEM_ATT_KEY: "sa:" ("record_date_created" | "record_date_modified" | "entity_date_modified" | "entity_date_created" | "record_date" | "record_source" | "record_status") >
+ | < SYSTEM_ATT_KEY: "sa:" ("record_date" | "record_source" | "record_status") >
+ | < SYSTEM_ATT_KEY_UTC: "sa:" ("record_date_created" | "record_date_modified" | "entity_date_modified" | "entity_date_created" ) >
  
 
  | < QUERY_SPLITTER : "|" >
@@ -187,7 +191,7 @@ TOKEN :
  | < RATTRIBUTE_GB_KEY_DATE: "r_attribute_gb:d:"< DM_KEY >":"(< DM_KEY >)?":"(< DATE_GB_KEY >)>
  | < RATTRIBUTE_GB_KEY_LIST: "r_attribute_gb:l:" < DM_KEY > ":" (< DM_KEY >)? ":" (< DM_KEY > ":")* >
  | < RATTRIBUTE_GB_KEY_EMPLOYEE: "r_attribute_gb:e:"< DM_KEY > ":" (< DM_KEY >)? ":" (< UUID > ":")* >
- | < SYSTEM_ATT_KEY_GB: < SYSTEM_ATT_KEY > ":" (< DATE_GB_KEY >)>
+ | < SYSTEM_ATT_KEY_GB: ( < SYSTEM_ATT_KEY > | < SYSTEM_ATT_KEY_UTC > )":" (< DATE_GB_KEY >)>
 
  
 }
@@ -460,6 +464,8 @@ IQueryFilter SystemAttributeFilter():
   String key = null;
   LocalDate date1 = null;
   LocalDate date2 = null;
+  LocalDateTime datetime1 = null;
+  LocalDateTime datetime2 = null;
   Operator op = null;
   String value = null;
 }
@@ -497,12 +503,45 @@ IQueryFilter SystemAttributeFilter():
 		 )
 	) 			 
 	)
-	{
+		{
 		if ( value != null) {
 		  return SystemAttributeFilter.create(key, op, value);
 		}else { 
   			return SystemAttributeFilter.create(key, op, date1, date2);
   		}
+	}
+
+|
+
+(
+		< SYSTEM_ATT_KEY_UTC > {key = token.image;}
+		op = DateOp()
+		< DATETIME_STRING >  {
+			  String datestring = token.image;
+			  try
+			  {
+			    datetime1 = LocalDateTime.parse(datestring, DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR));
+			  }catch (Exception ex)
+			  {
+			     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
+			  }
+			}
+		< K_AND >
+		< DATETIME_STRING > {
+			  datestring = token.image;
+			  try
+			  {
+			    datetime2 = LocalDateTime.parse(datestring, DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR));
+			  }catch (Exception ex)
+			  {
+			     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
+			  }
+			} 			 
+	)
+	{
+		
+  		return SystemAttributeFilter.create(key, op, datetime1, datetime2);
+  		
 	}	
 }
 

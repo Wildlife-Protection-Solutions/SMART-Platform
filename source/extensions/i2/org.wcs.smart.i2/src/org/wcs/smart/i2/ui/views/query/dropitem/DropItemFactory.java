@@ -437,8 +437,11 @@ public class DropItemFactory {
 		
 		DropItem di = new SystemAttributeFilterItem(filter.getAttribute()).asDropItem()[0];
 		
-		if (filter.getAttribute().isDate()) {
+		if (filter.getAttribute().isUtcDate()) {
+			((UTCDateTimeDropItem)di).setInitialValue(filter.getOperator(), filter.getDateTimeValues()[0], filter.getDateTimeValues()[1]);
+		}else if (filter.getAttribute().isDate()) {
 			((DateTimeDropItem)di).setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
+			
 		}else {
 			((OptionDropItem)di).setInitialValue(filter.getStringKey());
 		}

@@ -23,7 +23,10 @@ package org.wcs.smart.i2.ui.views.query.dropitem;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -49,34 +52,37 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * @since 8.1.0
+ * 
+ * users picks the date/time as the local value but the filters
+ * returns convert this to utc
+ * @since 8.1.2
  */
-public class DateTimeDropItem extends DropItem {
-
-	public enum Type{DATE, TIME};
+public class UTCDateTimeDropItem extends DropItem {
 	
-	private DateTime dtime1;
-	private DateTime dtime2;
+	private DateTime date1;
+	private DateTime date2;
+	private DateTime time1;
+	private DateTime time2;
 	
 	protected String text;
 	protected String queryKey;
 	
 	private ComboViewer operators;
 
-	private LocalDate currentDate1;
-	private LocalDate currentDate2;
-	private LocalTime currentTime1;
-	private LocalTime currentTime2;
+	private LocalDateTime currentDate1;
+	private LocalDateTime currentDate2;
+	
 	private Operator currentOperator;
 
 	private boolean canEdit;
-	private Type type;
 	
-	public DateTimeDropItem(Type type, String text, String queryKey, boolean canEdit) {
-		this.type = type;
+	public UTCDateTimeDropItem(String text, String queryKey, boolean canEdit) {
 		this.text = text;
 		this.queryKey = queryKey;
 		this.canEdit = canEdit;
+		
+		this.currentDate1 = LocalDate.now().atStartOfDay();
+		this.currentDate2 = LocalDate.now().atTime(LocalTime.MAX);
 	}
 	
 
@@ -85,16 +91,14 @@ public class DateTimeDropItem extends DropItem {
 	 */
 	@Override
 	public String getText() {
-		String d1 = ""; //$NON-NLS-1$
-		String d2 = ""; //$NON-NLS-1$
 	
-		if (type == Type.DATE) {
-			d1 = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime1));
-			d2 = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime2));
-		}else {
-			d1 = DateTimeFormatter.ISO_LOCAL_TIME.format(SmartUtils.toTime(dtime1));
-			d2 = DateTimeFormatter.ISO_LOCAL_TIME.format(SmartUtils.toTime(dtime2));
-		}
+		LocalDateTime utcdt = toDateTime(1).atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+		LocalDateTime utcdt2 = toDateTime(2).atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+
+		
+		String d1 = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(utcdt);
+		String d2 = DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(utcdt2);
+		
 		return this.text + " " + getOperatorSelection().getLabel(Locale.getDefault()) + " " + d1 + " " + d2; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		
@@ -111,23 +115,37 @@ public class DateTimeDropItem extends DropItem {
 		querypart.append( " "); //$NON-NLS-1$
 		querypart.append(getOperatorSelection().getKey());
 		querypart.append( " "); //$NON-NLS-1$
-		if (type == Type.DATE) {
-			querypart.append((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(SmartUtils.toDate(dtime1)));
-		}else if (type == Type.TIME) {
-			querypart.append((DateTimeFormatter.ofPattern(IQueryFilter.TIME_FORMAT_STR)).format(SmartUtils.toTime(dtime1)));
-		}
+		
+		LocalDateTime utcdt = toDateTime(1).atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+		
+		querypart.append((DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(utcdt));
+				
 		querypart.append( " "); //$NON-NLS-1$
 		querypart.append( Operator.AND.getKey() );
 		querypart.append( " "); //$NON-NLS-1$
-		if (type == Type.DATE) {
-			querypart.append((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(SmartUtils.toDate(dtime2)));
-		}else if (type == Type.TIME) {
-			querypart.append((DateTimeFormatter.ofPattern(IQueryFilter.TIME_FORMAT_STR)).format(SmartUtils.toTime(dtime2)));
-		}
+		
+		LocalDateTime utcdt2 = toDateTime(2).atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+		
+		querypart.append((DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(utcdt2));
 		
 		return querypart.toString();
 	}
 
+	private LocalDateTime toDateTime(int widget) {
+		if (widget == 1) {
+			LocalDate d1 = SmartUtils.toDate(date1);
+			LocalTime t1 = SmartUtils.toTime(time1);
+			return d1.atTime(t1);
+		}else if (widget == 2) {
+			LocalDate d1 = SmartUtils.toDate(date2);
+			LocalTime t1 = SmartUtils.toTime(time2);
+			return d1.atTime(t1);
+		}
+		return LocalDateTime.now();
+		
+		
+	}
+	
 	private Operator getOperatorSelection(){
 		return (Operator) ((IStructuredSelection)operators.getSelection()).getFirstElement();
 	}
@@ -137,7 +155,7 @@ public class DateTimeDropItem extends DropItem {
 	@Override
 	protected void createComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
-		GridLayout layout = new GridLayout(4, false);
+		GridLayout layout = new GridLayout(7, false);
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		main.setLayout(layout);
@@ -176,79 +194,81 @@ public class DateTimeDropItem extends DropItem {
 		operators.getCombo().addListener(SWT.Dispose, e->smallerFont.dispose());
 		
 			
-		int style = type == Type.DATE ? SWT.DATE : SWT.TIME;
-		dtime1 = new DateTime(main, SWT.DROP_DOWN | style | SWT.MEDIUM);
-		dtime1.addListener(SWT.Selection, new Listener(){
+		date1 = new DateTime(main, SWT.DROP_DOWN | SWT.MEDIUM | SWT.DATE );
+		date1.addListener(SWT.Selection, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
-				if (type == Type.DATE) {
-					LocalDate newValue = SmartUtils.toDate(dtime1);
-					if (currentDate1 == null || !newValue.isEqual(currentDate1)){
-						queryChanged();
-						currentDate1 = newValue;
-					}
-				}else if (type == Type.TIME) {
-					LocalTime newValue = SmartUtils.toTime(dtime1);
-					if (currentTime1 == null || !newValue.equals(currentTime1)){
-						queryChanged();
-						currentTime1 = newValue;
-					}
+				LocalDateTime newValue = toDateTime(1);
+				if (currentDate1 == null || !newValue.isEqual(currentDate1)){
+					queryChanged();
+					currentDate1 = newValue;			
 				}
 			}});
 		
-		dtime2 = new DateTime(main, SWT.DROP_DOWN | style | SWT.MEDIUM);
-		dtime2.addListener(SWT.Selection, new Listener(){
+		
+		time1 = new DateTime(main, SWT.DROP_DOWN | SWT.MEDIUM | SWT.TIME );
+		time1.addListener(SWT.Selection, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
-				if (type == Type.DATE) {
-					LocalDate newValue = SmartUtils.toDate(dtime2);
-					if (currentDate2 == null || !newValue.isEqual(currentDate2)){
-						queryChanged();
-						currentDate2 = newValue;
-					}
-				}else if (type == Type.TIME) {
-					LocalTime newValue = SmartUtils.toTime(dtime2);
-					if (currentTime2 == null || !newValue.equals(currentTime2)){
-						queryChanged();
-						currentTime2 = newValue;
-					}
+				LocalDateTime newValue = toDateTime(1);
+				if (currentDate1 == null || !newValue.isEqual(currentDate1)){
+					queryChanged();
+					currentDate1 = newValue;			
+				}
+			}});
+		Label l  = new Label(main, SWT.NONE);
+		l.setText("And");
+		
+		date2 = new DateTime(main, SWT.DROP_DOWN | SWT.MEDIUM | SWT.DATE);
+		date2.addListener(SWT.Selection, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				LocalDateTime newValue = toDateTime(2);
+				if (currentDate2 == null || !newValue.isEqual(currentDate1)){
+					queryChanged();
+					currentDate2 = newValue;			
+				}
+			}});
+		
+		time2 = new DateTime(main, SWT.DROP_DOWN | SWT.MEDIUM | SWT.TIME);
+		time2.addListener(SWT.Selection, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				LocalDateTime newValue = toDateTime(2);
+				if (currentDate2 == null || !newValue.isEqual(currentDate1)){
+					queryChanged();
+					currentDate2 = newValue;			
 				}
 			}});
 		
 		operators.getControl().setEnabled(canEdit);
-		dtime1.setEnabled(canEdit);
-		dtime2.setEnabled(canEdit);
+		date1.setEnabled(canEdit);
+		date2.setEnabled(canEdit);
+		time1.setEnabled(canEdit);
+		time2.setEnabled(canEdit);
 		
 		initDrag(main);
 		initDrag(lblAttribute);
 		
-		if (type == Type.DATE) {
-			if (dtime1 != null && currentDate1 != null){
-				SmartUtils.initDateTimeWidget(dtime1, currentDate1);	
-			}
-			if (dtime2 != null && currentDate2 != null){
-				SmartUtils.initDateTimeWidget(dtime2, currentDate2);	
-			}
-		}else if (type == Type.TIME) {
-			if (dtime1 != null && currentTime1 != null){
-				SmartUtils.initDateTimeWidget(dtime1, currentTime1);	
-			}
-			if (dtime2 != null && currentTime2 != null){
-				SmartUtils.initDateTimeWidget(dtime2, currentTime2);	
-			}	
-		}
 		
+		SmartUtils.initDateTimeWidget(date1, currentDate1.toLocalDate());
+		SmartUtils.initDateTimeWidget(time1, currentDate1.toLocalTime());
+		
+		
+		SmartUtils.initDateTimeWidget(date2, currentDate2.toLocalDate());
+		SmartUtils.initDateTimeWidget(time2, currentDate2.toLocalTime());
 	}
 
-	public void setInitialValue(Operator op, LocalDate d1, LocalDate d2) {
+	public void setInitialValue(Operator op, LocalDateTime d1, LocalDateTime d2) {
+		
+		//convert d1, d2 provided in utc
+		this.currentDate1 = d1.atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneOffset.systemDefault()).toLocalDateTime();
+		this.currentDate2= d2.atOffset(ZoneOffset.UTC).atZoneSameInstant(ZoneOffset.systemDefault()).toLocalDateTime();
+
+		
 		this.currentOperator = op;
-		this.currentDate1 = d1;
-		this.currentDate2 = d2;
+		//this.currentDate1 = d1;
+		//this.currentDate2 = d2;
 	}
 	
-	public void setInitialValue(Operator op, LocalTime t1, LocalTime t2) {
-		this.currentOperator = op;
-		this.currentTime1 = t1;
-		this.currentTime2 = t2;
-	}
 }

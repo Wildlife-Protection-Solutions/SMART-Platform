@@ -290,8 +290,8 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 				GroupByItem.DateOption dateOp = groupBy.getDateOption();
 				switch(dateOp) {
 					case DAY:
-						selectSql.append(columnName+ " as c_" + cnt); //$NON-NLS-1$
-						groupBySql.append(columnName);
+						selectSql.append("cast (" + columnName + " as date) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$
+						groupBySql.append("cast (" + columnName + " as date)"); //$NON-NLS-1$ //$NON-NLS-2$
 						break;
 					case MONTH:
 						selectSql.append("cast(year(" + columnName + ") as char(4)) || '-' || trim(cast(month(" + columnName + ") as char(2))) as c_" + cnt); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

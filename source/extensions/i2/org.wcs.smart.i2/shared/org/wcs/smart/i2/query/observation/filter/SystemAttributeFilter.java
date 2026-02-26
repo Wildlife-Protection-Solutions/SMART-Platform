@@ -23,6 +23,7 @@ package org.wcs.smart.i2.query.observation.filter;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -72,6 +73,13 @@ public class SystemAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 					this == RECORD_DATE_CREATED ||
 					this == RECORD_DATE;
 		}
+		
+		public boolean isUtcDate() {
+			return this == ENTITY_DATE_CREATED ||
+					this == ENTITY_DATE_MODIFIED ||
+					this == RECORD_DATE_MODIFIED ||
+					this == RECORD_DATE_CREATED;
+		}
 	}
 	
 	
@@ -105,10 +113,24 @@ public class SystemAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 		SystemAttributeFilter filter = new SystemAttributeFilter(sa, operator, date1, date2);
 		return filter;
 	}
+	
+	public static SystemAttributeFilter create(String key, Operator operator, LocalDateTime date1, LocalDateTime date2){
+		
+		String[] parts = key.split(INTERNAL_SEPERATOR);
+		
+		if (!parts[0].toLowerCase(Locale.ROOT).equals(SA_KEY)) throw new IllegalStateException("Not a valid system attribute filter."); //$NON-NLS-1$
+		
+		SystemAttribute sa = SystemAttribute.valueOf(parts[1].toUpperCase(Locale.ROOT));
+		if (sa == null) throw new IllegalStateException(MessageFormat.format("Invalid attribute for system attribute:{0}", parts[1])); //$NON-NLS-1$
+		
+		SystemAttributeFilter filter = new SystemAttributeFilter(sa, operator, date1, date2);
+		return filter;
+	}
 
 	private SystemAttribute attribute;
 	
 	private LocalDate[] dateValues = null;
+	private LocalDateTime[] dateTimeValues = null;
 	private String key = null;
 	private Operator op = null;
 	
@@ -119,8 +141,15 @@ public class SystemAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 		this.dateValues = new LocalDate[] {d1,d2};
 	}
 	
+	public SystemAttributeFilter(SystemAttribute attribute, Operator op, LocalDateTime d1, LocalDateTime d2) {
+		this.attribute = attribute;
+		this.op = op;
+		this.key = null;
+		this.dateTimeValues = new LocalDateTime[] {d1,d2};
+	}
+	
 	public SystemAttributeFilter(SystemAttribute attribute, Operator op, String key) {
-		this(attribute,op, null,null);
+		this(attribute,op, (LocalDate)null,(LocalDate)null);
 		this.key = key;
 	}
 	
@@ -131,6 +160,11 @@ public class SystemAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 	public String getStringKey() {
 		return this.key;
 	}
+	
+	public LocalDateTime[] getDateTimeValues() {
+		return this.dateTimeValues;
+	}
+	
 	public LocalDate[] getDateValues() {
 		return this.dateValues;
 	}

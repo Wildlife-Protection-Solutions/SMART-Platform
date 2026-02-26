@@ -23,7 +23,10 @@ package org.wcs.smart.i2.search;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -301,10 +304,13 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					
 				LocalDate d1 = LocalDate.parse(bits[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 				LocalDate d2 = LocalDate.parse(bits[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
+				//these columns are stored as utc so we need to convert these localdates to utc
+				LocalDateTime startdt  = d1.atStartOfDay(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+				LocalDateTime enddt  = d2.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
 				
 				session.createNativeMutationQuery(sb.toString())
-					.setParameter("date1", d1.atStartOfDay()) //$NON-NLS-1$
-					.setParameter("date2", d2.atTime(LocalTime.MAX)) //$NON-NLS-1$
+					.setParameter("date1", startdt) //$NON-NLS-1$
+					.setParameter("date2", enddt) //$NON-NLS-1$
 					.executeUpdate();
 				
 				sb = new StringBuilder();

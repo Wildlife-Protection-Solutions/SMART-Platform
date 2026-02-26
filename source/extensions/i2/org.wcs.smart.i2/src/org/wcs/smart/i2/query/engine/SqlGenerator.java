@@ -23,12 +23,18 @@ package org.wcs.smart.i2.query.engine;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.hibernate.Session;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
 
 /**
  * SQL Generation utilities for query engines
@@ -73,6 +79,38 @@ public class SqlGenerator {
 		return null;
 	}
 	
+	
+	/**
+	 * Called when the fieldName value is stored in utc and the filters are localdatetime in UTC
+	 * 
+	 * @param filter
+	 * @param fieldName
+	 * @return
+	 */
+	//for these utc fields I created a UTC drop down item which display the date/time to the user
+	//in there local timezone, but stores the utc value of this in the filter. This ensures connect
+	//will produce the same results.
+	public static String generateSystemDateClauseUtc(LocalDateTime[] filter, String fieldName){
+				
+		String[] dts = new String[] {null, null};
+		
+		if (filter[0] != null) {
+			dts[0] = DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR).format(filter[0]);
+		}
+		if (filter[1] != null){
+			dts[1] = DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR).format(filter[1]);
+		}
+		
+		
+		if (filter[0] == null && filter[1] != null){
+			return " ( " + fieldName + " <= '" + dts[1] + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}else if (filter[0] != null && filter[1] == null){
+			return " ( " + fieldName + " >= '" + dts[0] + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}else if (filter[0] != null && filter[1] != null){
+			return " ( " + fieldName + " between '" + dts[0] + "' and '" + dts[1]  + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+		}
+		return null;
+	}
 	
 	public static String operatorToSql(Operator op) throws Exception{
 		switch(op){
@@ -145,5 +183,72 @@ public class SqlGenerator {
 	
 	public static void logString(String string){
 		if (Intelligence2PlugIn.LOG_QUERY) System.out.println(string);
+	}
+	
+	
+	/**
+	 * 
+	 * @param sql MUST include "smart.i_entity e" in the from clause
+	 * @param filter
+	 * @param session
+	 * @throws Exception
+	 */
+	public static void processEntitySystemDateFilter(StringBuilder sql, SystemAttributeFilter filter, Session session) throws Exception {
+		//these dates are stored as utc and the parameters needs to reflect this	
+		if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED) {
+			sql.append(" e.date_created "); //$NON-NLS-1$
+		}else if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
+			sql.append(" e.date_modified "); //$NON-NLS-1$
+		}			
+		sql.append(operatorToSql(filter.getOperator()));
+		sql.append(" :value1 and :value2"); //$NON-NLS-1$
+	
+		MutationQuery query = session.createNativeMutationQuery(sql.toString());
+		
+		LocalDateTime dstart = filter.getDateTimeValues()[0];
+		LocalDateTime dend= filter.getDateTimeValues()[1];
+		
+		logString((DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dstart));
+		logString((DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dend));
+				
+		query.setParameter("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dstart) ); //$NON-NLS-1$
+		query.setParameter("value2", (DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dend) ); //$NON-NLS-1$
+		
+	
+		logString(sql.toString());
+		query.executeUpdate();
+	}
+	
+	/**
+	 * 
+	 * @param sql MUST include "smart.i_record r" in the from clause
+	 * @param filter
+	 * @param session
+	 * @throws Exception
+	 */
+	public static void processRecordSystemDateFilter(StringBuilder sql, SystemAttributeFilter filter, Session session ) throws Exception{
+			
+		if (filter.getAttribute() == SystemAttribute.RECORD_DATE_CREATED) {
+			sql.append(" r.date_created "); //$NON-NLS-1$
+		}else if (filter.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED) {
+			sql.append(" r.last_modified_date "); //$NON-NLS-1$
+		}
+		sql.append(operatorToSql(filter.getOperator()));
+		sql.append(" :value1 and :value2"); //$NON-NLS-1$
+	
+		MutationQuery query = session.createNativeMutationQuery(sql.toString());
+		
+		LocalDateTime dtstart = filter.getDateTimeValues()[0];
+		LocalDateTime dtend= filter.getDateTimeValues()[1];
+		
+		logString((DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dtstart));
+		logString((DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dtend));
+				
+		query.setParameter("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dtstart) ); //$NON-NLS-1$
+		query.setParameter("value2", (DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dtend) ); //$NON-NLS-1$
+		
+	
+		logString(sql.toString());
+		query.executeUpdate();
 	}
 }
