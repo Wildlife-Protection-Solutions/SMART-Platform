@@ -217,7 +217,7 @@ public class UTCDateTimeDropItem extends DropItem {
 				}
 			}});
 		Label l  = new Label(main, SWT.NONE);
-		l.setText("And");
+		l.setText(Operator.AND.getLabel(Locale.getDefault()));
 		
 		date2 = new DateTime(main, SWT.DROP_DOWN | SWT.MEDIUM | SWT.DATE);
 		date2.addListener(SWT.Selection, new Listener(){
