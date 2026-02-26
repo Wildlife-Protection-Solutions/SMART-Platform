@@ -23,11 +23,16 @@ package org.wcs.smart.connect.query.engine.i2;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.hibernate.Session;
+import org.hibernate.query.MutationQuery;
 import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
 
 /**
  * SQL Generation utilities for query engines
@@ -72,6 +77,17 @@ public class SqlGenerator {
 			return " ( cast(" + fieldName + " as date) >= '" + DateTimeFormatter.ISO_LOCAL_DATE.format(filter[0]) + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (filter[0] != null && filter[1] != null){
 			return " ( cast(" + fieldName + " as date) >= '" + DateTimeFormatter.ISO_LOCAL_DATE.format(filter[0]) + "'  AND cast(" + fieldName + " as date) <= '" + DateTimeFormatter.ISO_LOCAL_DATE.format(filter[1]) + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		}
+		return null;
+	}
+	
+	public static String generateDateTimeClause(LocalDateTime[] filter, String fieldName){
+		if (filter[0] == null && filter[1] != null){
+			return " ( " + fieldName + " <= '" + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(filter[1]) + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}else if (filter[0] != null && filter[1] == null){
+			return " ( " + fieldName + " >= '" + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(filter[0]) + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}else if (filter[0] != null && filter[1] != null){
+			return " ( " + fieldName + " between '" + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(filter[0]) + "'  AND '" + DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(filter[1]) + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 		return null;
 	}
@@ -154,4 +170,70 @@ public class SqlGenerator {
 	public static void logString(String string){
 		//System.out.println(string);
 	}
+	
+	
+	/**
+	 * 
+	 * @param sql MUST include "smart.i_entity e" in the from clause
+	 * @param filter
+	 * @param session
+	 * @throws Exception
+	 */
+	public static void processEntitySystemDateFilter(StringBuilder sql, SystemAttributeFilter filter, Session session) throws Exception {
+		//these dates are stored as utc and the parameters needs to reflect this	
+		if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED) {
+			sql.append(" e.date_created "); //$NON-NLS-1$
+		}else if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
+			sql.append(" e.date_modified "); //$NON-NLS-1$
+		}			
+		sql.append(operatorToSql(filter.getOperator()));
+		sql.append(" :value1 and :value2"); //$NON-NLS-1$
+	
+		MutationQuery query = session.createNativeMutationQuery(sql.toString());
+		
+		LocalDateTime dstart = filter.getDateTimeValues()[0];
+		LocalDateTime dend= filter.getDateTimeValues()[1];
+		
+		logString((DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dstart));
+		logString((DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dend));
+
+		query.setParameter("value1", dstart); //$NON-NLS-1$
+		query.setParameter("value2", dend); //$NON-NLS-1$
+	
+		logString(sql.toString());
+		query.executeUpdate();
+	}
+	
+	/**
+	 * 
+	 * @param sql MUST include "smart.i_record r" in the from clause
+	 * @param filter
+	 * @param session
+	 * @throws Exception
+	 */
+	public static void processRecordSystemDateFilter(StringBuilder sql, SystemAttributeFilter filter, Session session ) throws Exception{
+			
+		if (filter.getAttribute() == SystemAttribute.RECORD_DATE_CREATED) {
+			sql.append(" r.date_created "); //$NON-NLS-1$
+		}else if (filter.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED) {
+			sql.append(" r.last_modified_date "); //$NON-NLS-1$
+		}
+		sql.append(operatorToSql(filter.getOperator()));
+		sql.append(" :value1 and :value2"); //$NON-NLS-1$
+	
+		MutationQuery query = session.createNativeMutationQuery(sql.toString());
+		
+		LocalDateTime dtstart = filter.getDateTimeValues()[0];
+		LocalDateTime dtend= filter.getDateTimeValues()[1];
+		
+		logString((DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dtstart));
+		logString((DateTimeFormatter.ofPattern(IQueryFilter.DATETIME_FORMAT_STR)).format(dtend));
+				
+		query.setParameter("value1", dtstart); //$NON-NLS-1$
+		query.setParameter("value2", dtend); //$NON-NLS-1$
+		
+		logString(sql.toString());
+		query.executeUpdate();
+	}
 }
+

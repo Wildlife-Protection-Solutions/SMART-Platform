@@ -744,14 +744,15 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		if (queryFilter instanceof SystemAttributeFilter) {
 			
 			SystemAttributeFilter f = (SystemAttributeFilter)queryFilter;
-			if (f.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED || f.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
+			if (f.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED || 
+					f.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
 				String columnName = null;
 				if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED) {
 					columnName = "e.date_created"; //$NON-NLS-1$
 				}else if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED) {
 					columnName = "e.date_modified"; //$NON-NLS-1$
 				}
-				whereSql.append(SqlGenerator.generateDateClause(f.getDateValues(), columnName));
+				whereSql.append(SqlGenerator.generateDateTimeClause(f.getDateTimeValues(), columnName));
 			}else{
 				throw new IllegalStateException("Group by record dates is not supported for entity summary queries"); //$NON-NLS-1$
 			}

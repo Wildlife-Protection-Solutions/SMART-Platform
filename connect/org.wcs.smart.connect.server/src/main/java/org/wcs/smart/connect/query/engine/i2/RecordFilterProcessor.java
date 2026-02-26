@@ -63,8 +63,8 @@ public class RecordFilterProcessor {
 		new String[] {"source_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
 		new String[] {"ca_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
 		new String[] {"record_title", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
-		new String[] {"record_date_created", "date"}, //$NON-NLS-1$ //$NON-NLS-2$
-		new String[] {"record_date_modified", "date"}, //$NON-NLS-1$ //$NON-NLS-2$
+		new String[] {"record_date_created", "timestamp"}, //$NON-NLS-1$ //$NON-NLS-2$
+		new String[] {"record_date_modified", "timestamp"}, //$NON-NLS-1$ //$NON-NLS-2$
 		new String[] {"profile_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
 	};
 	
@@ -117,7 +117,7 @@ public class RecordFilterProcessor {
 		sb.deleteCharAt(sb.length() - 1);
 		sb.append(")"); //$NON-NLS-1$
 		sb.append(" SELECT a.uuid, cast(a.primary_date as date), a.status, b.keyid, a.source_uuid , a.ca_uuid, a.title, "); //$NON-NLS-1$
-		sb.append(" cast(a.date_created as date), cast(a.last_modified_date as date), "); //$NON-NLS-1$
+		sb.append(" a.date_created, a.last_modified_date, "); //$NON-NLS-1$
 		sb.append(" a.profile_uuid"); //$NON-NLS-1$
 		sb.append(" FROM "); //$NON-NLS-1$
 		sb.append(" smart.i_record a left join smart.i_recordsource b on a.source_uuid = b.uuid "); //$NON-NLS-1$
@@ -399,10 +399,10 @@ public class RecordFilterProcessor {
 				String columnName = null;
 				if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED) {
 					columnName = "a.record_date_created"; //$NON-NLS-1$
-					whereSql.append(SqlGenerator.generateDateClause(f.getDateValues(), columnName));
+					whereSql.append(SqlGenerator.generateDateTimeClause(f.getDateTimeValues(), columnName));
 				}else if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED) {
 					columnName = "a.record_date_modified"; //$NON-NLS-1$
-					whereSql.append(SqlGenerator.generateDateClause(f.getDateValues(), columnName));
+					whereSql.append(SqlGenerator.generateDateTimeClause(f.getDateTimeValues(), columnName));
 				}else if (f.getAttribute() == SystemAttribute.RECORD_SOURCE) {
 					String key = "p_" + parameters.size(); //$NON-NLS-1$
 					parameters.put(key, f.getStringKey());
