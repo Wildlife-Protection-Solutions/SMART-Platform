@@ -66,6 +66,7 @@ public class AttachmentInterceptor implements Interceptor, Serializable {
 	//track files to delete; only delete
 	//after transaction has been committed
 	protected List<Path> toDelete = new ArrayList<>();
+	protected List<FileDetails> toCopy = new ArrayList<>();
 	
 	private Session session;
 	private Locale locale;
@@ -91,6 +92,26 @@ public class AttachmentInterceptor implements Interceptor, Serializable {
 	
 	@Override
 	public void afterTransactionCompletion(Transaction tx){
+		for (FileDetails copy : toCopy) {
+			if (copy.encrypt) {
+    			try {
+    				EncryptUtils.encryptFile(copy.from, copy.to, copy.attachment);
+    			}catch (Exception ex) {
+    				throw new RuntimeException(getExceptionErrorMessage() + ": " + ex.getMessage(), ex); //$NON-NLS-1$
+    			}
+			}else {
+				try {
+					Files.copy(copy.from, copy.to);
+				} catch (IOException e) {
+    				throw new RuntimeException(getExceptionErrorMessage() + ": " + e.getMessage(), e); //$NON-NLS-1$
+
+				}
+			}
+			copy.attachment.setCopyFromLocation(null);
+			copy.attachment.computeFileLocation(copy.to);
+		}
+		toCopy.clear();
+		
 		if (tx.getStatus() == TransactionStatus.COMMITTED){
 			for (Path f : toDelete){
 				try{
@@ -184,7 +205,7 @@ public class AttachmentInterceptor implements Interceptor, Serializable {
     			Pattern p = Pattern.compile("(.*)_(\\d+)"); //$NON-NLS-1$
     			int counter = 1;
     			
-    			while(Files.exists(to)){
+    			while(Files.exists(to) || exists(to)){
     				Matcher m = p.matcher(basename);
     				if (m.matches()){
     					basename = m.group(1) + "_" + (Integer.parseInt(m.group(2)) +1 ); //$NON-NLS-1$
@@ -197,20 +218,27 @@ public class AttachmentInterceptor implements Interceptor, Serializable {
     			}
     			
     			if (this.encrypt && attachment.isEncrypted()) {
-	    			try {
-	    				EncryptUtils.encryptFile(attachment.getCopyFromLocation(), to, attachment);
-	    			}catch (Exception ex) {
-	    				throw new RuntimeException(getExceptionErrorMessage() + ": " + ex.getMessage(), ex); //$NON-NLS-1$
-	    			}
+    				toCopy.add(new FileDetails(attachment.getCopyFromLocation(), to, attachment, true));
     			}else {
     				//just copy files
-    				try {
-						Files.copy(attachment.getCopyFromLocation(), to);
-					} catch (IOException e) {
-	    				throw new RuntimeException(getExceptionErrorMessage() + ": " + e.getMessage(), e); //$NON-NLS-1$
-
-					}
+    				toCopy.add(new FileDetails(attachment.getCopyFromLocation(), to, attachment, false));
     			}
+    			
+//    			if (this.encrypt && attachment.isEncrypted()) {
+//	    			try {
+//	    				EncryptUtils.encryptFile(attachment.getCopyFromLocation(), to, attachment);
+//	    			}catch (Exception ex) {
+//	    				throw new RuntimeException(getExceptionErrorMessage() + ": " + ex.getMessage(), ex); //$NON-NLS-1$
+//	    			}
+//    			}else {
+//    				//just copy files
+//    				try {
+//						Files.copy(attachment.getCopyFromLocation(), to);
+//					} catch (IOException e) {
+//	    				throw new RuntimeException(getExceptionErrorMessage() + ": " + e.getMessage(), e); //$NON-NLS-1$
+//
+//					}
+//    			}
     			
     			//state is what is written to db and should be updated
     			attachment.setFilename(to.getFileName().toString());
@@ -219,8 +247,8 @@ public class AttachmentInterceptor implements Interceptor, Serializable {
     					state[i] = to.getFileName().toString();
     				}
     			}
-    			attachment.setCopyFromLocation(null);
-    			attachment.computeFileLocation(to);
+//    			attachment.setCopyFromLocation(null);
+//    			attachment.computeFileLocation(to);
     			
     		}
     		
@@ -229,8 +257,30 @@ public class AttachmentInterceptor implements Interceptor, Serializable {
     	return true;
     }
 
+	protected boolean exists(Path path) {
+		for (FileDetails fd : toCopy) {
+			if (fd.to.equals(path)) return true;
+		}
+		return false;
+	}
     
     protected String getExceptionErrorMessage() {
     	return Messages.getString("AttachmentInterceptor_AttachmentError", locale); //$NON-NLS-1$
+    }
+    
+    class FileDetails {
+        Path from;
+        Path to;
+        ISmartAttachment attachment;
+        boolean encrypt;
+
+        // Constructor
+        public FileDetails(Path from, Path to, ISmartAttachment attachment, boolean encrypt) {
+            this.from = from;
+            this.to = to;
+            this.attachment = attachment;
+            this.encrypt = encrypt;
+        }
+
     }
 }
