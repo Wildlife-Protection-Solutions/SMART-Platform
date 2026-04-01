@@ -79,8 +79,9 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class DataLoader {
 
-	private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"); //$NON-NLS-1$
+	//private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"); //$NON-NLS-1$
 	private DateTimeFormatter timeFormat = DateTimeFormatter.ofPattern("HH:mm"); //$NON-NLS-1$
+	private DateTimeFormatter dateFormat;
 	
 	private static final String SPECIES_COL = "Species"; //$NON-NLS-1$
 	private static final String DATE_COL = "Date"; //$NON-NLS-1$
@@ -114,7 +115,7 @@ public class DataLoader {
 	
 
 	
-	public DataLoader(Path wopath, Path empath, Path ocpath, Path hwcpath, Path incidentpath, PatrolTransportType tt, CoordinateReferenceSystem srcCrs) {
+	public DataLoader(Path wopath, Path empath, Path ocpath, Path hwcpath, Path incidentpath, PatrolTransportType tt, CoordinateReferenceSystem srcCrs, String dateFormat) {
 		this.srcCrs = srcCrs;
 		this.wopath = wopath;
 		this.empath = empath;
@@ -122,6 +123,8 @@ public class DataLoader {
 		this.ocpath = ocpath;
 		this.incidentpath = incidentpath;
 		this.tt = tt;
+		this.dateFormat = DateTimeFormatter.ofPattern(dateFormat);
+
 	}
 	
 	public List<String> getWarnings(){
@@ -202,6 +205,12 @@ public class DataLoader {
 			LocalDate day = wp.getDateTime().toLocalDate();
 			if (!groups.containsKey(day)) groups.put(day, new ArrayList<>());
 			groups.get(day).add(wp);
+		}
+		for (var wps : groups.values()) {
+		    int id = 1;
+		    for (var wp : wps) {
+		        wp.setId(String.valueOf(id++));
+		    }
 		}
 		
 		MathTransform transform = CRS.findMathTransform(srcCrs, SmartDB.DATABASE_CRS);

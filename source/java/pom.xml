@@ -637,6 +637,18 @@
 			</modules>
 		</profile>
 		<profile>
+			<id>utils_04012026</id>
+			
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.utils.updatesite</module>
+				
+				<module>../extensions/wcomm/org.wcs.smart.wcomm</module>
+				<module>../extensions/wcomm/org.wcs.smart.wcomm.feature</module>
+				
+			</modules>
+		</profile>
+		<profile>
 			<id>languagepacks</id>
 			<modules>
 				<module>org.wcs.smart.license.feature</module>

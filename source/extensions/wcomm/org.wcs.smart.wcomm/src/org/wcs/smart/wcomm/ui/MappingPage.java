@@ -55,6 +55,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
@@ -219,9 +220,10 @@ public class MappingPage  extends EditorPart {
 			}
 			
 			//close and reopen editor
-			editor.getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(editor, false);
-			try {
-				editor.getEditorSite().getWorkbenchWindow().getActivePage().openEditor(DataImportEditorInput.INSTANCE, WCommImportEditor.ID);
+			IWorkbenchPage current = editor.getEditorSite().getWorkbenchWindow().getActivePage();
+			current.closeEditor(editor, false);
+			try {				
+				current.openEditor(DataImportEditorInput.INSTANCE, WCommImportEditor.ID);
 			} catch (PartInitException e1) {
 				WCommPlugIn.displayLog(e1.getMessage(), e1);
 			}	
