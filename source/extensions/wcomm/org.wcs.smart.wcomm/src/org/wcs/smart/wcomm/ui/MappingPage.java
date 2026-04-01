@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -332,7 +333,7 @@ public class MappingPage  extends EditorPart {
 	}
 	
 	private List<Attribute> getAttributes(Category c){
-		return c.getAllAttributes().stream().map(m->m.getAttribute()).toList();
+		return c.getAllAttributes().stream().map(m->m.getAttribute()).collect(Collectors.toList());
 	}
 	
 	private void createElephantMortality(Composite c) {
@@ -486,8 +487,9 @@ public class MappingPage  extends EditorPart {
 		toolkit.createLabel(m, Messages.MappingPage_LivestockField);
 		attviewer.add(createAttributeComboViewer(m, WcommMapping.Field.HWC_LIVESTOCK));
 		
-		toolkit.createLabel(m, Messages.MappingPage_Timefield);
-		attviewer.add(createAttributeComboViewer(m, WcommMapping.Field.HWC_TIME));
+		//this doesn't do anything TIME is automatically mapped to noon (day) or midnight (night)
+		//toolkit.createLabel(m, Messages.MappingPage_Timefield);
+		//attviewer.add(createAttributeComboViewer(m, WcommMapping.Field.HWC_TIME));
 		
 		cmbHwcCat.addSelectionChangedListener(e->{
 			Category cat = (Category) cmbHwcCat.getStructuredSelection().getFirstElement();

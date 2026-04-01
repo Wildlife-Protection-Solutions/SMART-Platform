@@ -12,7 +12,7 @@
 
 	<artifactId>org.wcs.smart.utils.updatesite</artifactId>
 	<packaging>eclipse-repository</packaging>
-	<version>8.1.0-SNAPSHOT</version>
+	<version>8.1.3-SNAPSHOT</version>
 
 
 </project>

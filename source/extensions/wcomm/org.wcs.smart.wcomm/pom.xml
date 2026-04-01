@@ -12,6 +12,6 @@
 	<name>SMART WCoMM Module</name>
 	<artifactId>org.wcs.smart.wcomm</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>8.1.0-SNAPSHOT</version>
+	<version>8.1.3-SNAPSHOT</version>
 	
 </project>

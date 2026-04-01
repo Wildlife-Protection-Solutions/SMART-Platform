@@ -40,6 +40,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
@@ -75,6 +76,7 @@ public class ImportDataPage extends EditorPart {
 	private static final String PREF_OC = "org.wcs.smart.wcomm.OC"; //$NON-NLS-1$
 	private static final String PREF_HWC = "org.wcs.smart.wcomm.HWC"; //$NON-NLS-1$
 	private static final String PREF_INC = "org.wcs.smart.wcomm.INC"; //$NON-NLS-1$
+	private static final String PREF_DATE = "org.wcs.smart.wcomm.DATE"; //$NON-NLS-1$
 	
 	private FormToolkit toolkit;
 	
@@ -85,6 +87,7 @@ public class ImportDataPage extends EditorPart {
 	
 	private Text txtResults;
 	private Text txtWoFile, txtEmFile, txtOcFile, txtHwcFile, txtIncidentFile;
+	private Text txtDateFormat;
 	
 	private ComboViewer cmbPType;
 	private ComboViewer cmbUTMZone;
@@ -100,7 +103,8 @@ public class ImportDataPage extends EditorPart {
 		WCommPlugIn.getDefault().getPreferenceStore().setValue(PREF_WO, txtWoFile.getText());
 		WCommPlugIn.getDefault().getPreferenceStore().setValue(PREF_OC, txtOcFile.getText());
 		WCommPlugIn.getDefault().getPreferenceStore().setValue(PREF_HWC, txtHwcFile.getText());
-		WCommPlugIn.getDefault().getPreferenceStore().setValue(PREF_INC, txtIncidentFile.getText());
+		WCommPlugIn.getDefault().getPreferenceStore().setValue(PREF_INC, txtIncidentFile.getText());		
+		WCommPlugIn.getDefault().getPreferenceStore().setValue(PREF_DATE, txtDateFormat.getText());
 	}
 	
 	private void initPreferences() {
@@ -118,6 +122,10 @@ public class ImportDataPage extends EditorPart {
 		
 		t = WCommPlugIn.getDefault().getPreferenceStore().getString(PREF_INC);
 		if (t != null) txtIncidentFile.setText(t);
+
+		t = WCommPlugIn.getDefault().getPreferenceStore().getString(PREF_DATE);
+		if (t != null && !t.isBlank()) txtDateFormat.setText(t);
+
 		
 		Listener setL = e->setPreferences();
 		
@@ -126,6 +134,7 @@ public class ImportDataPage extends EditorPart {
 		txtOcFile.addListener(SWT.Modify, setL);
 		txtHwcFile.addListener(SWT.Modify, setL);
 		txtIncidentFile.addListener(SWT.Modify, setL);
+		txtDateFormat.addListener(SWT.Modify, setL);
 	}
 	
 	private CoordinateReferenceSystem getCrs() throws Exception{
@@ -257,6 +266,18 @@ public class ImportDataPage extends EditorPart {
 		cmbUTMZone.setSelection(new StructuredSelection(UtmZone.UTM37N));
 		cmbUTMZone.getControl().setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 2, 1));
 		
+		Label l = toolkit.createLabel(filec, "Date Format:", SWT.NONE);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		Composite dtinfo = toolkit.createComposite(filec);
+		dtinfo.setLayout(new GridLayout());
+		((GridLayout)dtinfo.getLayout()).marginWidth = 0;
+		((GridLayout)dtinfo.getLayout()).marginHeight = 0;
+		txtDateFormat = toolkit.createText(dtinfo, "dd/MM/yyyy HH:mm", SWT.BORDER); //$NON-NLS-1$
+		txtDateFormat.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		toolkit.createLabel(dtinfo, "The time part is ignored, to specify time use a 'Time' column (ex: dd/MM/yyyy HH:mm)");
+		
+		
 		try(Session session = HibernateManager.openSession()){
 			List<PatrolTransportType> tts = QueryFactory.buildQuery(session, PatrolTransportType.class, new Object[] {"conservationArea",  SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
 			tts.forEach(r->r.getName());
@@ -293,12 +314,14 @@ public class ImportDataPage extends EditorPart {
 		Path oc = null;
 		Path hwc = null;
 		Path incident = null;
+		String dateFormat = null;
 		
 		if (!txtWoFile.getText().isEmpty()) wo = Paths.get(txtWoFile.getText());
 		if (!txtEmFile.getText().isEmpty()) em = Paths.get(txtEmFile.getText());
 		if (!txtOcFile.getText().isEmpty()) oc = Paths.get(txtOcFile.getText());
 		if (!txtHwcFile.getText().isEmpty()) hwc = Paths.get(txtHwcFile.getText());
 		if (!txtIncidentFile.getText().isEmpty()) incident = Paths.get(txtIncidentFile.getText());
+		if (!txtDateFormat.getText().isEmpty()) dateFormat = txtDateFormat.getText();
 		
 		if (wo != null && !Files.exists(wo)) throw new Exception(Messages.ImportDataPage_invalidwofile);
 		if (em != null && !Files.exists(em)) throw new Exception(Messages.ImportDataPage_invalidemfile);
@@ -306,11 +329,12 @@ public class ImportDataPage extends EditorPart {
 		if (hwc != null && !Files.exists(hwc)) throw new Exception(Messages.ImportDataPage_invalidhwcfile);
 		if (incident != null && !Files.exists(incident)) throw new Exception(Messages.ImportDataPage_invalidincidentsfile);
 		
+		
 		try {
 			txtResults.setText(Messages.ImportDataPage_loadingtext);
 			
 			PatrolTransportType tt = (PatrolTransportType) cmbPType.getStructuredSelection().getFirstElement();
-			DataLoader dl = new DataLoader(wo, em, oc, hwc, incident, tt, getCrs());
+			DataLoader dl = new DataLoader(wo, em, oc, hwc, incident, tt, getCrs(), dateFormat);
 			
 			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getSite().getShell());
 			pmd.run(true,  false, new IRunnableWithProgress() {
