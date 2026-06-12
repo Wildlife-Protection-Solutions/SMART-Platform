@@ -257,16 +257,18 @@ public class Zipper {
 		
 		//apparently this will sometimes lead to corrupt files due to the
 		//way the metadata and crc is calculated
-//      ZipArchiveEntry zipEntry = new ZipArchiveEntry(source.toAbsolutePath().normalize().toFile(), entryName);
-		
+//      ZipArchiveEntry zipEntry = new ZipArchiveEntry(source.toAbsolutePath().normalize().toFile(), entryName);		
 		ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName);
+		
+		//we need to set the size here to ensure files >4gb
+		//are processed correctly; otherwise errors are thrown
+		long size = Files.size(source);
+		zipEntry.setSize(size);
 		
 		if (isCompressedFile(source)) {
 			//don't compress this entry
 			// You must set size, compressed size, and CRC for STORED entries
 			zipEntry.setMethod(ZipEntry.STORED);
-			long size = Files.size(source);
-			zipEntry.setSize(size);
 			zipEntry.setCompressedSize(size);
 			zipEntry.setCrc(calculateCRC32(source));
 		}
@@ -319,7 +321,5 @@ public class Zipper {
 		    }
         }
         return checksum.getValue();
-    }
-	
-    
+    }    
 }
