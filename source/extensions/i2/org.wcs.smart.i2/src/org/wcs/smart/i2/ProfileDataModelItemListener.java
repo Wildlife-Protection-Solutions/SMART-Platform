@@ -84,7 +84,7 @@ public enum ProfileDataModelItemListener implements IDataModelItemListener {
 		sql.append(" SET attributeListItem = null "); //$NON-NLS-1$
 		sql.append( " WHERE attribute = :att "); //$NON-NLS-1$
 		
-		currentSession.createNativeMutationQuery(sql.toString())
+		currentSession.createMutationQuery(sql.toString())
 			.setParameter("att", attribute) //$NON-NLS-1$
 			.executeUpdate();
 		
