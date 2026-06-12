@@ -176,7 +176,7 @@ public enum PatrolIdGenerator {
 			String p2 = prefix + "(\\d{" + length + "})" + postfix; //$NON-NLS-1$ //$NON-NLS-2$
 			Pattern ptn2 = Pattern.compile(p2);
 
-			int max = 0;
+			int max = -1;
 			for (String id2 : items) {
 				m = ptn2.matcher(id2.substring(nextId.length()));
 				if (m.matches()) {
@@ -184,7 +184,7 @@ public enum PatrolIdGenerator {
 					if (num > max) max = num;
 				}
 			}
-			if (max != 0) max++;
+			max++;
 			
 			String cntstr = IdGeneratorEngine.INSTANCE.formatUniqueNumber(max, unqString);
 			String id = nextId + cntstr;
