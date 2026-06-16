@@ -61,7 +61,10 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -379,7 +382,12 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 					return true;
 				}
 			};
-			Button btnChecked = new Button(cemp, SWT.CHECK);
+			
+			Composite cbottom = new Composite(cemp, SWT.NONE);
+			cbottom.setLayout(new GridLayout(3, false));
+			cbottom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			Button btnChecked = new Button(cbottom, SWT.CHECK);
 			btnChecked.setText(Messages.PatrolMetadataPackageContribution_ShowChecked);
 			btnChecked.addListener(SWT.Selection, e->{
 				lstEmployees.getControl().setVisible(false);
@@ -387,6 +395,26 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				else lstEmployees.removeFilter(filter);
 				lstEmployees.getControl().setVisible(true);
 			});
+			btnChecked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			Link lnkAll = new Link(cbottom, SWT.NONE);
+			lnkAll.setText("<a>" +  DialogConstants.SELECT_ALL + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+			lnkAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			lnkAll.addListener(SWT.Selection, e->lstEmployees.setAllChecked(true));
+			
+			Link lnkNone = new Link(cbottom, SWT.NONE);
+			lnkNone.setText("<a>" + DialogConstants.DESELECT_ALL  + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+			lnkNone.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			lnkNone.addListener(SWT.Selection, e->lstEmployees.setAllChecked(false));
+			
+			Menu mnu = new Menu(lstEmployees.getControl());
+			MenuItem miall = new MenuItem(mnu, SWT.DEFAULT);
+			miall.setText(DialogConstants.SELECT_ALL);
+			miall.addListener(SWT.Selection, e->lstEmployees.setAllChecked(true));
+			MenuItem minone = new MenuItem(mnu, SWT.DEFAULT);
+			minone.setText(DialogConstants.DESELECT_ALL);
+			minone.addListener(SWT.Selection, e->lstEmployees.setAllChecked(false));
+			lstEmployees.getControl().setMenu(mnu);
 			
 			// leader
 			d = createComboViewerSection(Messages.PatrolMetadataPackageContribution_LeaderLabel2, core, PatrolMetadataField.LEADER, false, false, defaultIs);

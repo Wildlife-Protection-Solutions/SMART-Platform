@@ -65,6 +65,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -358,14 +361,40 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 			};
 			lstEmployees.addCheckStateListener(e->validate());
 			
-			Button btnChecked = new Button(obs, SWT.CHECK);
-			btnChecked.setText(Messages.CtIncidentPackageConfigurator_ShowOnlyChecked);
+			
+			Composite cbottom = new Composite(obs, SWT.NONE);
+			cbottom.setLayout(new GridLayout(3, false));
+			cbottom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			Button btnChecked = new Button(cbottom, SWT.CHECK);
+			btnChecked.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			btnChecked.setText(Messages.CtIncidentPackageConfigurator_ShowOnlyChecked);			
 			btnChecked.addListener(SWT.Selection, e->{
 				lstEmployees.getControl().setVisible(false);
 				if (btnChecked.getSelection()) lstEmployees.addFilter(filter);
 				else lstEmployees.removeFilter(filter);
 				lstEmployees.getControl().setVisible(true);
 			});
+			
+			Link lnkAll = new Link(cbottom, SWT.NONE);
+			lnkAll.setText("<a>" +  DialogConstants.SELECT_ALL + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+			lnkAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			lnkAll.addListener(SWT.Selection, e->lstEmployees.setAllChecked(true));
+			
+			Link lnkNone = new Link(cbottom, SWT.NONE);
+			lnkNone.setText("<a>" + DialogConstants.DESELECT_ALL  + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+			lnkNone.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			lnkNone.addListener(SWT.Selection, e->lstEmployees.setAllChecked(false));
+			
+			Menu mnu = new Menu(lstEmployees.getControl());
+			MenuItem miall = new MenuItem(mnu, SWT.DEFAULT);
+			miall.setText(DialogConstants.SELECT_ALL);
+			miall.addListener(SWT.Selection, e->lstEmployees.setAllChecked(true));
+			MenuItem minone = new MenuItem(mnu, SWT.DEFAULT);
+			minone.setText(DialogConstants.DESELECT_ALL);
+			minone.addListener(SWT.Selection, e->lstEmployees.setAllChecked(false));
+			lstEmployees.getControl().setMenu(mnu);
+			
 			
 			
 		}
