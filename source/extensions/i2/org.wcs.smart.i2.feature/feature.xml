@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.i2.feature"
       label="SMART Profiles Module"
-      version="8.1.2.qualifier"
+      version="8.1.3.qualifier"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"

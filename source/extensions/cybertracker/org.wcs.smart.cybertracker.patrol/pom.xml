@@ -13,6 +13,6 @@
 	<name>SMART Cybertracker Patrol Module</name>
 	<artifactId>org.wcs.smart.cybertracker.patrol</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>8.1.0-SNAPSHOT</version>
+	<version>8.1.3-SNAPSHOT</version>
 
 </project>
