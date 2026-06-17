@@ -508,12 +508,16 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 							if (cnt == exportedQueries.size() * cas.size()){
 								openInfo(MessageFormat.format(Messages.ExportQueryWizard_Complete, new Object[]{cnt, exportedQueries.size() * cas.size()}));
 							}else{
-								WarningDialog wd = new WarningDialog(getContainer().getShell(), 
-										EXPORT_DIALOGTITLE, 
-										MessageFormat.format(Messages.ExportQueryWizard_CompleteWError,
-												new Object[]{cnt, exportedQueries.size() * cas.size()}), 
-										error);
-								wd.open();
+								final int fcnt = cnt;
+								final int esize =  exportedQueries.size() * cas.size();
+								Display.getDefault().syncExec(()->{
+									WarningDialog wd = new WarningDialog(getContainer().getShell(), 
+											EXPORT_DIALOGTITLE, 
+											MessageFormat.format(Messages.ExportQueryWizard_CompleteWError,
+													new Object[]{fcnt, esize}), 
+											error);
+									wd.open();
+								});
 							
 							}
 						}catch (OperationCanceledException e) {
@@ -538,9 +542,10 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		
 	}
 	private void openInfo(String message){
-		MessageDialog.openInformation(
+		Display.getDefault().syncExec(()->
+			MessageDialog.openInformation(
 				getContainer().getShell(), EXPORT_DIALOGTITLE,
-				message);
+				message));
 	}
 	
 	private Object[] importQueries(List<ConservationArea> cas, HashMap<Query, Path> queriesToImport, IProgressMonitor monitor){
@@ -617,7 +622,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 					query = QueryHibernateManager.getInstance().findQuery(session, ((QueryEditorInput)qi).getUuid(), ((QueryEditorInput)qi).getType());
 				}
 				if (query == null){
-					MessageDialog.openError(getShell(), Messages.ExportQueryWizard_QueryNotFound, MessageFormat.format(Messages.ExportQueryWizard_QueryNotFoundMsg, new Object[]{((QueryEditorInput)qi).getName() + " [" + ((QueryEditorInput)qi).getId() + "]"})); //$NON-NLS-1$ //$NON-NLS-2$
+					Display.getDefault().syncExec(()->MessageDialog.openError(getShell(), Messages.ExportQueryWizard_QueryNotFound, MessageFormat.format(Messages.ExportQueryWizard_QueryNotFoundMsg, new Object[]{((QueryEditorInput)qi).getName() + " [" + ((QueryEditorInput)qi).getId() + "]"}))); //$NON-NLS-1$ //$NON-NLS-2$
 					continue;
 				}
 			}
@@ -632,22 +637,28 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			}
 			//to definition exporter found for query type
 			if (lexporter == null){
-				MessageDialog.openError(getShell(), Messages.ExportQueryWizard_ExporterNotFound, MessageFormat.format(Messages.ExportQueryWizard_ExporterNotFoundMsg, new Object[]{query.getName() + " [" + query.getId() + "]"})); //$NON-NLS-1$ //$NON-NLS-2$
+				final String message = query.getName() + " [" + query.getId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+				Display.getDefault().syncExec(()->MessageDialog.openError(getShell(), Messages.ExportQueryWizard_ExporterNotFound, MessageFormat.format(Messages.ExportQueryWizard_ExporterNotFoundMsg, message)));
 				continue;
 			}
 			
 			Path outputFile = outputLocation.resolve(URLUtils.cleanFilename(query.getName()) +"_" + query.getId() + "." + lexporter.getDefaultExtension()); //$NON-NLS-1$ //$NON-NLS-2$
 			if (!overwriteall && Files.exists(outputFile)){
-				MessageDialog md = new MessageDialog(getShell(), Messages.ExportQueryWizard_OverwriteDialogTitle,
+				final int[] ret = new int[1];
+				Display.getDefault().syncExec(()->{			
+					MessageDialog md = new MessageDialog(getShell(), Messages.ExportQueryWizard_OverwriteDialogTitle,
 						MessageDialog.getImage(Dialog.DLG_IMG_MESSAGE_INFO),
 						MessageFormat.format(Messages.ExportQueryWizard_OverwriteDialogMessage, new Object[]{outputFile.toString()}), 
 						MessageDialog.INFORMATION,
 						new String[]{IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.YES_LABEL, IDialogConstants.SKIP_LABEL},
+						
 						0);
-				int ret = md.open();
-				if (ret == 2){
+					ret[0] = md.open();
+				});
+				
+				if (ret[0] == 2){
 					continue;
-				}else if (ret == 0){
+				}else if (ret[0] == 0){
 					overwriteall = true;
 				}
 			}
@@ -656,10 +667,14 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 				lexporter.export(query, query.getCachedResults(), outputFile, ops, sub.split(1));
 				exportedFiles.put(query, outputFile);
 			}catch (Throwable ex){
-				MessageDialog.openError(getShell(), 
-						Messages.ExportQueryWizard_ExportFailed, 
-						MessageFormat.format(Messages.ExportQueryWizard_ExportFailedMsg + "\n\n" + ex.getLocalizedMessage(), new Object[]{query.getName() + " [" + query.getId() + "]"}));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ 
 				QueryPlugIn.log(ex.getMessage(), ex);
+				final String lbl = query.getName() + " [" + query.getId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+				Display.getDefault().syncExec(()->{
+					MessageDialog.openError(getShell(), 
+							Messages.ExportQueryWizard_ExportFailed, 
+							MessageFormat.format(Messages.ExportQueryWizard_ExportFailedMsg + "\n\n" + ex.getLocalizedMessage(), lbl));  //$NON-NLS-1$ 
+				});
+				
 			}
 			sub.checkCanceled();
 		}
