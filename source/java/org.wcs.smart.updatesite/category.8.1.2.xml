@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature id="org.wcs.smart.connect.dataqueue.feature">
+      <category name="connectdq"/>
+   </feature>
+   <feature id="org.wcs.smart.feature">
+      <category name="smart"/>
+   </feature>
+   <feature id="org.wcs.smart.connect.cybertracker.feature">
+      <category name="connect"/>
+   </feature>
+   <feature id="org.wcs.smart.cybertracker.feature">
+      <category name="smartmobile"/>
+   </feature>
+   <feature id="org.wcs.smart.smartcollect.feature">
+      <category name="smartcollect"/>
+   </feature>
+   <feature id="org.wcs.smart.cybertracker.survey.feature">
+      <category name="smartmobile"/>
+   </feature>
+   <feature id="org.wcs.smart.er.feature">
+      <category name="ecologicalrecords"/>
+   </feature>
+   <feature id="org.wcs.smart.asset.feature">
+      <category name="asset"/>
+   </feature>
+   <feature id="org.wcs.smart.i2.feature">
+      <category name="profiles"/>
+   </feature>
+   <feature id="org.wcs.smart.independentincident.feature">
+      <category name="independentincident"/>
+   </feature>
+   <feature id="org.wcs.smart.plan.feature">
+      <category name="planning"/>
+   </feature>
+   <feature id="org.wcs.smart.connect.feature">
+      <category name="connect"/>
+   </feature>
+   <feature id="org.wcs.smart.r.feature">
+      <category name="r"/>
+   </feature>
+   <category-def name="planning" label="SMART Planning Plug-in">
+      <description>
+         The SMART Planning plug-in contains a plan module that allows users to organize, maintain and query planning information. Plans allow for a set of targets (such as total distance patrolled or specific locations to visit) to be assigned to a patrol or series of patrols.
+      </description>
+   </category-def>
+   <category-def name="independentincident" label="SMART Independent Incident Plug-in">
+      <description>
+         The SMART Independent Incident plug-in provides the ability to record observations (using the data model) that are not associated with a patrol (or any other data collection object within SMART).
+      </description>
+   </category-def>
+   <category-def name="ecologicalrecords" label="SMART Ecological Records Plug-in">
+      <description>
+         The SMART Ecological Records (SMART-ER) plug-in extends the SMART capability to more scientific data collection and analysis of species, their habitats and disturbances. The Ecological Records plug-in is used for recording and analysing field survey data.
+      </description>
+   </category-def>
+   <category-def name="connect" label="SMART Connect">
+      <description>
+         The SMART Connect plug-in allows SMART Desktop software to communicate and share data over the Internet with a SMART Connect Server.
+      </description>
+   </category-def>
+   <category-def name="smartmobile" label="SMART Mobile">
+      <description>
+         The SMART Mobile plug-in provides compatibility with the SMART Mobile mobile application - which itself runs on a GPS-enabled handheld device. Using this plug-in, SMART users are able to create and deploy SMART Mobile applications based on the Data Model or a Configurable Model (a simplified data model for the SMART Moible application). The plug-in also provides the ability to work directly with handheld devices while exporting/importing data, doing all of the interaction with SMART Mobile in the background.
+      </description>
+   </category-def>
+   <category-def name="connectdq" label="SMART Connect Data Queue">
+      <description>
+         The SMART Connect Data Queue plug-in allows SMART Desktop software to processes data files uploaded to a SMART Connect Server.
+      </description>
+   </category-def>
+   <category-def name="asset" label="SMART Field Sensors (Cameras etc) Plug-in">
+      <description>
+         The SMART Field Sensor plug-in is designed to allow users to load data from sensors they have deployed to the field. The plug-in is built for generic sensors, but data loading is focused on camera traps. Users can configure the system to automatically read image metadata and generate observation data based on the information in the image.
+      </description>
+   </category-def>
+   <category-def name="profiles" label="SMART Profiles Plug-in">
+      <description>
+         The SMART Profiles plug-in allows users to create a system in their Conservation Area for tracking a variety of items. The flexible design allows users to create their own definition of what they want to track and what attributes to collect for each item.(examples include offenders, animals, cases, cars, employees).  The Profies plug-in allows the tracking of relationships, sightings and updates so you can build up a comprehensive understanding of the item being tracked, how they related to other items, and what is changing over time. This can be used as an Investigative Intelligence System, an Animal Population Tracking System, or any other applications that are developed.
+      </description>
+   </category-def>
+   <category-def name="events" label="SMART Triggers Plug-in">
+      <description>
+         The SMART Triggers plug-in is designed to work with the Profiles plug-in.  It allows users to automatically create new records in their Profiles system when particular types of observation data are imported into SMART. This allows users to automatically update their Profiles tracking system as soon as any relevant data is entered into SMART. Data that will trigger the system can come from any of the data inputs: patrol data, field sensors, independent incidents or ecological monitoring missions.
+      </description>
+   </category-def>
+   <category-def name="r" label="SMART R Scripts Plug-in">
+      <description>
+         The SMART R Script plug-in supports the use of R within the SMART Desktop environment.  R Scripts can be imported into and run from within SMART using the results from queries as parameters to the scripts.
+      </description>
+   </category-def>
+   <category-def name="smartcollect" label="SMART Collect">
+      <description>
+         Tools to support public data collection via the SMART Collect app.
+      </description>
+   </category-def>
+   <category-def name="smart" label="SMART Core"/>
+</site>

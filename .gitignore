@@ -1,0 +1,47 @@
+**/target/
+**/bin/
+**/.settings/
+**/lib/
+**/lib-src/
+
+
+
+# /source/java/
+/source/java/.settings
+/source/java/buildsmart8.bat
+
+#source/java/org.wcs.smart-product
+/source/java/org.wcs.smart-product/org/
+
+# /source/java/org.wcs.smart/
+/source/java/org.wcs.smart/GPSBabel
+/source/java/org.wcs.smart/backup
+/source/java/org.wcs.smart/data
+/source/java/org.wcs.smart/derby.log
+/source/java/org.wcs.smart/workbench.xmi
+/source/java/org.wcs.smart/properties/telemetry.properties
+
+# /source/java/org.wcs.smart-product/macosx_includes/items/
+/source/java/org.wcs.smart-product/splash.bmp
+/source/java/org.wcs.smart-product/macosx_includes/items/jre
+/source/java/org.wcs.smart-product/macosx_includes/items/MacOS/data
+/source/java/org.wcs.smart-product/macosx_includes/items/MacOS/updatesite
+/source/java/org.wcs.smart-product/win64_includes/items/GPSBabel
+/source/java/org.wcs.smart-product/win64_includes/items/data
+/source/java/org.wcs.smart-product/win64_includes/items/jre
+/source/java/org.wcs.smart-product/win64_includes/items/updatesite
+
+
+
+# /source/java/org.wcs.smart.util/
+/source/java/org.wcs.smart.util/.classpath
+/source/java/org.wcs.smart.util/.project
+
+
+# /source/utils/org.wcs.smart.mist/
+/source/utils/org.wcs.smart.mist/.classpath
+/source/utils/org.wcs.smart.mist/.project
+
+# /telemetry/googlecloud/
+/telemetry/googlecloud/setup_script.txt
+/telemetry/googlecloud/GoogleCloudNotes.txt
